@@ -30,7 +30,7 @@
         .drag-handle:active { cursor: grabbing; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="fetchDataFromSheet()">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
     <div id="app" class="flex flex-col min-h-screen">
         <!-- Top Bar -->
         <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -80,9 +80,10 @@
 
         <!-- Main Layout -->
         <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6">
-            <!-- Sidebar -->
-            <aside class="w-full md:w-80 flex-shrink-0 space-y-4">
-                <nav class="bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
+            <!-- Sidebar (Mobile: ordinata con flex order) -->
+            <aside class="w-full md:w-80 flex-shrink-0 flex flex-col space-y-4">
+                <!-- 1. Navigazione Tab -->
+                <nav class="order-1 md:order-1 bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
                     <button onclick="switchTab('itinerary')" data-tab="itinerary" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-brand-600 bg-brand-50 dark:bg-brand-900/30 dark:text-brand-400">
                         <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
                         <span>Itinerario</span>
@@ -101,13 +102,12 @@
                     </button>
                 </nav>
 
-                <!-- Box Voli Saudia Dettagliato -->
-                <section class="bg-orange-50 dark:bg-orange-950/40 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-orange-200 dark:border-orange-800 shadow-sm space-y-3 text-xs">
+                <!-- 2. Box Voli Saudia -->
+                <section class="order-3 md:order-2 bg-orange-50 dark:bg-orange-950/40 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-orange-200 dark:border-orange-800 shadow-sm space-y-3 text-xs">
                     <div class="flex justify-between items-center border-b border-orange-200 dark:border-orange-800 pb-2">
                         <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
                         <span class="bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: 7XJFTQ</span>
                     </div>
-                    
                     <div class="space-y-1.5">
                         <p class="font-bold text-brand-700 dark:text-brand-400 flex items-center gap-1">
                             <i class="fa-solid fa-plane-departure"></i> ANDATA · 26–27 Dic
@@ -118,7 +118,6 @@
                             <p><b>SV 847:</b> RUH 02:35 (+1) → BKK 13:40</p>
                         </div>
                     </div>
-
                     <div class="space-y-1.5 pt-2 border-t border-orange-200 dark:border-orange-800">
                         <p class="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                             <i class="fa-solid fa-plane-arrival"></i> RITORNO · 10–11 Gen
@@ -130,10 +129,21 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- 3. Box Viaggiatrici & Countdown -->
+                <section class="order-4 md:order-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2 text-xs">
+                    <h2 class="font-bold text-sm flex items-center gap-2 text-brand-600 dark:text-brand-400">
+                        <i class="fa-solid fa-user-group"></i> Le Viaggiatrici
+                    </h2>
+                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl">
+                        <span class="font-semibold text-slate-700 dark:text-slate-200">Barbara & Laura 🐨</span>
+                        <span id="countdown-badge" class="bg-brand-100 text-brand-800 dark:bg-brand-900/50 dark:text-brand-300 px-2 py-0.5 rounded font-bold text-[10px]">-- giorni al viaggio</span>
+                    </div>
+                </section>
             </aside>
 
-            <!-- Main Area -->
-            <main class="flex-1 min-w-0">
+            <!-- Main Area (Su mobile appare subito dopo la nav) -->
+            <main class="order-2 md:order-2 flex-1 min-w-0">
                 <!-- Tab Itinerario -->
                 <section id="tab-itinerary" class="tab-content space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
@@ -151,15 +161,27 @@
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
                             <div>
-                                <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-amber-500"></i> Riepilogo Budget & Costi</h2>
-                                <p class="text-xs text-slate-500">Monitoraggio spese registrate nelle tappe.</p>
+                                <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-amber-500"></i> Riepilogo Budget & Spese</h2>
+                                <p class="text-xs text-slate-500">Gestione spese condivise tra Barbara e Laura.</p>
                             </div>
                             <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Totale parziale inserito</span>
+                                <span class="text-xs text-slate-400 block">Totale Complessivo Spese</span>
                                 <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0 €</span>
                             </div>
                         </div>
-                        <div id="budget-list" class="space-y-2"></div>
+
+                        <!-- Box Debiti / Crediti tra Barbara e Laura -->
+                        <div id="split-summary-box" class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                            <!-- Popolato via JS -->
+                        </div>
+
+                        <!-- Pulsante aggiungi spesa -->
+                        <div class="flex justify-between items-center pt-2">
+                            <h3 class="font-bold text-sm">Elenco Spese Extra / Extra Tappe</h3>
+                            <button onclick="addExpensePrompt()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Spesa</button>
+                        </div>
+
+                        <div id="expenses-list" class="space-y-2"></div>
                     </div>
                 </section>
 
@@ -191,7 +213,29 @@
     <script>
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEctxIJynpq1Cy4oF1wOI-75Mlwgyd_NL7IT3v8eIvArkQdXkgwpCQtAj_0jMMAVqDAw/exec";
 
-        let tripData = { days: [], todos: [], notes: [] };
+        let tripData = { days: [], todos: [], notes: [], expenses: [] };
+
+        function initApp() {
+            calculateCountdown();
+            fetchDataFromSheet();
+        }
+
+        function calculateCountdown() {
+            const departureDate = new Date('2026-12-26T09:30:00');
+            const today = new Date();
+            const diffTime = departureDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const badge = document.getElementById('countdown-badge');
+            if(badge) {
+                if(diffDays > 0) {
+                    badge.innerText = `${diffDays} giorni al viaggio`;
+                } else if(diffDays === 0) {
+                    badge.innerText = `Si parte oggi! ✈️`;
+                } else {
+                    badge.innerText = `Buon viaggio in corso! 🌴`;
+                }
+            }
+        }
 
         function convertCurrency(source) {
             const eurInput = document.getElementById('eur-input');
@@ -221,6 +265,7 @@
                 const data = await res.json();
                 if(data && typeof data === 'object' && (data.days || data.todos)) {
                     tripData = data;
+                    if(!tripData.expenses) tripData.expenses = [];
                     renderApp();
                     updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
                     return;
@@ -229,17 +274,17 @@
                 console.error("Errore fetch:", e);
             }
             
-            // Fallback locale se fallisce la rete
             updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
-            const saved = localStorage.getItem('thailandData2026');
+            const saved = localStorage.getItem('thailandData2026_v2');
             if(saved) {
                 try { tripData = JSON.parse(saved); } catch(err) {}
             }
+            if(!tripData.expenses) tripData.expenses = [];
             renderApp();
         }
 
         async function saveDataToSheet() {
-            localStorage.setItem('thailandData2026', JSON.stringify(tripData));
+            localStorage.setItem('thailandData2026_v2', JSON.stringify(tripData));
             updateSyncStatus('💾 Salvataggio...', 'bg-amber-100 text-amber-700');
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
@@ -258,7 +303,8 @@
             if(!raw) return;
             try {
                 const parsed = JSON.parse(raw);
-                tripData = Array.isArray(parsed) ? { days: parsed } : parsed;
+                tripData = Array.isArray(parsed) ? { days: parsed, todos: [], notes: [], expenses: [] } : parsed;
+                if(!tripData.expenses) tripData.expenses = [];
                 saveDataToSheet();
                 renderApp();
                 alert("✅ Dati importati e salvati sul Google Sheet!");
@@ -352,35 +398,100 @@
         }
 
         function renderBudget() {
-            const container = document.getElementById('budget-list');
+            const container = document.getElementById('expenses-list');
+            const splitBox = document.getElementById('split-summary-box');
             let total = 0;
-            if(!tripData.days || tripData.days.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400">Nessun costo registrato.</p>`;
-                document.getElementById('total-budget-sum').innerText = "0 €";
+            let barbTotalPaid = 0;
+            let laurTotalPaid = 0;
+            let barbShouldPay = 0;
+            let laurShouldPay = 0;
+
+            // Calcolo costi dalle tappe (considerati divisi equamente tra Barbara e Laura)
+            if(tripData.days) {
+                tripData.days.forEach(day => {
+                    if(day.cost) {
+                        const parsed = parseFloat(day.cost.replace(/[^0-9.,]/g, '').replace(',', '.'));
+                        if(!isNaN(parsed)) {
+                            total += parsed;
+                            barbTotalPaid += parsed / 2;
+                            laurTotalPaid += parsed / 2;
+                            barbShouldPay += parsed / 2;
+                            laurShouldPay += parsed / 2;
+                        }
+                    }
+                });
+            }
+
+            // Calcolo spese extra
+            if(tripData.expenses) {
+                tripData.expenses.forEach(exp => {
+                    const amt = parseFloat(exp.amount) || 0;
+                    total += amt;
+                    const paidBy = exp.payer || 'Barbara';
+                    const splitType = exp.split || 'uguale'; // 'uguale', 'Barbara', 'Laura'
+
+                    if(paidBy === 'Barbara') barbTotalPaid += amt;
+                    else laurTotalPaid += amt;
+
+                    if(splitType === 'uguale') {
+                        barbShouldPay += amt / 2;
+                        laurShouldPay += amt / 2;
+                    } else if(splitType === 'Barbara') {
+                        barbShouldPay += amt;
+                    } else if(splitType === 'Laura') {
+                        laurShouldPay += amt;
+                    }
+                });
+            }
+
+            document.getElementById('total-budget-sum').innerText = total.toFixed(2) + " €";
+
+            // Calcolo bilancio Barbara vs Laura
+            // Barbara Balance = quanto ha pagato - quanto doveva pagare
+            const barbBalance = barbTotalPaid - barbShouldPay; 
+            
+            let settlementText = "";
+            if(Math.abs(barbBalance) < 0.05) {
+                settlementText = "<b>Siete perfettamente pari!</b> ✨";
+            } else if(barbBalance > 0) {
+                settlementText = `<b>Laura deve a Barbara:</b> <span class="text-brand-600 font-bold">${barbBalance.toFixed(2)} €</span>`;
+            } else {
+                settlementText = `<b>Barbara deve a Laura:</b> <span class="text-brand-600 font-bold">${Math.abs(barbBalance).toFixed(2)} €</span>`;
+            }
+
+            splitBox.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <span class="block text-slate-400">Totale Speso Barbara</span>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${barbTotalPaid.toFixed(2)} €</span>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-600">
+                    <span class="block text-slate-400">Totale Speso Laura</span>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${laurTotalPaid.toFixed(2)} €</span>
+                </div>
+                <div class="bg-brand-50 dark:bg-brand-950/40 p-2.5 rounded-lg border border-brand-200 dark:border-brand-800 flex flex-col justify-center">
+                    <span class="block text-brand-700 dark:text-brand-300 font-semibold">Situazione Debiti</span>
+                    <span class="text-xs">${settlementText}</span>
+                </div>
+            `;
+
+            if(!tripData.expenses || tripData.expenses.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400">Nessuna spesa extra inserita. Usa il pulsante "+ Aggiungi Spesa" per registrarne una.</p>`;
                 return;
             }
 
-            container.innerHTML = tripData.days.map((day, dIdx) => {
-                if(day.cost) {
-                    const parsed = parseFloat(day.cost.replace(/[^0-9.,]/g, '').replace(',', '.'));
-                    if(!isNaN(parsed)) total += parsed;
-                }
-                return `
-                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-700">
-                        <div>
-                            <span class="font-bold text-brand-600 dark:text-brand-400">Giorno ${day.id} (${day.date || ''})</span>
-                            <span class="text-slate-600 dark:text-slate-300 ml-2"><b>${day.title || 'Tappa'}</b></span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <span class="px-2 py-0.5 rounded text-[10px] ${day.hotel_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'}">Hotel: ${day.hotel_status || 'Da Prenotare'}</span>
-                            <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${day.cost || '0€'}</span>
-                            <button onclick="editCostPrompt(${dIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
-                        </div>
+            container.innerHTML = tripData.expenses.map((exp, eIdx) => `
+                <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-700">
+                    <div class="space-y-0.5">
+                        <span class="font-bold text-slate-800 dark:text-slate-200">${exp.title}</span>
+                        <div class="text-[10px] text-slate-400">Pagato da: <b>${exp.payer}</b> | Divisione: <b>${exp.split}</b></div>
                     </div>
-                `;
-            }).join('');
-
-            document.getElementById('total-budget-sum').innerText = total + " €";
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${exp.amount} €</span>
+                        <button onclick="editExpensePrompt(${eIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteExpense(${eIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function renderTodos() {
@@ -429,7 +540,47 @@
             }
         }
 
-        /* --- FUNZIONI DI MODIFICA --- */
+        /* --- FUNZIONI DI GESTIONE SPESE --- */
+        function addExpensePrompt() {
+            const title = prompt("Descrizione spesa (es. cena, taxi, escursione):");
+            if(!title) return;
+            const amount = prompt("Importo in €:");
+            if(!amount || isNaN(amount)) return;
+            const payer = prompt("Chi ha anticipato i soldi? (Scrivi Barbara o Laura):", "Barbara");
+            if(payer !== "Barbara" && payer !== "Laura") return;
+            const split = prompt("Come dividere la spesa?\nScrivi:\n- 'uguale' (50 e 50)\n- 'Barbara' (tutto a carico di Barbara)\n- 'Laura' (tutto a carico di Laura)", "uguale");
+            if(!split) return;
+
+            if(!tripData.expenses) tripData.expenses = [];
+            tripData.expenses.push({ title, amount: parseFloat(amount), payer, split });
+            saveDataToSheet();
+            renderApp();
+        }
+
+        function editExpensePrompt(eIdx) {
+            const exp = tripData.expenses[eIdx];
+            const title = prompt("Modifica descrizione:", exp.title);
+            if(!title) return;
+            const amount = prompt("Modifica importo in €:", exp.amount);
+            if(!amount || isNaN(amount)) return;
+            const payer = prompt("Chi ha pagato? (Barbara o Laura):", exp.payer);
+            const split = prompt("Divisione ('uguale', 'Barbara', 'Laura'):", exp.split || 'uguale');
+
+            exp.title = title;
+            exp.amount = parseFloat(amount);
+            exp.payer = payer;
+            exp.split = split;
+            saveDataToSheet();
+            renderApp();
+        }
+
+        function deleteExpense(eIdx) {
+            tripData.expenses.splice(eIdx, 1);
+            saveDataToSheet();
+            renderApp();
+        }
+
+        /* --- ALTRE FUNZIONI DI MODIFICA --- */
         function editDayPrompt(dIdx) {
             const d = tripData.days[dIdx];
             const newTitle = prompt("Titolo del giorno:", d.title || "");
