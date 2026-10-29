@@ -293,6 +293,43 @@
 .thai-expense-delete{background:#fae5e8;color:#913c52;}
 .dark .thai-expense-delete{background:#543e49;color:#ffe5ec;}
 @media(max-width:480px){.thai-expense-head{gap:.5rem}.thai-expense-icon{width:2rem;height:2rem}.thai-expense-amount{font-size:.88rem}.thai-expense-meta{font-size:.7rem}.thai-expense-chevron{width:40px;min-width:40px}}
+
+/* Hotel: nome evidente e indirizzo apribile in Maps. */
+.thai-hotel-name strong{font-size:1rem;line-height:1.5;font-weight:800;overflow-wrap:anywhere}
+.thai-hotel-map-link{display:inline-flex;align-items:baseline;gap:.35rem;max-width:100%;color:#176b76;text-decoration:underline;text-underline-offset:3px;font-weight:650;overflow-wrap:anywhere;padding:.2rem 0}
+.dark .thai-hotel-map-link{color:#a5ece3}
+.thai-hotel-map-link:hover{filter:brightness(1.15)}
+.thai-hotel-map-link:focus-visible{outline:3px solid #68cbbc;outline-offset:3px;border-radius:.25rem}
+
+/* Hotel: numero notte e navigazione */
+.thai-night-tag{display:inline-flex;align-items:center;padding:.23rem .55rem;border-radius:999px;font-size:.72rem;font-weight:750;background:#dff1e7;color:#24654e;border:1px solid #b1dcca}
+.dark .thai-night-tag{background:#315b50;color:#def8ec;border-color:#6b9e88}
+.thai-hotel-navigate{display:inline-flex;align-items:center;gap:.4rem;padding:.6rem .85rem;min-height:42px;border-radius:.7rem;background:#e0f2fe;color:#075985;font-weight:700;text-decoration:none!important}
+.dark .thai-hotel-navigate{background:#32566d;color:#e3f4ff}
+.thai-change-route{border:1px solid #a5c4cf;border-radius:1rem;padding:.8rem;background:#f2f8fa;color:#224b59}
+.dark .thai-change-route{background:#233b4a;border-color:#547588;color:#e4f3f7}
+.thai-change-route-item{display:flex;align-items:flex-start;gap:.6rem;padding:.4rem 0;font-size:.82rem}
+.thai-change-route-dot{width:1.5rem;height:1.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#d9edf1;flex:none}
+.dark .thai-change-route-dot{background:#345867}
+/* To Do: elenco compatto, senza shell comprimi per ogni voce */
+.thai-todo-row{display:flex;align-items:center;gap:.7rem;border-radius:.9rem;padding:.75rem .8rem!important;border:1px solid #cbdfe3;background:#f8fbfc!important;min-height:62px}
+.dark .thai-todo-row{background:#213b47!important;border-color:#486775!important}
+.thai-todo-row.is-done{opacity:.72}
+.thai-todo-check{width:21px;height:21px;accent-color:#2b877d;flex:none}
+.thai-todo-main{flex:1;min-width:0}
+.thai-todo-text{display:block;font-size:.9rem;font-weight:650;line-height:1.3;overflow-wrap:anywhere}
+.thai-todo-meta{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.25rem}
+.thai-todo-chip{display:inline-block;padding:.13rem .5rem;border-radius:99px;font-size:.7rem;font-weight:650;background:#e5eff5;color:#36576c}
+.dark .thai-todo-chip{background:#365362;color:#e3eff6}
+.thai-todo-drag{font-size:1.2rem;color:#658895;cursor:grab;touch-action:none;user-select:none;padding:.45rem;flex:none}
+.thai-todo-action{width:39px;height:39px;border-radius:.65rem;display:inline-flex;align-items:center;justify-content:center;background:#e2f0ef;color:#205b59;border:1px solid #c4dbd8;flex:none}
+.dark .thai-todo-action{background:#315865;color:#e2f5fa;border-color:#56828c}
+.thai-todo-action.danger{background:#f8eaed;color:#9e4759;border-color:#ecc7cf}
+.dark .thai-todo-action.danger{background:#533b48;color:#ffe4ed;border-color:#805c69}
+.thai-todo-toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
+.thai-todo-progress{height:6px;background:#d8e7e7;border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.thai-todo-progress>div{background:#4aada0;height:100%;transition:width .2s}
+@media(max-width:480px){.thai-todo-row{gap:.35rem;padding:.55rem!important}.thai-todo-action{width:34px;height:36px}.thai-todo-drag{padding:.24rem}.thai-todo-text{font-size:.84rem}}
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
@@ -497,6 +534,7 @@
                             <h2 class="font-bold text-lg"><i class="fa-solid fa-clipboard-check text-brand-500"></i> To Do Checklist</h2>
                             <button onclick="openTodoModal()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Task</button>
                         </div>
+                        <div id="todo-progress-summary" aria-live="polite"></div>
                         <div id="todo-list" class="space-y-2"></div>
                     </div>
                 </section>
@@ -1118,6 +1156,12 @@
             const u = thaiUrl(v, label === 'Google Maps');
             return u ? `<a href="${thaiEsc(u)}" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline font-semibold inline-flex items-center gap-1 py-1" aria-label="${thaiEsc(label)} (apri collegamento esterno)">${thaiEsc(label)} ↗</a>` : '';
         };
+        const thaiHotelAddress = (address) => {
+            const val=String(address??'').trim();
+            if(!val)return '';
+            const href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(val);
+            return `<a href="${thaiEsc(href)}" target="_blank" rel="noopener noreferrer" class="thai-hotel-map-link" aria-label="Apri indirizzo hotel su Google Maps">📍 ${thaiEsc(val)} <span aria-hidden="true">↗</span></a>`;
+        };
         const thaiBtn = (label, handler, cls='') => `<button type="button" onclick="${handler}" class="thai-action ${cls}">${label}</button>`;
         const thaiValid = d => d && typeof d === 'object' && Array.isArray(d.days) && Array.isArray(d.todos) && Array.isArray(d.notes) && (d.expenses === undefined || Array.isArray(d.expenses));
         function thaiNormalize(d) {
@@ -1419,19 +1463,45 @@
             const stays=thaiHotelStaysForDay(dayIndex);
             return stays.find(s=>!s.checkout) || stays[0] || null;
         }
-        function thaiSharedHotelCard(stay) {
+        function thaiHotelNightLabel(h, dayDate) {
+            const current=thaiDateKey(dayDate), start=thaiDateKey(h?.checkin), end=thaiDateKey(h?.checkout);
+            if(current===null || start===null || current<start || (end!==null && current>=end))return '';
+            const number=Math.round((current-start)/86400000)+1;
+            const nights=end===null?null:Math.round((end-start)/86400000);
+            if(nights!==null && number===nights)return 'Ultima notte · '+number+'ª notte';
+            return number+'ª notte';
+        }
+        function thaiHotelDirections(address) {
+            if(!address || !String(address).trim())return '';
+            const href='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(String(address).trim())+'&travelmode=driving';
+            return `<a class="thai-hotel-navigate" href="${thaiEsc(href)}" target="_blank" rel="noopener noreferrer" aria-label="Naviga verso hotel con Google Maps">📍 Naviga verso hotel ↗</a>`;
+        }
+        function thaiHotelChangeSummary(dayIndex, stays, transports) {
+            const exiting=stays.filter(x=>x.checkout);
+            const arrivals=stays.filter(x=>!x.checkout && thaiDateKey(x.hotel.checkin)===thaiDateKey(tripData.days[dayIndex]?.date));
+            if(!exiting.length || !arrivals.length)return '';
+            const moves=(transports||[]).map(t=>thaiTransportLabel(t)).filter(Boolean);
+            return `<div class="thai-change-route" aria-label="Riepilogo cambio hotel"><p class="font-bold text-sm mb-2">🧳 Cambio hotel · Programma della giornata</p>
+              ${exiting.map(x=>`<div class="thai-change-route-item"><span class="thai-change-route-dot">1</span><span><strong>Check-out:</strong> ${thaiEsc(x.hotel.name)}</span></div>`).join('')}
+              <div class="thai-change-route-item"><span class="thai-change-route-dot">2</span><span><strong>Trasporto:</strong> ${moves.length?moves.map(thaiEsc).join(' · '):'Non ancora inserito'}</span></div>
+              ${arrivals.map(x=>`<div class="thai-change-route-item"><span class="thai-change-route-dot">3</span><span><strong>Check-in:</strong> ${thaiEsc(x.hotel.name)}</span></div>`).join('')}
+              <p class="text-xs opacity-75 mt-1">Riepilogo automatico dalle prenotazioni e dagli spostamenti registrati.</p></div>`;
+        }
+        function thaiSharedHotelCard(stay, currentDate) {
             if (!stay) return '';
             const h=stay.hotel;
             const source=tripData.days[stay.sourceIndex];
-            const title=stay.checkout?'🧳 Check-out oggi':(['Prenotato','Completato'].includes(h.status)?'🏨 Hotel prenotato':'🏨 Hotel previsto');
+            const isCheckin=thaiDateKey(h.checkin)===thaiDateKey(source.date) && !stay.checkout && thaiDateKey(h.checkin)!==null;
+            const title=stay.checkout?'🧳 Check-out oggi':isCheckin?'🏨 Check-in oggi':(['Prenotato','Completato'].includes(h.status)?'🏨 Hotel prenotato':'🏨 Hotel previsto');
             const shortName=(h.name||'Hotel').split(' · ')[0];
+            const nightLabel=thaiHotelNightLabel(h,currentDate);
             return `<details class="thai-linked-stay thai-section hotel-detail" aria-label="Soggiorno collegato dal giorno ${thaiEsc(source.id||stay.sourceIndex+1)}">
                 <summary class="thai-linked-stay-summary">
                     <span class="thai-linked-stay-main"><strong>${title} · ${thaiEsc(shortName)}</strong><small>${thaiEsc(h.checkin||'Check-in da definire')} – ${thaiEsc(h.checkout||'Check-out da definire')} · Dal giorno ${thaiEsc(source.id||stay.sourceIndex+1)}</small></span>
-                    <span class="thai-linked-stay-hint">Dettagli <span class="thai-linked-stay-chevron" aria-hidden="true">▾</span></span>
+                    ${nightLabel?`<span class="thai-night-tag">${thaiEsc(nightLabel)}</span>`:``}<span class="thai-linked-stay-hint">Dettagli <span class="thai-linked-stay-chevron" aria-hidden="true">▾</span></span>
                 </summary>
                 <div class="thai-linked-stay-details text-xs space-y-2">
-                    ${h.address?`<p>📍 ${thaiEsc(h.address)}</p>`:''}
+                    ${h.address?`<p>${thaiHotelAddress(h.address)}</p><p>${thaiHotelDirections(h.address)}</p>`:''}
                     <p>Check-in: ${thaiEsc(h.checkin||'non indicato')} · Check-out: ${thaiEsc(h.checkout||'non indicato')}</p>
                     ${h.status?`<p>Stato: ${thaiEsc(h.status)}</p>`:''}
                     ${h.cost!=='' && h.cost!=null?`<p>💶 Prezzo totale soggiorno: ${formatEUR(h.cost)} <span class="opacity-75">(non per notte, non aggiunto automaticamente al budget)</span></p>`:''}
@@ -1458,12 +1528,16 @@
                 const activities=(d.activities||[]).map((a,j)=>({a,j})).sort((x,y)=>(x.a.start||'99:99').localeCompare(y.a.start||'99:99'));
                 const transport=(d.transports||[]);
                 const hotel=d.hotel;
-                const sharedStays=thaiHotelStaysForDay(i).filter(stay=>stay.sourceIndex!==i);
+                const linkedStays=thaiHotelStaysForDay(i).filter(stay=>stay.sourceIndex!==i);
+                const checkoutStays=linkedStays.filter(stay=>stay.checkout);
+                const otherStays=linkedStays.filter(stay=>!stay.checkout);
                 return `<article class="day-card bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                   <div class="flex justify-between items-start gap-2"><div class="flex gap-2 items-start"><span class="day-drag-handle cursor-grab p-1 text-slate-400">☷</span><div><p class="text-[11px] font-bold text-brand-600">GIORNO ${thaiEsc(d.id)} · ${thaiEsc(d.date||'')}</p><h3 class="font-bold">${thaiEsc(d.title||'Tappa')}</h3></div></div><div class="flex gap-2">${thaiBtn('✏️',`openDayModal(${i})`)}${thaiBtn('🗑️',`deleteDay(${i})`)}</div></div>
                   <div class="flex flex-wrap gap-2">${thaiBtn(hotel || d.link || d.cancellation || d.hotel_status === 'Prenotato' ? '🏨 Gestisci hotel' : '🏨 Aggiungi hotel',`openHotelModal(${i})`)}${thaiBtn('🚆 Aggiungi spostamento',`openTransportModal(${i})`)}${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}</div>
-                  ${(hotel || d.link || d.cancellation || d.hotel_status === 'Prenotato') ? `<div class="thai-section hotel-detail text-xs space-y-2"><div class="flex items-center justify-between flex-wrap gap-2"><p class="font-bold">🏨 Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p><span class="flex flex-wrap gap-2"><button type="button" onclick="thaiOpenMove('hotel',${i})" class="thai-action" aria-label="Sposta hotel in un altro giorno">↔️ Sposta hotel</button><button type="button" onclick="thaiDeleteHotel(${i})" class="rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-2 text-rose-700 dark:text-rose-200 font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Elimina hotel dalla giornata">🗑️ Elimina hotel</button></span></div>${hotel?.name?`<p>${thaiEsc(hotel.name)} · ${thaiEsc(hotel.address||'')}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${hotel?.cost !== undefined && hotel?.cost !== null && hotel?.cost !== '' ? `<p class="font-bold text-sm">💶 Prezzo totale hotel: ${formatEUR(hotel.cost)} <span class="font-normal opacity-75">(non aggiunto automaticamente al budget)</span></p>` : ''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${(hotel?.cancellation||d.cancellation)?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(hotel?.cancellation||d.cancellation)}</p>`:''}</div>` : ''}
-                  ${sharedStays.map(thaiSharedHotelCard).join('')}
+                  ${checkoutStays.map(stay=>thaiSharedHotelCard(stay,d.date)).join('')}
+                  ${(hotel?.name) ? `<div class="thai-section hotel-detail text-xs space-y-2"><div class="flex items-center justify-between flex-wrap gap-2"><p class="font-bold">🏨 ${hotel?.checkin && thaiDateKey(hotel.checkin)===thaiDateKey(d.date)?'Check-in oggi · ':''}Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p><span class="flex flex-wrap gap-2"><button type="button" onclick="thaiOpenMove('hotel',${i})" class="thai-action" aria-label="Sposta hotel in un altro giorno">↔️ Sposta hotel</button><button type="button" onclick="thaiDeleteHotel(${i})" class="rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-2 text-rose-700 dark:text-rose-200 font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Elimina hotel dalla giornata">🗑️ Elimina hotel</button></span></div>${hotel?.name?`<p class="thai-hotel-name"><strong>${thaiEsc(hotel.name)}</strong></p>`:''}${thaiHotelNightLabel(hotel,d.date)?`<span class="thai-night-tag">${thaiEsc(thaiHotelNightLabel(hotel,d.date))}</span>`:''}${hotel?.address?`<p>${thaiHotelAddress(hotel.address)}</p><p>${thaiHotelDirections(hotel.address)}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${hotel?.cost !== undefined && hotel?.cost !== null && hotel?.cost !== '' ? `<p class="font-bold text-sm">💶 Prezzo totale hotel: ${formatEUR(hotel.cost)} <span class="font-normal opacity-75">(non aggiunto automaticamente al budget)</span></p>` : ''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${(hotel?.cancellation||d.cancellation)?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(hotel?.cancellation||d.cancellation)}</p>`:''}</div>` : ''}
+                  ${otherStays.map(stay=>thaiSharedHotelCard(stay,d.date)).join('')}
+                  ${thaiHotelChangeSummary(i,thaiHotelStaysForDay(i),transport)}
                   ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<div class="thai-legacy"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-semibold">📌 Descrizione trasporto importata</span><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},\'transport_details\')`)}</div></div><p class="whitespace-pre-wrap mt-1">${thaiEsc(d.transport_details)}</p><p class="thai-help">È un testo salvato nel vecchio itinerario, non un biglietto o una spesa. Puoi rimuoverlo dopo aver creato lo spostamento qui sopra.</p></div>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('↔️ Sposta',`thaiOpenMove('transport',${i},${j})`)} ${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
                   ${d.cost?`<div class="thai-legacy text-xs"><div class="flex flex-wrap items-center justify-between gap-2"><b>💶 Importo del vecchio itinerario: ${thaiEsc(d.cost)}</b><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},'cost')`)}</div></div><p class="thai-help">È un valore generico importato: non è stato attribuito a hotel, trasporti o budget. Se è una spesa reale, registrala in Budget & Costi, poi rimuovi questo valore.</p></div>`:''}
                   ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
@@ -1474,7 +1548,20 @@
             }).join('');
         }
         function renderTodos(){
-            document.getElementById('todo-list').innerHTML=(tripData.todos||[]).map((t,i)=>`<div class="thai-todo-row flex justify-between items-center gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-xs"><span class="todo-drag-handle touch-none cursor-grab text-lg text-slate-400 select-none px-2" role="img" aria-label="Trascina per riordinare" title="Trascina per riordinare">☷</span><label class="flex gap-2 items-center min-w-0 flex-1"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span class="${t.done?'line-through text-slate-400':''}">${thaiEsc(t.text||'')}${t.due?` <small>(${thaiEsc(t.due)})</small>`:''}${t.owner?` <small>· ${thaiEsc(t.owner)}</small>`:''}</span></label><div class="flex gap-1">${thaiBtn('✏️',`openTodoModal(${i})`)}${thaiBtn('🗑️',`deleteTodo(${i})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività da fare.</p>';
+            const all=tripData.todos||[];
+            const done=all.filter(t=>t.done).length;
+            const percent=all.length?Math.round(done/all.length*100):0;
+            const summary=document.getElementById('todo-progress-summary');
+            if(summary)summary.innerHTML=`<div class="thai-todo-toolbar"><span class="text-sm font-bold">${done} di ${all.length} completate</span><span class="text-xs opacity-75">Trascina ☷ per riordinare</span></div><div class="thai-todo-progress" role="progressbar" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100" aria-label="To Do completate"><div style="width:${percent}%"></div></div>`;
+            document.getElementById('todo-list').innerHTML=all.map((t,i)=>`<div class="thai-todo-row ${t.done?'is-done':''}" data-todo-index="${i}">
+              <span class="todo-drag-handle thai-todo-drag" role="img" aria-label="Trascina per riordinare" title="Trascina per riordinare">☷</span>
+              <input class="thai-todo-check" type="checkbox" id="thai-todo-${i}" ${t.done?'checked':''} onchange="toggleTodo(${i});renderApp()" aria-label="Completa ${thaiEsc(t.text||'attività')}" />
+              <label for="thai-todo-${i}" class="thai-todo-main"><span class="thai-todo-text ${t.done?'line-through':''}">${thaiEsc(t.text||'Da fare')}</span>
+                ${(t.due||t.owner)?`<span class="thai-todo-meta">${t.due?`<span class="thai-todo-chip">📅 ${thaiEsc(t.due)}</span>`:''}${t.owner?`<span class="thai-todo-chip">👤 ${thaiEsc(t.owner)}</span>`:''}</span>`:''}
+              </label>
+              <button type="button" class="thai-todo-action" onclick="openTodoModal(${i})" title="Modifica" aria-label="Modifica To Do">✏️</button>
+              <button type="button" class="thai-todo-action danger" onclick="deleteTodo(${i})" title="Elimina" aria-label="Elimina To Do">🗑️</button>
+            </div>`).join('')||'<p class="text-sm opacity-75 p-3">Nessuna attività da fare. Aggiungi la prima!</p>';
         }
         function renderNotes(){
             document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>`<div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-between gap-2"><b>${thaiEsc(n.title||'Nota')}</b><span class="flex gap-1">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div><p class="whitespace-pre-wrap">${thaiEsc(n.text||'')}</p>${thaiLink(n.link,'Link utile')}</div>`).join('')||'<p class="text-xs text-slate-400">Nessuna nota.</p>';
@@ -1743,7 +1830,7 @@
                 if(personal)thaiWrapFold(personal,'budget:personal','💳 Spesa a persona');
             }
             document.querySelectorAll('#notes-container > div').forEach((node,i)=>thaiWrapFold(node,'note:'+i,'📝 '+(tripData.notes?.[i]?.title||'Nota')));
-            document.querySelectorAll('#todo-list > div').forEach((node,i)=>thaiWrapFold(node,'todo:'+i,'☑️ '+(tripData.todos?.[i]?.text||'Da fare')));
+            // To Do volutamente compatti: non aggiungere un pannello Comprimi per ogni voce.
             document.querySelectorAll('#expenses-list > .thai-expense-card').forEach(node=>{
                 const key=node.dataset.thaiFoldKey;
                 const body=node.querySelector('.thai-fold-body');
