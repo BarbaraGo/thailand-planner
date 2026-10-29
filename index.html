@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thailand Planner 2026/2027 - Live Sync Sheet</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c', 700: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome & Fonts -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .drag-handle { cursor: grab; touch-action: none; }
+        .drag-handle:active { cursor: grabbing; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+    <div id="app" class="flex flex-col min-h-screen">
+        <!-- Top Bar -->
+        <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-md">
+                    <svg viewBox="0 0 30 20" width="30" height="20" role="img" class="rounded-sm">
+                        <rect width="30" height="20" fill="#a51931" />
+                        <rect y="3.333" width="30" height="13.334" fill="#f4f5f8" />
+                        <rect y="6.667" width="30" height="6.666" fill="#2d2a4a" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+                        Thailandia Live Planner 🌴
+                        <span id="sync-status" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">⚡ Google DB Collegato</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sincronizzazione automatica tra dispositivi</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="fetchDataFromSheet()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Aggiorna Dati ora">
+                    <i class="fa-solid fa-rotate"></i>
+                </button>
+                <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Tema Notte/Giorno">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6">
+            <!-- Sidebar -->
+            <aside class="w-full md:w-64 flex-shrink-0 space-y-4">
+                <nav class="bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
+                    <button onclick="switchTab('itinerary')" data-tab="itinerary" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-brand-600 bg-brand-50 dark:bg-brand-900/30 dark:text-brand-400">
+                        <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
+                        <span>Itinerario</span>
+                    </button>
+                    <button onclick="switchTab('checklist')" data-tab="checklist" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                        <i class="fa-solid fa-list-check text-base w-5 text-center"></i>
+                        <span>To Do</span>
+                    </button>
+                    <button onclick="switchTab('notes')" data-tab="notes" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                        <i class="fa-solid fa-note-sticky text-base w-5 text-center"></i>
+                        <span>Note</span>
+                    </button>
+                </nav>
+
+                <!-- Box Voli Saudia -->
+                <section class="bg-orange-100 dark:bg-orange-950 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-orange-200 dark:border-orange-800 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b border-orange-200 pb-2">
+                        <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
+                        <span class="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded text-xs font-mono font-bold">PNR: 7XJFTQ</span>
+                    </div>
+                    <div class="text-xs space-y-1">
+                        <p class="font-bold text-brand-700">ANDATA · 26–27 Dic</p>
+                        <p>FCO 09:30 → BKK 13:40 (1 scalo RUH 10h)</p>
+                    </div>
+                    <div class="text-xs space-y-1 border-t border-orange-200 pt-2">
+                        <p class="font-bold text-emerald-700">RITORNO · 10–11 Gen</p>
+                        <p>BKK 15:20 → FCO 06:15 (1 scalo RUH 6h 45m)</p>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Main Area -->
+            <main class="flex-1 min-w-0">
+                <section id="tab-itinerary" class="tab-content space-y-4">
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h2 class="font-bold text-lg">Programma Giornaliero</h2>
+                        <p class="text-xs text-slate-500">I dati sono salvati automaticamente su Google Sheets.</p>
+                    </div>
+                    <div id="days-container" class="space-y-4"></div>
+                </section>
+
+                <section id="tab-checklist" class="tab-content hidden space-y-4">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="font-bold text-lg"><i class="fa-solid fa-clipboard-check text-brand-500"></i> To Do Checklist</h2>
+                            <button onclick="addTodoPrompt()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Task</button>
+                        </div>
+                        <div id="todo-list" class="space-y-2"></div>
+                    </div>
+                </section>
+
+                <section id="tab-notes" class="tab-content hidden space-y-4">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h2 class="font-bold text-lg"><i class="fa-solid fa-note-sticky text-amber-500"></i> Note Generali</h2>
+                            <button onclick="addNotePrompt()" class="px-3 py-1.5 bg-amber-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Nota</button>
+                        </div>
+                        <div id="notes-container" class="space-y-3"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // INCOLLA QUI L'URL DELLA TUA WEB APP GOOGLE APPS SCRIPT
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0MEeS8GtlSKwBRjE02y-uk3vGmfgtyaw1FpSnqOMBFFJx7tlqnrdzDiNeJb9AoLOEMQ/exec";
+
+        let tripData = { days: [], todos: [], notes: [] };
+
+        function updateSyncStatus(status, colorClass) {
+            const el = document.getElementById('sync-status');
+            if(el) {
+                el.innerText = status;
+                el.className = `text-[10px] font-semibold px-2 py-0.5 rounded-full ${colorClass}`;
+            }
+        }
+
+        async function fetchDataFromSheet() {
+            updateSyncStatus('⌛ Sincronizzazione...', 'bg-amber-100 text-amber-700');
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL);
+                const data = await res.json();
+                if(data && typeof data === 'object') {
+                    tripData = data;
+                    renderApp();
+                    updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
+                }
+            } catch(e) {
+                updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
+                const saved = localStorage.getItem('thailandData2026');
+                if(saved) tripData = JSON.parse(saved);
+                renderApp();
+            }
+        }
+
+        async function saveDataToSheet() {
+            localStorage.setItem('thailandData2026', JSON.stringify(tripData));
+            updateSyncStatus('💾 Salvataggio in corso...', 'bg-amber-100 text-amber-700');
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(tripData)
+                });
+                updateSyncStatus('⚡ Sincronizzato su Sheet', 'bg-emerald-100 text-emerald-700');
+            } catch(e) {
+                updateSyncStatus('❌ Errore salvataggio', 'bg-red-100 text-red-700');
+            }
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active', 'bg-brand-50', 'text-brand-600', 'dark:bg-brand-900/30');
+                el.classList.add('text-slate-600', 'dark:text-slate-300');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active', 'bg-brand-50', 'text-brand-600', 'dark:bg-brand-900/30');
+        }
+
+        function renderApp() {
+            renderItinerary();
+            renderTodos();
+            renderNotes();
+            initDragAndDrop();
+        }
+
+        function renderItinerary() {
+            const container = document.getElementById('days-container');
+            if(!tripData.days || tripData.days.length === 0) {
+                container.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">Nessun dato sul Google Sheet. Inserisci tappe o importa il JSON iniziale.</div>`;
+                return;
+            }
+            container.innerHTML = tripData.days.map((day, dIdx) => `
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                    <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="drag-handle text-slate-400 p-1"><i class="fa-solid fa-grip-vertical"></i></span>
+                            <div>
+                                <span class="text-[10px] font-bold text-brand-500 uppercase">Giorno ${day.id} - ${day.date || ''}</span>
+                                <h3 class="font-bold text-base">${day.title || 'Tappa'}</h3>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            ${day.hotel ? `<span class="text-xs bg-slate-100 px-2 py-1 rounded-lg">🏨 ${day.hotel}</span>` : ''}
+                            <button onclick="addActivityPrompt(${dIdx})" class="p-1.5 text-xs text-brand-600"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="deleteDay(${dIdx})" class="p-1.5 text-xs text-red-400"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                    <div class="activities-list space-y-2" data-day-idx="${dIdx}">
+                        ${(day.activities || []).map((act, aIdx) => `
+                            <div class="bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="drag-handle text-slate-400"><i class="fa-solid fa-grip-vertical"></i></span>
+                                    <span>${act.title || act.desc || ''}</span>
+                                </div>
+                                <button onclick="deleteActivity(${dIdx}, ${aIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderTodos() {
+            const container = document.getElementById('todo-list');
+            container.innerHTML = (tripData.todos || []).map((t, idx) => `
+                <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl text-xs">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${idx})">
+                        <span class="${t.done ? 'line-through text-slate-400' : ''}">${t.text}</span>
+                    </div>
+                    <button onclick="deleteTodo(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function renderNotes() {
+            const container = document.getElementById('notes-container');
+            container.innerHTML = (tripData.notes || []).map((n, idx) => `
+                <div class="p-3 bg-amber-50 rounded-xl text-xs space-y-1">
+                    <div class="flex justify-between font-bold text-amber-900">
+                        <span>${n.title || 'Nota'}</span>
+                        <button onclick="deleteNote(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <p>${n.text}</p>
+                </div>
+            `).join('');
+        }
+
+        function initDragAndDrop() {
+            const daysContainer = document.getElementById('days-container');
+            if(daysContainer) {
+                new Sortable(daysContainer, {
+                    handle: '.drag-handle', animation: 150,
+                    onEnd: (evt) => {
+                        const moved = tripData.days.splice(evt.oldIndex, 1)[0];
+                        tripData.days.splice(evt.newIndex, 0, moved);
+                        saveDataToSheet();
+                    }
+                });
+            }
+        }
+
+        function deleteDay(dIdx) { tripData.days.splice(dIdx, 1); saveDataToSheet(); renderApp(); }
+        function addActivityPrompt(dIdx) {
+            const title = prompt("Attività:");
+            if(title) {
+                if(!tripData.days[dIdx].activities) tripData.days[dIdx].activities = [];
+                tripData.days[dIdx].activities.push({ title: title });
+                saveDataToSheet(); renderApp();
+            }
+        }
+        function deleteActivity(dIdx, aIdx) { tripData.days[dIdx].activities.splice(aIdx, 1); saveDataToSheet(); renderApp(); }
+        function addTodoPrompt() {
+            const text = prompt("Nuova task:");
+            if(text) { if(!tripData.todos) tripData.todos = []; tripData.todos.push({ text: text, done: false }); saveDataToSheet(); renderApp(); }
+        }
+        function toggleTodo(idx) { tripData.todos[idx].done = !tripData.todos[idx].done; saveDataToSheet(); }
+        function deleteTodo(idx) { tripData.todos.splice(idx, 1); saveDataToSheet(); renderApp(); }
+        function addNotePrompt() {
+            const title = prompt("Titolo:"); const text = prompt("Testo:");
+            if(title || text) { if(!tripData.notes) tripData.notes = []; tripData.notes.push({ title: title, text: text }); saveDataToSheet(); renderApp(); }
+        }
+        function deleteNote(idx) { tripData.notes.splice(idx, 1); saveDataToSheet(); renderApp(); }
+
+        fetchDataFromSheet();
+    </script>
+</body>
+</html>
