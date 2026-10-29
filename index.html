@@ -25,7 +25,7 @@
     <meta name="apple-mobile-web-app-status-bar-style"
           content="default">
     
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#102c35">
     <script>
       // Dark by default; preserve the visitor's explicit choice across sessions.
       (function () {
@@ -44,7 +44,7 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c', 700: '#c2410c',
+                            50: '#effaf9', 100: '#d9f1ee', 200: '#b8e2dd', 300: '#8acbc6', 400: '#62b4ae', 500: '#3c9e9b', 600: '#287f80', 700: '#20676a', 800: '#1b5156', 900: '#163f46', 950: '#0e3037',
                         }
                     }
                 }
@@ -61,10 +61,10 @@
         .drag-handle:active { cursor: grabbing; }
         .thai-modal-panel { max-height: 88dvh; overflow-y: auto; }
         .thai-field { width:100%; background:transparent; border:1px solid #cbd5e1; border-radius:0.75rem; padding:0.65rem; font-size:0.875rem; }
-        .dark .thai-field { border-color:#475569; color:#f1f5f9; background:#0f172a; }
+        .dark .thai-field { border-color:#475569; color:#f1f5f9; background:#19333d; }
         .thai-label { display:block; font-size:.75rem; font-weight:600; margin-bottom:.3rem; }
-        .thai-action { display:inline-flex; align-items:center; gap:.3rem; border-radius:.65rem; padding:.45rem .7rem; font-size:.75rem; font-weight:700; background:#ffedd5; color:#c2410c; }
-        .dark .thai-action { background:#7c2d12; color:#fed7aa; }
+        .thai-action { display:inline-flex; align-items:center; gap:.3rem; border-radius:.65rem; padding:.45rem .7rem; font-size:.75rem; font-weight:700; background:#d9f1ee; color:#20676a; }
+        .dark .thai-action { background:#204f56; color:#c9f5ef; }
         .thai-section { border:1px solid #e2e8f0; border-radius:.75rem; padding:.75rem; }
         .dark .thai-section { border-color:#475569; }
         .thai-pill { display:inline-block; border-radius:.5rem; padding:.15rem .4rem; background:#f1f5f9; font-size:.7rem; }
@@ -72,34 +72,54 @@
 
         /* Contrasto ottimizzato per la modalità notte, compreso il contenuto dinamico */
         .dark { color-scheme: dark; }
-        .dark body { background-color: #0b1220; color: #f1f5f9; }
+        .dark body { background-color: #10242c; color: #edf7f7; }
         .dark input, .dark textarea, .dark select {
             color: #f8fafc;
-            background-color: #18263a;
+            background-color: #19333d;
             border-color: #64748b;
         }
         .dark input::placeholder, .dark textarea::placeholder { color: #cbd5e1; opacity: 1; }
         .dark input:focus, .dark textarea:focus, .dark select:focus {
-            outline: 2px solid #fb923c;
+            outline: 2px solid #7dd3c7;
             outline-offset: 1px;
-            border-color: #fb923c;
+            border-color: #7dd3c7;
         }
-        .dark .thai-field { color:#f8fafc; background:#18263a; border-color:#64748b; }
+        .dark .thai-field { color:#f8fafc; background:#19333d; border-color:#64748b; }
         .dark .thai-section { border-color:#64748b; }
         .dark .thai-pill { color: #f1f5f9; background: #334155; }
-        .dark .thai-action { background: #9a3412; color: #fff7ed; }
+        .dark .thai-action { background: #245a61; color: #e0fffa; }
         .dark .text-slate-400, .dark .text-slate-500 { color: #cbd5e1 !important; }
         .dark .text-slate-600, .dark .text-slate-700, .dark .text-slate-800 { color: #e2e8f0 !important; }
-        .dark .text-brand-600, .dark .text-brand-700 { color: #fdba74 !important; }
-        .dark .text-amber-900 { color: #fde68a !important; }
-        .dark .bg-amber-50 { background-color: #422006; }
-        .dark .bg-orange-50 { background-color: #431e0a; }
-        .dark .bg-brand-50 { background-color: #431e0a; }
+        .dark .text-brand-600, .dark .text-brand-700 { color: #8fddd5 !important; }
+        .dark .text-sky-900 { color: #c5e8fb !important; }
+        .dark .bg-sky-50 { background-color: #163c4b; }
+        .dark .bg-teal-50 { background-color: #163b43; }
+        .dark .bg-brand-50 { background-color: #163b43; }
         .dark .bg-emerald-100 { background-color: #064e3b; }
         .dark .text-emerald-800, .dark .text-emerald-700 { color: #a7f3d0 !important; }
-        .dark a:not([class*="text-"]) { color: #fdba74; }
+        .dark a:not([class*="text-"]) { color: #8fddd5; }
         .dark a:hover { text-decoration: underline; }
-        .dark button:focus-visible, .dark a:focus-visible { outline: 2px solid #fdba74; outline-offset: 2px; }
+        .dark button:focus-visible, .dark a:focus-visible { outline: 2px solid #8fddd5; outline-offset: 2px; }
+
+
+        /* Palette blu petrolio chiaro / acqua: notte morbida, contrasti leggibili */
+        .dark .dark\:bg-slate-900 { background-color: #10242c !important; }
+        .dark .dark\:bg-slate-800 { background-color: #1a3842 !important; }
+        .dark .dark\:bg-slate-800\/90 { background-color: rgba(26,56,66,.94) !important; }
+        .dark .dark\:bg-slate-700 { background-color: #254650 !important; }
+        .dark .dark\:bg-slate-700\/50 { background-color: rgba(37,70,80,.55) !important; }
+        .dark .dark\:bg-slate-700\/40 { background-color: rgba(37,70,80,.45) !important; }
+        .dark .dark\:border-slate-700, .dark .dark\:border-slate-600 { border-color: #42616c !important; }
+        .dark .dark\:bg-brand-900\/30 { background-color: rgba(52,122,124,.28) !important; }
+        .dark .dark\:bg-brand-900\/50 { background-color: rgba(52,122,124,.42) !important; }
+        .dark .dark\:text-brand-400, .dark .dark\:text-brand-300 { color: #9ce1d8 !important; }
+        .dark .dark\:bg-teal-950\/30 { background-color: #1a3d47 !important; }
+        .dark .dark\:bg-sky-950\/30 { background-color: #1a394b !important; }
+        .dark .thai-action:hover { background-color: #2d6f72; }
+        .dark .text-sky-800 { color: #c8e9fa !important; }
+        .dark .text-sky-900 { color: #e1f2fc !important; }
+        .dark a { text-underline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
 
 
     </style>
@@ -119,7 +139,7 @@
                 <div>
                     <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
                         Thailandia Live Planner 🌴
-                        <span id="sync-status" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⌛ Connessione...</span>
+                        <span id="sync-status" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">⌛ Connessione...</span>
                     </h1>
                     <p class="text-xs text-slate-500 dark:text-slate-400">Sincronizzazione automatica Google Sheet</p>
                 </div>
@@ -128,7 +148,7 @@
             <!-- Convertitore e Tasti di Azione -->
             <div class="flex items-center flex-wrap gap-2">
                 <div class="bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 border border-slate-200 dark:border-slate-600">
-                    <i class="fa-solid fa-coins text-amber-500"></i>
+                    <i class="fa-solid fa-coins text-teal-500"></i>
                     <input type="number" id="eur-input" placeholder="€" oninput="convertCurrency('eur')" class="w-14 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
                     <span>=</span>
                     <input type="number" id="thb-input" placeholder="THB" oninput="convertCurrency('thb')" class="w-16 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
@@ -178,10 +198,10 @@
                 </nav>
 
                 <!-- Box Voli Saudia -->
-                <section class="order-3 md:order-2 bg-orange-50 dark:bg-orange-950/40 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-orange-200 dark:border-orange-800 shadow-sm space-y-3 text-xs">
-                    <div class="flex justify-between items-center border-b border-orange-200 dark:border-orange-800 pb-2">
+                <section class="order-3 md:order-2 bg-teal-50 dark:bg-teal-950/30 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-teal-200 dark:border-teal-800 shadow-sm space-y-3 text-xs">
+                    <div class="flex justify-between items-center border-b border-teal-200 dark:border-teal-800 pb-2">
                         <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
-                        <span class="bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: 7XJFTQ</span>
+                        <span class="bg-sky-100 text-sky-900 dark:bg-sky-900 dark:text-sky-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: 7XJFTQ</span>
                     </div>
                     <div class="space-y-1.5">
                         <p class="font-bold text-brand-700 dark:text-brand-400 flex items-center gap-1">
@@ -193,7 +213,7 @@
                             <p><b>SV 847:</b> RUH 02:35 (+1) → BKK 13:40</p>
                         </div>
                     </div>
-                    <div class="space-y-1.5 pt-2 border-t border-orange-200 dark:border-orange-800">
+                    <div class="space-y-1.5 pt-2 border-t border-teal-200 dark:border-teal-800">
                         <p class="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                             <i class="fa-solid fa-plane-arrival"></i> RITORNO · 10–11 Gen
                         </p>
@@ -228,7 +248,7 @@
                         </div>
                         <button onclick="openDayModal()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Giorno</button>
                     </div>
-                    <div id="day-summary" class="bg-orange-50 dark:bg-slate-800 rounded-2xl p-4 border border-orange-200 dark:border-slate-700"></div>
+                    <div id="day-summary" class="bg-teal-50 dark:bg-slate-800 rounded-2xl p-4 border border-teal-200 dark:border-slate-700"></div>
                     <div id="days-container" class="space-y-4"></div>
                 </section>
 
@@ -237,7 +257,7 @@
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
                             <div>
-                                <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-amber-500"></i> Riepilogo Budget & Spese</h2>
+                                <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-teal-500"></i> Riepilogo Budget & Spese</h2>
                                 <p class="text-xs text-slate-500">Inserimento manuale e gestione spese condivise.</p>
                             </div>
                             <div class="text-right">
@@ -283,8 +303,8 @@
                 <section id="tab-notes" class="tab-content hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
-                            <h2 class="font-bold text-lg"><i class="fa-solid fa-note-sticky text-amber-500"></i> Note Generali & Link Utili</h2>
-                            <button onclick="openNoteModal()" class="px-3 py-1.5 bg-amber-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Nota</button>
+                            <h2 class="font-bold text-lg"><i class="fa-solid fa-note-sticky text-teal-500"></i> Note Generali & Link Utili</h2>
+                            <button onclick="openNoteModal()" class="px-3 py-1.5 bg-sky-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Nota</button>
                         </div>
                         <div id="notes-container" class="space-y-3"></div>
                     </div>
@@ -339,6 +359,10 @@
         </div>
     </div>
 
+    <!-- Indicatore trascina verso il basso per aggiornare su mobile -->
+    <div id="thai-pull-indicator" role="status" aria-live="polite" class="fixed z-50 left-1/2 top-3 -translate-x-1/2 rounded-full bg-slate-800 text-white shadow-xl border border-slate-600 px-4 py-2 text-xs font-semibold pointer-events-none" style="opacity:0;transform:translate(-50%,-110%);transition:opacity 150ms ease,transform 150ms ease;white-space:nowrap">
+        ↓ Trascina per aggiornare
+    </div>
     <!-- Un'unica finestra per giornate, attività, trasporti, hotel, note e To Do -->
     <div id="thai-modal" role="dialog" aria-modal="true" aria-labelledby="thai-modal-title" class="fixed inset-0 z-50 bg-black/60 hidden items-center justify-center p-3 sm:p-5">
         <form id="thai-modal-form" onsubmit="saveThaiModal(event)" class="thai-modal-panel bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 max-w-lg w-full p-5 space-y-4">
@@ -346,7 +370,7 @@
             <div id="thai-modal-fields" class="space-y-3"></div>
             <div class="flex justify-end gap-2 pt-2 sticky bottom-0 bg-white dark:bg-slate-800 py-2">
                 <button type="button" onclick="closeThaiModal()" class="px-4 py-2 rounded-xl text-sm font-bold bg-slate-100 dark:bg-slate-700">Annulla</button>
-                <button type="submit" class="px-4 py-2 rounded-xl text-sm font-bold bg-orange-500 text-white">Salva</button>
+                <button type="submit" class="px-4 py-2 rounded-xl text-sm font-bold bg-teal-500 text-white">Salva</button>
             </div>
         </form>
     </div>
@@ -417,7 +441,7 @@
         }
 
         async function fetchDataFromSheet() {
-            updateSyncStatus('⌛ Sincronizzazione...', 'bg-amber-100 text-amber-700');
+            updateSyncStatus('⌛ Sincronizzazione...', 'bg-sky-100 text-sky-800');
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await res.json();
@@ -443,7 +467,7 @@
 
         async function saveDataToSheet() {
             localStorage.setItem('thailandData2026_v5', JSON.stringify(tripData));
-            updateSyncStatus('💾 Salvataggio...', 'bg-amber-100 text-amber-700');
+            updateSyncStatus('💾 Salvataggio...', 'bg-sky-100 text-sky-800');
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -497,7 +521,7 @@
         function renderItinerary() {
             const container = document.getElementById('days-container');
             if(!tripData.days || tripData.days.length === 0) {
-                container.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">Nessun dato trovato. Importa il JSON iniziale con il pulsante 📥 in alto a destra.</div>`;
+                container.innerHTML = `<div class="p-4 bg-sky-50 text-sky-800 rounded-xl text-xs">Nessun dato trovato. Importa il JSON iniziale con il pulsante 📥 in alto a destra.</div>`;
                 return;
             }
             container.innerHTML = tripData.days.map((day, dIdx) => `
@@ -514,7 +538,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
-                            <button onclick="toggleHotelStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.hotel_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'}">
+                            <button onclick="toggleHotelStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.hotel_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200'}">
                                 🏨 Hotel: ${day.hotel_status || 'Da Prenotare'}
                             </button>
                             <button onclick="toggleTransportStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.transport_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}">
@@ -606,7 +630,7 @@
                     <span class="block text-slate-400">Totale Speso Laura</span>
                     <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${formatEUR(laurTotalPaid)}</span>
                 </div>
-                <div class="bg-brand-50 dark:bg-brand-950/40 p-2.5 rounded-lg border border-brand-200 dark:border-brand-800 flex flex-col justify-center">
+                <div class="bg-brand-50 dark:bg-brand-950/30 p-2.5 rounded-lg border border-brand-200 dark:border-brand-800 flex flex-col justify-center">
                     <span class="block text-brand-700 dark:text-brand-300 font-semibold">Situazione Debiti</span>
                     <span class="text-xs">${settlementText}</span>
                 </div>
@@ -651,8 +675,8 @@
         function renderNotes() {
             const container = document.getElementById('notes-container');
             container.innerHTML = (tripData.notes || []).map((n, idx) => `
-                <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl text-xs space-y-1 border border-amber-200 dark:border-amber-900">
-                    <div class="flex justify-between font-bold text-amber-900 dark:text-amber-300">
+                <div class="p-3 bg-sky-50 dark:bg-sky-950/30 rounded-xl text-xs space-y-1 border border-sky-200 dark:border-sky-900">
+                    <div class="flex justify-between font-bold text-sky-900 dark:text-sky-200">
                         <span>${n.title || 'Nota'}</span>
                         <div class="flex items-center gap-2">
                             <button onclick="editNotePrompt(${idx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
@@ -891,7 +915,7 @@
         function thaiShowSync() {
             document.getElementById('thai-conflict-button')?.classList.toggle('hidden',!thaiConflict);
             if(thaiConflict) updateSyncStatus('⚠️ Conflitto dati: esporta JSON', 'bg-red-100 text-red-700');
-            else if(thaiDirty) updateSyncStatus(navigator.onLine ? '💾 Modifiche da sincronizzare' : '📴 Salvato offline', 'bg-amber-100 text-amber-800');
+            else if(thaiDirty) updateSyncStatus(navigator.onLine ? '💾 Modifiche da sincronizzare' : '📴 Salvato offline', 'bg-sky-100 text-sky-800');
             else updateSyncStatus('✅ Sincronizzato', 'bg-emerald-100 text-emerald-700');
         }
         function initApp() {
@@ -904,7 +928,7 @@
             if(thaiDirty || thaiSaving) { thaiShowSync(); return; }
             if(thaiLoadStarted) return;
             thaiLoadStarted=true;
-            updateSyncStatus('⌛ Caricamento...', 'bg-amber-100 text-amber-700');
+            updateSyncStatus('⌛ Caricamento...', 'bg-sky-100 text-sky-800');
             try {
                 const response=await fetch(GOOGLE_SCRIPT_URL,{cache:'no-store'});
                 if(!response.ok) throw Error('HTTP '+response.status);
@@ -914,7 +938,7 @@
                 tripData=thaiNormalize(data);
                 localStorage.setItem(THAI_STORAGE,JSON.stringify(tripData));
                 renderApp(); thaiShowSync();
-            } catch(e) { console.warn('Lettura remota non riuscita',e); updateSyncStatus('📴 Dati locali / connessione assente','bg-amber-100 text-amber-800'); }
+            } catch(e) { console.warn('Lettura remota non riuscita',e); updateSyncStatus('📴 Dati locali / connessione assente','bg-sky-100 text-sky-800'); }
             finally { thaiLoadStarted=false; }
         }
         function saveDataToSheet() {
@@ -929,7 +953,7 @@
             thaiSaving=true;
             const seq=thaiSequence;
             const payload=JSON.stringify(tripData);
-            updateSyncStatus('⌛ Invio modifiche...', 'bg-amber-100 text-amber-800');
+            updateSyncStatus('⌛ Invio modifiche...', 'bg-sky-100 text-sky-800');
             try {
                 const res=await fetch(GOOGLE_SCRIPT_URL, {method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:payload});
                 if(!res.ok) throw Error('HTTP '+res.status);
@@ -1070,7 +1094,7 @@
         function renderItinerary(){
             thaiRenderSummary();
             const el=document.getElementById('days-container');
-            if(!tripData.days.length){el.innerHTML='<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-sm">Nessuna giornata presente. Usa “Aggiungi Giorno”.</div>';return;}
+            if(!tripData.days.length){el.innerHTML='<div class="p-4 bg-sky-50 text-sky-800 rounded-xl text-sm">Nessuna giornata presente. Usa “Aggiungi Giorno”.</div>';return;}
             el.innerHTML=tripData.days.map((d,i)=>{
                 const activities=(d.activities||[]).map((a,j)=>({a,j})).sort((x,y)=>(x.a.start||'99:99').localeCompare(y.a.start||'99:99'));
                 const transport=(d.transports||[]);
@@ -1078,10 +1102,10 @@
                 return `<article class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                   <div class="flex justify-between items-start gap-2"><div class="flex gap-2 items-start"><span class="day-drag-handle cursor-grab p-1 text-slate-400">☷</span><div><p class="text-[11px] font-bold text-brand-600">GIORNO ${thaiEsc(d.id)} · ${thaiEsc(d.date||'')}</p><h3 class="font-bold">${thaiEsc(d.title||'Tappa')}</h3></div></div><div class="flex gap-2">${thaiBtn('✏️',`openDayModal(${i})`)}${thaiBtn('🗑️',`deleteDay(${i})`)}</div></div>
                   <div class="flex flex-wrap gap-2">${thaiBtn('🏨 Gestisci hotel',`openHotelModal(${i})`)}${thaiBtn('🚆 Aggiungi spostamento',`openTransportModal(${i})`)}${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}</div>
-                  <div class="thai-section text-xs space-y-1"><p class="font-bold">🏨 Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p>${hotel?.name?`<p>${thaiEsc(hotel.name)} · ${thaiEsc(hotel.address||'')}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}</div>
-                  ${(transport.length || d.transport_details)?`<div class="thai-section text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<p class="whitespace-pre-wrap">${thaiEsc(d.transport_details)}</p>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
-                  ${d.notes||d.cancellation?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1">${d.notes?`<p>📝 ${thaiEsc(d.notes)}</p>`:''}${d.cancellation?`<p>ℹ️ ${thaiEsc(d.cancellation)}</p>`:''}</div>`:''}
-                  <div class="flex justify-between gap-2 items-center"><h4 class="font-bold text-sm">Attività (${activities.length})</h4><span class="text-xs">Costo stimato: ${thaiEsc(d.cost||'0,00€')}</span></div>
+                  <div class="thai-section text-xs space-y-1"><p class="font-bold">🏨 Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p>${hotel?.name?`<p>${thaiEsc(hotel.name)} · ${thaiEsc(hotel.address||'')}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${d.cancellation?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(d.cancellation)}</p>`:''}</div>
+                  ${(transport.length || d.transport_details)?`<div class="thai-section text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${!transport.length && d.transport_details?`<p class="whitespace-pre-wrap"><b>Dettagli trasporto precedenti:</b> ${thaiEsc(d.transport_details)}</p>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
+                  ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
+                  <div class="flex justify-between gap-2 items-center"><h4 class="font-bold text-sm">Attività (${activities.length})</h4>${d.cost?`<span class="text-xs text-slate-600 dark:text-slate-300" title="Valore storico indicativo, separato da hotel, trasporti e budget">💶 Costo storico giornata: ${thaiEsc(d.cost)} <span class="opacity-80">(non incluso automaticamente nel budget)</span></span>`:''}</div>
                   <div class="space-y-2">${activities.map(({a,j})=>`<div class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs flex justify-between gap-2"><div class="min-w-0"><p class="font-semibold">${a.start?`<span class="text-brand-600">${thaiEsc(a.start)}${a.end?'–'+thaiEsc(a.end):''} · </span>`:''}${thaiEsc(a.title||a.desc||'Attività')}</p>${a.desc&&a.title?`<p class="mt-1 whitespace-pre-wrap">${thaiEsc(a.desc)}</p>`:''}<div class="flex gap-3 mt-1">${thaiLink(a.maps,'Google Maps')} ${thaiLink(a.link,'Apri link')}</div></div><div class="flex gap-1 items-start">${thaiBtn('✏️',`openActivityModal(${i},${j})`)}${thaiBtn('🗑️',`deleteActivity(${i},${j})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività aggiunta.</p>'}</div>
                   ${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}
                 </article>`;
@@ -1091,7 +1115,7 @@
             document.getElementById('todo-list').innerHTML=(tripData.todos||[]).map((t,i)=>`<div class="flex justify-between items-center gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-xs"><label class="flex gap-2 items-center min-w-0"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span class="${t.done?'line-through text-slate-400':''}">${thaiEsc(t.text||'')}${t.due?` <small>(${thaiEsc(t.due)})</small>`:''}${t.owner?` <small>· ${thaiEsc(t.owner)}</small>`:''}</span></label><div class="flex gap-1">${thaiBtn('✏️',`openTodoModal(${i})`)}${thaiBtn('🗑️',`deleteTodo(${i})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività da fare.</p>';
         }
         function renderNotes(){
-            document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>`<div class="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-between gap-2"><b>${thaiEsc(n.title||'Nota')}</b><span class="flex gap-1">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div><p class="whitespace-pre-wrap">${thaiEsc(n.text||'')}</p>${thaiLink(n.link,'Link utile')}</div>`).join('')||'<p class="text-xs text-slate-400">Nessuna nota.</p>';
+            document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>`<div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-between gap-2"><b>${thaiEsc(n.title||'Nota')}</b><span class="flex gap-1">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div><p class="whitespace-pre-wrap">${thaiEsc(n.text||'')}</p>${thaiLink(n.link,'Link utile')}</div>`).join('')||'<p class="text-xs text-slate-400">Nessuna nota.</p>';
         }
         function renderBudget(){
             const arr=tripData.expenses||[];let total=0,barbPaid=0,lauraPaid=0,barbOwes=0;
@@ -1103,7 +1127,7 @@
             document.getElementById('total-budget-sum').textContent=formatEUR(total);
             const balance=barbPaid-barbOwes;
             const result=Math.abs(balance)<0.005?'Siete pari ✨':balance>0?`Laura deve a Barbara: <b>${formatEUR(balance)}</b>`:`Barbara deve a Laura: <b>${formatEUR(-balance)}</b>`;
-            document.getElementById('split-summary-box').innerHTML=`<div class="thai-section bg-white dark:bg-slate-800">Barbara ha pagato<br><b>${formatEUR(barbPaid)}</b></div><div class="thai-section bg-white dark:bg-slate-800">Laura ha pagato<br><b>${formatEUR(lauraPaid)}</b></div><div class="thai-section bg-orange-50 dark:bg-orange-950/30"><b>Situazione debiti</b><br>${result}</div>`;
+            document.getElementById('split-summary-box').innerHTML=`<div class="thai-section bg-white dark:bg-slate-800">Barbara ha pagato<br><b>${formatEUR(barbPaid)}</b></div><div class="thai-section bg-white dark:bg-slate-800">Laura ha pagato<br><b>${formatEUR(lauraPaid)}</b></div><div class="thai-section bg-teal-50 dark:bg-teal-950/30"><b>Situazione debiti</b><br>${result}</div>`;
             const category=document.getElementById('expense-category-filter')?.value||'all';
             const filtered=arr.map((e,i)=>({e,i})).filter(({e})=>category==='all'||(e.category||'Altro')===category);
             const fs=filtered.reduce((sum,{e})=>sum+(Number(e.amount)||0),0);
@@ -1151,7 +1175,66 @@
             }catch(e){alert('JSON non valido: '+e.message);}
         }
         // In caso di conflitto preserviamo il JSON locale per un ripristino manuale.
-        function thaiRefresh(){if(thaiDirty){thaiSyncPending();return;}fetchDataFromSheet();}
+        async function thaiRefresh(){
+            if(thaiDirty) {
+                if(thaiConflict) { thaiShowSync(); return; }
+                await thaiSyncPending();
+                return;
+            }
+            await fetchDataFromSheet();
+        }
+
+        // Pull-to-refresh: si attiva solo da inizio pagina e solo su schermi mobili.
+        // Se ci sono modifiche locali, tenta prima di sincronizzarle senza sovrascriverle.
+        (function thaiInstallPullToRefresh(){
+            const indicator = document.getElementById('thai-pull-indicator');
+            if (!indicator) return;
+            const threshold = 76;
+            let startY = 0, startX = 0, distance = 0;
+            let tracking = false, refreshing = false;
+            const atPageTop = () => window.scrollY <= 2 &&
+                document.documentElement.scrollTop <= 2;
+            const modalVisible = () =>
+                !document.getElementById('thai-modal')?.classList.contains('hidden') ||
+                !document.getElementById('expense-modal')?.classList.contains('hidden');
+            function show(distance, message){
+                indicator.textContent = message;
+                indicator.style.opacity = '1';
+                indicator.style.transform = 'translate(-50%,' + Math.min(18, -35 + distance * 0.7) + 'px)';
+            }
+            function hide(){
+                indicator.style.opacity = '0';
+                indicator.style.transform = 'translate(-50%,-110%)';
+            }
+            document.addEventListener('touchstart', function(e){
+                tracking = false; distance = 0;
+                if (refreshing || e.touches.length !== 1 ||
+                    window.innerWidth >= 768 || !atPageTop() || modalVisible() ||
+                    e.target.closest('input,textarea,select,[contenteditable="true"],.thai-modal-panel')) return;
+                startY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
+                tracking = true;
+            }, {passive:true});
+            document.addEventListener('touchmove', function(e){
+                if (!tracking || refreshing || e.touches.length !== 1) return;
+                const dy = e.touches[0].clientY - startY;
+                const dx = Math.abs(e.touches[0].clientX - startX);
+                if (dy <= 0 || dx > dy || !atPageTop()) { tracking = false; hide(); return; }
+                distance = Math.min(120,dy * 0.65);
+                if (e.cancelable && distance > 8) e.preventDefault();
+                if (distance > 8) show(distance, distance >= threshold ? '↻ Rilascia per aggiornare' : '↓ Trascina per aggiornare');
+            }, {passive:false});
+            document.addEventListener('touchend', async function(){
+                if (!tracking) return;
+                tracking = false;
+                if (distance < threshold || refreshing) { hide(); return; }
+                refreshing = true;
+                show(95, '↻ Aggiornamento...');
+                try { await thaiRefresh(); }
+                finally { refreshing = false; distance = 0; hide(); }
+            }, {passive:true});
+            document.addEventListener('touchcancel', function(){tracking=false;distance=0;hide();}, {passive:true});
+        })();
         function thaiResolveConflict(){thaiClearConflictAfterBackup();}
         window.thaiClearConflictAfterBackup = function(){
             if(!confirm('Hai esportato un backup? Procedendo perderai le modifiche locali in conflitto.'))return;
