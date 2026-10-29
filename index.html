@@ -1,350 +1,217 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thailand Planner 2026/2027 - Live Sync Sheet</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#fff7ed', 100: '#ffedd5', 500: '#f97316', 600: '#ea580c', 700: '#c2410c',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome & Fonts -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .drag-handle { cursor: grab; touch-action: none; }
-        .drag-handle:active { cursor: grabbing; }
-    </style>
-</head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
-    <div id="app" class="flex flex-col min-h-screen">
-        <!-- Top Bar -->
-        <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-md">
-                    <svg viewBox="0 0 30 20" width="30" height="20" role="img" class="rounded-sm">
-                        <rect width="30" height="20" fill="#a51931" />
-                        <rect y="3.333" width="30" height="13.334" fill="#f4f5f8" />
-                        <rect y="6.667" width="30" height="6.666" fill="#2d2a4a" />
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
-                        Thailandia Live Planner 🌴
-                        <span id="sync-status" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">⚡ Google DB Collegato</span>
-                    </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Sincronizzazione automatica tra dispositivi</p>
-                </div>
-            </div>
-
-            <!-- Convertitore e Tasti di Azione -->
-            <div class="flex items-center flex-wrap gap-2">
-                <div class="bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 border border-slate-200 dark:border-slate-600">
-                    <i class="fa-solid fa-coins text-amber-500"></i>
-                    <input type="number" id="eur-input" placeholder="€" oninput="convertCurrency('eur')" class="w-14 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
-                    <span>=</span>
-                    <input type="number" id="thb-input" placeholder="THB" oninput="convertCurrency('thb')" class="w-16 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
-                </div>
-
-                <div class="flex items-center space-x-1">
-                    <button onclick="importJSONPrompt()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Importa JSON">
-                        <i class="fa-solid fa-file-import text-brand-600 dark:text-brand-400"></i>
-                    </button>
-                    <button onclick="exportJSONData()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Esporta JSON">
-                        <i class="fa-solid fa-download"></i>
-                    </button>
-                    <button onclick="fetchDataFromSheet()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Aggiorna Dati ora">
-                        <i class="fa-solid fa-rotate"></i>
-                    </button>
-                    <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Tema Notte/Giorno">
-                        <i class="fa-solid fa-moon dark:hidden"></i>
-                        <i class="fa-solid fa-sun hidden dark:inline"></i>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Layout -->
-        <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6">
-            <!-- Sidebar -->
-            <aside class="w-full md:w-64 flex-shrink-0 space-y-4">
-                <nav class="bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
-                    <button onclick="switchTab('itinerary')" data-tab="itinerary" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-brand-600 bg-brand-50 dark:bg-brand-900/30 dark:text-brand-400">
-                        <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
-                        <span>Itinerario</span>
-                    </button>
-                    <button onclick="switchTab('checklist')" data-tab="checklist" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
-                        <i class="fa-solid fa-list-check text-base w-5 text-center"></i>
-                        <span>To Do</span>
-                    </button>
-                    <button onclick="switchTab('notes')" data-tab="notes" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
-                        <i class="fa-solid fa-note-sticky text-base w-5 text-center"></i>
-                        <span>Note</span>
-                    </button>
-                </nav>
-
-                <!-- Box Voli Saudia -->
-                <section class="bg-orange-100 dark:bg-orange-950 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-orange-200 dark:border-orange-800 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center border-b border-orange-200 pb-2">
-                        <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
-                        <span class="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-0.5 rounded text-xs font-mono font-bold">PNR: 7XJFTQ</span>
-                    </div>
-                    <div class="text-xs space-y-1">
-                        <p class="font-bold text-brand-700">ANDATA · 26–27 Dic</p>
-                        <p>FCO 09:30 → BKK 13:40 (1 scalo RUH 10h)</p>
-                    </div>
-                    <div class="text-xs space-y-1 border-t border-orange-200 pt-2">
-                        <p class="font-bold text-emerald-700">RITORNO · 10–11 Gen</p>
-                        <p>BKK 15:20 → FCO 06:15 (1 scalo RUH 6h 45m)</p>
-                    </div>
-                </section>
-            </aside>
-
-            <!-- Main Area -->
-            <main class="flex-1 min-w-0">
-                <section id="tab-itinerary" class="tab-content space-y-4">
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                        <h2 class="font-bold text-lg">Programma Giornaliero</h2>
-                        <p class="text-xs text-slate-500">I dati sono salvati automaticamente su Google Sheets.</p>
-                    </div>
-                    <div id="days-container" class="space-y-4"></div>
-                </section>
-
-                <section id="tab-checklist" class="tab-content hidden space-y-4">
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="font-bold text-lg"><i class="fa-solid fa-clipboard-check text-brand-500"></i> To Do Checklist</h2>
-                            <button onclick="addTodoPrompt()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Task</button>
-                        </div>
-                        <div id="todo-list" class="space-y-2"></div>
-                    </div>
-                </section>
-
-                <section id="tab-notes" class="tab-content hidden space-y-4">
-                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h2 class="font-bold text-lg"><i class="fa-solid fa-note-sticky text-amber-500"></i> Note Generali</h2>
-                            <button onclick="addNotePrompt()" class="px-3 py-1.5 bg-amber-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Nota</button>
-                        </div>
-                        <div id="notes-container" class="space-y-3"></div>
-                    </div>
-                </section>
-            </main>
-        </div>
-    </div>
-
-    <script>
-        // INCOLLA QUI L'URL DELLA TUA WEB APP GOOGLE APPS SCRIPT
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0MEeS8GtlSKwBRjE02y-uk3vGmfgtyaw1FpSnqOMBFFJx7tlqnrdzDiNeJb9AoLOEMQ/exec";
-
-        let tripData = { days: [], todos: [], notes: [] };
-
-        function convertCurrency(source) {
-            const eurInput = document.getElementById('eur-input');
-            const thbInput = document.getElementById('thb-input');
-            const rate = 38.5; 
-            if(source === 'eur') {
-                const val = parseFloat(eurInput.value);
-                thbInput.value = isNaN(val) ? '' : (val * rate).toFixed(0);
-            } else {
-                const val = parseFloat(thbInput.value);
-                eurInput.value = isNaN(val) ? '' : (val / rate).toFixed(2);
-            }
-        }
-
-        function updateSyncStatus(status, colorClass) {
-            const el = document.getElementById('sync-status');
-            if(el) {
-                el.innerText = status;
-                el.className = `text-[10px] font-semibold px-2 py-0.5 rounded-full ${colorClass}`;
-            }
-        }
-
-        async function fetchDataFromSheet() {
-            updateSyncStatus('⌛ Sincronizzazione...', 'bg-amber-100 text-amber-700');
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL);
-                const data = await res.json();
-                if(data && typeof data === 'object' && Object.keys(data).length > 0) {
-                    tripData = data;
-                    renderApp();
-                    updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
-                    return;
-                }
-            } catch(e) {}
-            
-            updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
-            const saved = localStorage.getItem('thailandData2026');
-            if(saved) tripData = JSON.parse(saved);
-            renderApp();
-        }
-
-        async function saveDataToSheet() {
-            localStorage.setItem('thailandData2026', JSON.stringify(tripData));
-            updateSyncStatus('💾 Salvataggio in corso...', 'bg-amber-100 text-amber-700');
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(tripData)
-                });
-                updateSyncStatus('⚡ Sincronizzato su Sheet', 'bg-emerald-100 text-emerald-700');
-            } catch(e) {
-                updateSyncStatus('❌ Errore salvataggio', 'bg-red-100 text-red-700');
-            }
-        }
-
-        function importJSONPrompt() {
-            const raw = prompt("Incolla qui il contenuto del tuo file JSON:");
-            if(!raw) return;
-            try {
-                const parsed = JSON.parse(raw);
-                tripData = Array.isArray(parsed) ? { days: parsed } : parsed;
-                saveDataToSheet();
-                renderApp();
-                alert("✅ Dati importati e inviati con successo!");
-            } catch(e) {
-                alert("⚠️ Errore nel formato JSON.");
-            }
-        }
-
-        function exportJSONData() {
-            navigator.clipboard.writeText(JSON.stringify(tripData, null, 2));
-            alert("📋 JSON copiato negli appunti!");
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active', 'bg-brand-50', 'text-brand-600', 'dark:bg-brand-900/30');
-                el.classList.add('text-slate-600', 'dark:text-slate-300');
-            });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active', 'bg-brand-50', 'text-brand-600', 'dark:bg-brand-900/30');
-        }
-
-        function renderApp() {
-            renderItinerary();
-            renderTodos();
-            renderNotes();
-            initDragAndDrop();
-        }
-
-        function renderItinerary() {
-            const container = document.getElementById('days-container');
-            if(!tripData.days || tripData.days.length === 0) {
-                container.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">Nessun dato sul Google Sheet. Inserisci tappe o importa il JSON iniziale con il pulsante in alto a destra 📥.</div>`;
-                return;
-            }
-            container.innerHTML = tripData.days.map((day, dIdx) => `
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                    <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="drag-handle text-slate-400 p-1"><i class="fa-solid fa-grip-vertical"></i></span>
-                            <div>
-                                <span class="text-[10px] font-bold text-brand-500 uppercase">Giorno ${day.id} - ${day.date || ''}</span>
-                                <h3 class="font-bold text-base">${day.title || 'Tappa'}</h3>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            ${day.hotel ? `<span class="text-xs bg-slate-100 px-2 py-1 rounded-lg">🏨 ${day.hotel}</span>` : ''}
-                            <button onclick="addActivityPrompt(${dIdx})" class="p-1.5 text-xs text-brand-600"><i class="fa-solid fa-plus"></i></button>
-                            <button onclick="deleteDay(${dIdx})" class="p-1.5 text-xs text-red-400"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <div class="activities-list space-y-2" data-day-idx="${dIdx}">
-                        ${(day.activities || []).map((act, aIdx) => `
-                            <div class="bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 text-xs flex justify-between items-center">
-                                <div class="flex items-center gap-2">
-                                    <span class="drag-handle text-slate-400"><i class="fa-solid fa-grip-vertical"></i></span>
-                                    <span>${act.title || act.desc || ''}</span>
-                                </div>
-                                <button onclick="deleteActivity(${dIdx}, ${aIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderTodos() {
-            const container = document.getElementById('todo-list');
-            container.innerHTML = (tripData.todos || []).map((t, idx) => `
-                <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-xl text-xs">
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${idx})">
-                        <span class="${t.done ? 'line-through text-slate-400' : ''}">${t.text}</span>
-                    </div>
-                    <button onclick="deleteTodo(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `).join('');
-        }
-
-        function renderNotes() {
-            const container = document.getElementById('notes-container');
-            container.innerHTML = (tripData.notes || []).map((n, idx) => `
-                <div class="p-3 bg-amber-50 rounded-xl text-xs space-y-1">
-                    <div class="flex justify-between font-bold text-amber-900">
-                        <span>${n.title || 'Nota'}</span>
-                        <button onclick="deleteNote(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                    <p>${n.text}</p>
-                </div>
-            `).join('');
-        }
-
-        function initDragAndDrop() {
-            const daysContainer = document.getElementById('days-container');
-            if(daysContainer) {
-                new Sortable(daysContainer, {
-                    handle: '.drag-handle', animation: 150,
-                    onEnd: (evt) => {
-                        const moved = tripData.days.splice(evt.oldIndex, 1)[0];
-                        tripData.days.splice(evt.newIndex, 0, moved);
-                        saveDataToSheet();
-                    }
-                });
-            }
-        }
-
-        function deleteDay(dIdx) { tripData.days.splice(dIdx, 1); saveDataToSheet(); renderApp(); }
-        function addActivityPrompt(dIdx) {
-            const title = prompt("Attività:");
-            if(title) {
-                if(!tripData.days[dIdx].activities) tripData.days[dIdx].activities = [];
-                tripData.days[dIdx].activities.push({ title: title });
-                saveDataToSheet(); renderApp();
-            }
-        }
-        function deleteActivity(dIdx, aIdx) { tripData.days[dIdx].activities.splice(aIdx, 1); saveDataToSheet(); renderApp(); }
-        function addTodoPrompt() {
-            const text = prompt("Nuova task:");
-            if(text) { if(!tripData.todos) tripData.todos = []; tripData.todos.push({ text: text, done: false }); saveDataToSheet(); renderApp(); }
-        }
-        function toggleTodo(idx) { tripData.todos[idx].done = !tripData.todos[idx].done; saveDataToSheet(); }
-        function deleteTodo(idx) { tripData.todos.splice(idx, 1); saveDataToSheet(); renderApp(); }
-        function addNotePrompt() {
-            const title = prompt("Titolo:"); const text = prompt("Testo:");
-            if(title || text) { if(!tripData.notes) tripData.notes = []; tripData.notes.push({ title: title, text: text }); saveDataToSheet(); renderApp(); }
-        }
-        function deleteNote(idx) { tripData.notes.splice(idx, 1); saveDataToSheet(); renderApp(); }
-
-        fetchDataFromSheet();
-    </script>
-</body>
-</html>
+{
+  "days": [
+    {
+      "id": 1,
+      "date": "27 dic",
+      "title": "Bangkok",
+      "transport_details": "Traghetto 3,5 THB",
+      "hotel_status": "Prenotato",
+      "transport_status": "Da Prenotare",
+      "cost": "81€",
+      "cancellation": "Gratis fino al 20/12",
+      "activities": [
+        { "title": "Arrivo a Bangkok (13:40)" },
+        { "title": "Traversata in traghetto navetta (3,5 THB) e Wat Arun (50 THB)" },
+        { "title": "Wat Traimit (40 THB)" },
+        { "title": "Baiyoke Sky o Lebua Sky Bar" },
+        { "title": "Chinatown (Yaowarat)" }
+      ]
+    },
+    {
+      "id": 2,
+      "date": "28 dic",
+      "title": "Bangkok",
+      "transport_details": "Treno / Grab",
+      "hotel_status": "Prenotato",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Mercato sui binari Mae Khlong" },
+        { "title": "Mercato galleggiante Damnoen Saduak" },
+        { "title": "Tramonto a Wat Saket (Golden Mount)" }
+      ]
+    },
+    {
+      "id": 3,
+      "date": "29 dic",
+      "title": "Bangkok -> Chiang Rai",
+      "transport_details": "Treno andata (14:15 - 15:18), Treno ritorno (18:59 oppure 21:22)",
+      "notes": "Stazione centrale: Krung Thep Aphiwat Central Terminal",
+      "hotel_status": "Prenotato",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Grand Palace & Wat Pho" },
+        { "title": "Escursione ad Ayutthaya" }
+      ]
+    },
+    {
+      "id": 4,
+      "date": "30 dic",
+      "title": "Chiang Rai -> Chiang Mai",
+      "transport_details": "Volo BKK-CEI + Transfer in van a Chiang Mai",
+      "notes": "Notte a Chiang Mai",
+      "hotel_status": "Prenotato",
+      "transport_status": "Da Prenotare",
+      "cost": "71€",
+      "cancellation": "Gratis fino al 26/12",
+      "link": "https://secure.booking.com/confirmation.it.html?label=metagha-link-MRIT-hotel-3015325_dev-desktop_los-1_bw-69_dow-Tuesday_defdate-0_room-0_gstadt-2_rateid-ein2eu_aud-9183044760_gacid-21415128859_mcid-50_bc-AC4CnQ_ppa-0_clrid-0_ad-1_gstkid-0_checkin-20270105_ppt-GG2B_lp-2380_r-11990941552551561018&sid=382eccdef2183463bf327dd68c656e31&aid=356934&auth_key=1RSHn1uy4ahFbiyJ&source=change_dates",
+      "activities": [
+        { "title": "Tempio Bianco (Wat Rong Khun)" },
+        { "title": "Tempio Blu" },
+        { "title": "Casa Nera" },
+        { "title": "Big Buddha" }
+      ]
+    },
+    {
+      "id": 5,
+      "date": "31 dic",
+      "title": "Chiang Mai",
+      "notes": "Notte a Chiang Mai",
+      "hotel_status": "Prenotato",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Santuario Etico Elefanti" },
+        { "title": "Templi (Doi Suthep, Phra Singh, Chedi Luang)" },
+        { "title": "Festa di Capodanno delle Lanterne (Yi Peng)" }
+      ]
+    },
+    {
+      "id": 6,
+      "date": "1 gen",
+      "title": "Chiang Mai",
+      "notes": "Notte a Chiang Mai",
+      "hotel_status": "Prenotato",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Trekking Parco Nazionale Doi Inthanon (Kew Mae Pan, Pagode Reali, Cascate)" }
+      ]
+    },
+    {
+      "id": 7,
+      "date": "2 gen",
+      "title": "Chiang Mai -> Khao Lak",
+      "transport_details": "Volo Chiang Mai (CNX) -> Phuket (HKT) + Transfer a Khao Lak (1h)",
+      "notes": "Notte Khao Lak",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Trasferimento e sistemazione a Khao Lak" }
+      ]
+    },
+    {
+      "id": 8,
+      "date": "3 gen",
+      "title": "Khao Lak",
+      "transport_details": "Speedboat",
+      "notes": "Notte Khao Lak",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Escursione in speedboat Isole Similan (snorkeling, tartarughe, Sailing Rock)" }
+      ]
+    },
+    {
+      "id": 9,
+      "date": "4 gen",
+      "title": "Khao Sok (Notte 1)",
+      "transport_details": "Transfer da Khao Lak a Khao Sok",
+      "notes": "Notte Khao Sok albero",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Check-in Casa sull'Albero nella giungla" },
+        { "title": "Bamboo rafting sul fiume Sok e trekking" }
+      ]
+    },
+    {
+      "id": 10,
+      "date": "5 gen",
+      "title": "Khao Sok (Notte 2)",
+      "transport_details": "Transfer al Lago Cheow Lan",
+      "notes": "Notte Khao Sok lago",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Check-in Casa Galleggiante (Floating Bungalow)" },
+        { "title": "Kayak, bagni e safari al tramonto" }
+      ]
+    },
+    {
+      "id": 11,
+      "date": "6 gen",
+      "title": "Khao Sok -> Railay",
+      "transport_details": "Transfer via terra + longtail boat per Railay Beach",
+      "notes": "Notte Krabi",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Safari all'alba & Coral Cave" },
+        { "title": "Check-in Railay" }
+      ]
+    },
+    {
+      "id": 12,
+      "date": "7 gen",
+      "title": "Railay Beach",
+      "notes": "Notte Krabi",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Relax Railay West & Phra Nang Cave Beach" },
+        { "title": "Massaggi e kayak tra le scogliere" }
+      ]
+    },
+    {
+      "id": 13,
+      "date": "8 gen",
+      "title": "Railay Beach",
+      "notes": "Notte Krabi",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Escursione Arcipelago Koh Hong - Laguna nascosta, snorkeling, viewpoint 360°" },
+        { "title": "Rientro a Railay" }
+      ]
+    },
+    {
+      "id": 14,
+      "date": "9 gen",
+      "title": "Koh Kradan",
+      "transport_details": "Trasferimento a Koh Kradan (van + traghetto/barca)",
+      "notes": "Notte Krabi",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Check-in resort sulla spiaggia" },
+        { "title": "Snorkeling dalla riva" }
+      ]
+    },
+    {
+      "id": 15,
+      "date": "10 gen",
+      "title": "Rientro",
+      "transport_details": "Barca da Koh Kradan alla terraferma, transfer aeroporto Krabi (KBV). Volo Krabi -> Bangkok (11:30-12:45)",
+      "hotel_status": "Da Prenotare",
+      "transport_status": "Da Prenotare",
+      "activities": [
+        { "title": "Coincidenza volo internazionale di rientro ore 15:20" }
+      ]
+    }
+  ],
+  "todos": [
+    { "text": "Prenotare volo interno Bangkok -> Chiang Rai", "done": false },
+    { "text": "Prenotare volo Chiang Mai -> Phuket", "done": false },
+    { "text": "Prenotare van/transfer per Khao Lak e Khao Sok", "done": false },
+    { "text": "Prenotare soggiorni Khao Sok (Casa sull'Albero e Lago Cheow Lan)", "done": false },
+    { "text": "Prenotare resort a Railay e Koh Kradan", "done": false }
+  ],
+  "notes": [
+    {
+      "title": "Link Utili Treni",
+      "text": "Prenotazione treni ufficiali Thailandia: https://dticket.railway.co.th/"
+    },
+    {
+      "title": "App Spostamenti",
+      "text": "App ufficiale Tuk Tuk a Bangkok: Muvmi"
+    }
+  ]
+}
