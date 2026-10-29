@@ -87,6 +87,10 @@
                         <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
                         <span>Itinerario</span>
                     </button>
+                    <button onclick="switchTab('budget')" data-tab="budget" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                        <i class="fa-solid fa-wallet text-base w-5 text-center"></i>
+                        <span>Budget & Costi</span>
+                    </button>
                     <button onclick="switchTab('checklist')" data-tab="checklist" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
                         <i class="fa-solid fa-list-check text-base w-5 text-center"></i>
                         <span>To Do</span>
@@ -130,6 +134,7 @@
 
             <!-- Main Area -->
             <main class="flex-1 min-w-0">
+                <!-- Tab Itinerario -->
                 <section id="tab-itinerary" class="tab-content space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
                         <div>
@@ -141,6 +146,24 @@
                     <div id="days-container" class="space-y-4"></div>
                 </section>
 
+                <!-- Tab Budget -->
+                <section id="tab-budget" class="tab-content hidden space-y-4">
+                    <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+                            <div>
+                                <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-amber-500"></i> Riepilogo Budget & Costi</h2>
+                                <p class="text-xs text-slate-500">Monitoraggio spese e costi alberghi registrati nelle tappe.</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 block">Totale parziale inserito</span>
+                                <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0 €</span>
+                            </div>
+                        </div>
+                        <div id="budget-list" class="space-y-2"></div>
+                    </div>
+                </section>
+
+                <!-- Tab Checklist -->
                 <section id="tab-checklist" class="tab-content hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
@@ -151,6 +174,7 @@
                     </div>
                 </section>
 
+                <!-- Tab Note -->
                 <section id="tab-notes" class="tab-content hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
@@ -256,6 +280,7 @@
 
         function renderApp() {
             renderItinerary();
+            renderBudget();
             renderTodos();
             renderNotes();
             initDragAndDrop();
@@ -276,7 +301,7 @@
                                 <span class="text-[10px] font-bold text-brand-500 uppercase">Giorno ${day.id} - ${day.date || ''}</span>
                                 <h3 class="font-bold text-base flex items-center gap-2">
                                     ${day.title || 'Tappa'}
-                                    <button onclick="editDayPrompt(${dIdx})" class="text-slate-400 hover:text-brand-500 text-xs" title="Modifica Titolo/Spostamenti/Costi"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="editDayPrompt(${dIdx})" class="text-slate-400 hover:text-brand-500 text-xs" title="Modifica"><i class="fa-solid fa-pen"></i></button>
                                 </h3>
                             </div>
                         </div>
@@ -287,7 +312,9 @@
                             <button onclick="toggleTransportStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.transport_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}">
                                 🚆 Trasporto: ${day.transport_status || 'Da Prenotare'}
                             </button>
-                            ${day.cost ? `<span class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md font-bold">💶 ${day.cost}</span>` : ''}
+                            <button onclick="editCostPrompt(${dIdx})" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 px-2 py-0.5 rounded-md font-bold transition">
+                                💶 ${day.cost || '0€'}
+                            </button>
                             <button onclick="addActivityPrompt(${dIdx})" class="p-1 text-xs text-brand-600" title="Aggiungi Attività"><i class="fa-solid fa-plus"></i></button>
                             <button onclick="deleteDay(${dIdx})" class="p-1 text-xs text-red-400" title="Elimina Giorno"><i class="fa-solid fa-trash"></i></button>
                         </div>
@@ -318,6 +345,39 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        function renderBudget() {
+            const container = document.getElementById('budget-list');
+            let total = 0;
+            if(!tripData.days || tripData.days.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400">Nessun costo registrato.</p>`;
+                document.getElementById('total-budget-sum').innerText = "0 €";
+                return;
+            }
+
+            container.innerHTML = tripData.days.map((day, dIdx) => {
+                let costVal = 0;
+                if(day.cost) {
+                    const parsed = parseFloat(day.cost.replace(/[^0-9.,]/g, '').replace(',', '.'));
+                    if(!isNaN(parsed)) total += parsed;
+                }
+                return `
+                    <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-700">
+                        <div>
+                            <span class="font-bold text-brand-600 dark:text-brand-400">Giorno ${day.id} (${day.date || ''})</span>
+                            <span class="text-slate-600 dark:text-slate-300 ml-2"><b>${day.title || 'Tappa'}</b></span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="px-2 py-0.5 rounded text-[10px] ${day.hotel_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'}">Hotel: ${day.hotel_status || 'Da Prenotare'}</span>
+                            <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${day.cost || '0€'}</span>
+                            <button onclick="editCostPrompt(${dIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('total-budget-sum').innerText = total + " €";
         }
 
         function renderTodos() {
@@ -379,6 +439,16 @@
             renderApp();
         }
 
+        function editCostPrompt(dIdx) {
+            const current = tripData.days[dIdx].cost || "";
+            const newCost = prompt("Inserisci il costo (es. 81€):", current);
+            if(newCost !== null) {
+                tripData.days[dIdx].cost = newCost;
+                saveDataToSheet();
+                renderApp();
+            }
+        }
+
         function toggleHotelStatus(dIdx) {
             const current = tripData.days[dIdx].hotel_status;
             tripData.days[dIdx].hotel_status = (current === 'Prenotato') ? 'Da Prenotare' : 'Prenotato';
@@ -424,6 +494,16 @@
         }
 
         function deleteDay(dIdx) { tripData.days.splice(dIdx, 1); saveDataToSheet(); renderApp(); }
+        function addDayPrompt() {
+            const id = tripData.days.length + 1;
+            const date = prompt("Data (es. 27 dic):", "");
+            const title = prompt("Titolo Tappa:", "");
+            if(title) {
+                tripData.days.push({ id: id, date: date, title: title, hotel_status: "Da Prenotare", transport_status: "Da Prenotare", cost: "0€", activities: [] });
+                saveDataToSheet();
+                renderApp();
+            }
+        }
         function addActivityPrompt(dIdx) {
             const title = prompt("Attività:");
             if(title) {
