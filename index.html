@@ -104,7 +104,6 @@
                         <span class="bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: 7XJFTQ</span>
                     </div>
                     
-                    <!-- Andata -->
                     <div class="space-y-1.5">
                         <p class="font-bold text-brand-700 dark:text-brand-400 flex items-center gap-1">
                             <i class="fa-solid fa-plane-departure"></i> ANDATA · 26–27 Dic
@@ -116,7 +115,6 @@
                         </div>
                     </div>
 
-                    <!-- Ritorno -->
                     <div class="space-y-1.5 pt-2 border-t border-orange-200 dark:border-orange-800">
                         <p class="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
                             <i class="fa-solid fa-plane-arrival"></i> RITORNO · 10–11 Gen
@@ -133,9 +131,12 @@
             <!-- Main Area -->
             <main class="flex-1 min-w-0">
                 <section id="tab-itinerary" class="tab-content space-y-4">
-                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                        <h2 class="font-bold text-lg">Programma Giornaliero</h2>
-                        <p class="text-xs text-slate-500">I dati sono salvati automaticamente su Google Sheets.</p>
+                    <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
+                        <div>
+                            <h2 class="font-bold text-lg">Programma Giornaliero</h2>
+                            <p class="text-xs text-slate-500">I dati sono salvati automaticamente su Google Sheets.</p>
+                        </div>
+                        <button onclick="addDayPrompt()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Giorno</button>
                     </div>
                     <div id="days-container" class="space-y-4"></div>
                 </section>
@@ -164,7 +165,6 @@
     </div>
 
     <script>
-        // GOOGLE APPS SCRIPT URL
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0MEeS8GtlSKwBRjE02y-uk3vGmfgtyaw1FpSnqOMBFFJx7tlqnrdzDiNeJb9AoLOEMQ/exec";
 
         let tripData = { days: [], todos: [], notes: [] };
@@ -274,39 +274,45 @@
                             <span class="drag-handle text-slate-400 p-1"><i class="fa-solid fa-grip-vertical"></i></span>
                             <div>
                                 <span class="text-[10px] font-bold text-brand-500 uppercase">Giorno ${day.id} - ${day.date || ''}</span>
-                                <h3 class="font-bold text-base">${day.title || 'Tappa'}</h3>
+                                <h3 class="font-bold text-base flex items-center gap-2">
+                                    ${day.title || 'Tappa'}
+                                    <button onclick="editDayPrompt(${dIdx})" class="text-slate-400 hover:text-brand-500 text-xs" title="Modifica Titolo/Spostamenti/Costi"><i class="fa-solid fa-pen"></i></button>
+                                </h3>
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
-                            <span class="px-2 py-0.5 rounded-md ${day.hotel_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'}">
-                                🏨 ${day.hotel_status || 'Da Prenotare'}
-                            </span>
-                            <span class="px-2 py-0.5 rounded-md ${day.transport_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}">
-                                🚆 ${day.transport_status || 'Da Prenotare'}
-                            </span>
+                            <button onclick="toggleHotelStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.hotel_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300'}">
+                                🏨 Hotel: ${day.hotel_status || 'Da Prenotare'}
+                            </button>
+                            <button onclick="toggleTransportStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.transport_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}">
+                                🚆 Trasporto: ${day.transport_status || 'Da Prenotare'}
+                            </button>
                             ${day.cost ? `<span class="bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded-md font-bold">💶 ${day.cost}</span>` : ''}
-                            <button onclick="addActivityPrompt(${dIdx})" class="p-1 text-xs text-brand-600"><i class="fa-solid fa-plus"></i></button>
-                            <button onclick="deleteDay(${dIdx})" class="p-1 text-xs text-red-400"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="addActivityPrompt(${dIdx})" class="p-1 text-xs text-brand-600" title="Aggiungi Attività"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="deleteDay(${dIdx})" class="p-1 text-xs text-red-400" title="Elimina Giorno"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
 
-                    ${day.notes || day.cancellation || day.link ? `
+                    ${day.transport_details || day.notes || day.cancellation || day.link ? `
                         <div class="text-xs bg-slate-50 dark:bg-slate-700/30 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 space-y-1 text-slate-600 dark:text-slate-300">
                             ${day.transport_details ? `<p><b>Spostamenti:</b> ${day.transport_details}</p>` : ''}
                             ${day.notes ? `<p><b>Note:</b> ${day.notes}</p>` : ''}
                             ${day.cancellation ? `<p class="text-emerald-600 dark:text-emerald-400"><b>Cancellazione:</b> ${day.cancellation}</p>` : ''}
-                            ${day.link ? `<p><a href="${day.link}" target="_blank" class="text-brand-600 underline font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Vedi Prenotazione Booking</a></p>` : ''}
+                            ${day.link ? `<p><a href="${day.link}" target="_blank" class="text-brand-600 underline font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Vedi Prenotazione Booking</a></p>` : ''}
                         </div>
                     ` : ''}
 
                     <div class="activities-list space-y-2" data-day-idx="${dIdx}">
                         ${(day.activities || []).map((act, aIdx) => `
                             <div class="bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-1">
                                     <span class="drag-handle text-slate-400"><i class="fa-solid fa-grip-vertical"></i></span>
                                     <span>${act.title || act.desc || ''}</span>
                                 </div>
-                                <button onclick="deleteActivity(${dIdx}, ${aIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="editActivityPrompt(${dIdx}, ${aIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="deleteActivity(${dIdx}, ${aIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -318,11 +324,14 @@
             const container = document.getElementById('todo-list');
             container.innerHTML = (tripData.todos || []).map((t, idx) => `
                 <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl text-xs border border-slate-200 dark:border-slate-700">
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-1">
                         <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${idx})">
                         <span class="${t.done ? 'line-through text-slate-400' : ''}">${t.text}</span>
                     </div>
-                    <button onclick="deleteTodo(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="editTodoPrompt(${idx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteTodo(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -333,7 +342,10 @@
                 <div class="p-3 bg-amber-50 dark:bg-amber-950/30 rounded-xl text-xs space-y-1 border border-amber-200 dark:border-amber-900">
                     <div class="flex justify-between font-bold text-amber-900 dark:text-amber-300">
                         <span>${n.title || 'Nota'}</span>
-                        <button onclick="deleteNote(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="editNotePrompt(${idx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteNote(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                        </div>
                     </div>
                     <p class="text-slate-700 dark:text-slate-300">${n.text}</p>
                 </div>
@@ -351,6 +363,63 @@
                         saveDataToSheet();
                     }
                 });
+            }
+        }
+
+        /* --- FUNZIONI DI MODIFICA --- */
+        function editDayPrompt(dIdx) {
+            const d = tripData.days[dIdx];
+            const newTitle = prompt("Titolo del giorno:", d.title || "");
+            if(newTitle !== null) d.title = newTitle;
+            const newTransport = prompt("Dettagli Spostamenti:", d.transport_details || "");
+            if(newTransport !== null) d.transport_details = newTransport;
+            const newNotes = prompt("Note extra:", d.notes || "");
+            if(newNotes !== null) d.notes = newNotes;
+            saveDataToSheet();
+            renderApp();
+        }
+
+        function toggleHotelStatus(dIdx) {
+            const current = tripData.days[dIdx].hotel_status;
+            tripData.days[dIdx].hotel_status = (current === 'Prenotato') ? 'Da Prenotare' : 'Prenotato';
+            saveDataToSheet();
+            renderApp();
+        }
+
+        function toggleTransportStatus(dIdx) {
+            const current = tripData.days[dIdx].transport_status;
+            tripData.days[dIdx].transport_status = (current === 'Prenotato') ? 'Da Prenotare' : 'Prenotato';
+            saveDataToSheet();
+            renderApp();
+        }
+
+        function editActivityPrompt(dIdx, aIdx) {
+            const currentText = tripData.days[dIdx].activities[aIdx].title || tripData.days[dIdx].activities[aIdx].desc || "";
+            const newText = prompt("Modifica attività:", currentText);
+            if(newText) {
+                tripData.days[dIdx].activities[aIdx].title = newText;
+                saveDataToSheet();
+                renderApp();
+            }
+        }
+
+        function editTodoPrompt(idx) {
+            const newText = prompt("Modifica To-Do:", tripData.todos[idx].text);
+            if(newText) {
+                tripData.todos[idx].text = newText;
+                saveDataToSheet();
+                renderApp();
+            }
+        }
+
+        function editNotePrompt(idx) {
+            const newTitle = prompt("Modifica Titolo Nota:", tripData.notes[idx].title);
+            const newText = prompt("Modifica Testo Nota:", tripData.notes[idx].text);
+            if(newTitle || newText) {
+                if(newTitle) tripData.notes[idx].title = newTitle;
+                if(newText) tripData.notes[idx].text = newText;
+                saveDataToSheet();
+                renderApp();
             }
         }
 
