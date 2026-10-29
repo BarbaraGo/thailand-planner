@@ -51,14 +51,30 @@
                 </div>
             </div>
 
-            <div class="flex items-center gap-2">
-                <button onclick="fetchDataFromSheet()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Aggiorna Dati ora">
-                    <i class="fa-solid fa-rotate"></i>
-                </button>
-                <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Tema Notte/Giorno">
-                    <i class="fa-solid fa-moon dark:hidden"></i>
-                    <i class="fa-solid fa-sun hidden dark:inline"></i>
-                </button>
+            <!-- Convertitore e Tasti di Azione -->
+            <div class="flex items-center flex-wrap gap-2">
+                <div class="bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 border border-slate-200 dark:border-slate-600">
+                    <i class="fa-solid fa-coins text-amber-500"></i>
+                    <input type="number" id="eur-input" placeholder="€" oninput="convertCurrency('eur')" class="w-14 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
+                    <span>=</span>
+                    <input type="number" id="thb-input" placeholder="THB" oninput="convertCurrency('thb')" class="w-16 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
+                </div>
+
+                <div class="flex items-center space-x-1">
+                    <button onclick="importJSONPrompt()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Importa JSON">
+                        <i class="fa-solid fa-file-import text-brand-600 dark:text-brand-400"></i>
+                    </button>
+                    <button onclick="exportJSONData()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Esporta JSON">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                    <button onclick="fetchDataFromSheet()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Aggiorna Dati ora">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                    <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Tema Notte/Giorno">
+                        <i class="fa-solid fa-moon dark:hidden"></i>
+                        <i class="fa-solid fa-sun hidden dark:inline"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -133,9 +149,22 @@
 
     <script>
         // INCOLLA QUI L'URL DELLA TUA WEB APP GOOGLE APPS SCRIPT
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0MEeS8GtlSKwBRjE02y-uk3vGmfgtyaw1FpSnqOMBFFJx7tlqnrdzDiNeJb9AoLOEMQ/exec";
+        const GOOGLE_SCRIPT_URL = "INCOLLA_QUI_IL_TUO_URL_APPS_SCRIPT";
 
         let tripData = { days: [], todos: [], notes: [] };
+
+        function convertCurrency(source) {
+            const eurInput = document.getElementById('eur-input');
+            const thbInput = document.getElementById('thb-input');
+            const rate = 38.5; 
+            if(source === 'eur') {
+                const val = parseFloat(eurInput.value);
+                thbInput.value = isNaN(val) ? '' : (val * rate).toFixed(0);
+            } else {
+                const val = parseFloat(thbInput.value);
+                eurInput.value = isNaN(val) ? '' : (val / rate).toFixed(2);
+            }
+        }
 
         function updateSyncStatus(status, colorClass) {
             const el = document.getElementById('sync-status');
@@ -150,17 +179,18 @@
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await res.json();
-                if(data && typeof data === 'object') {
+                if(data && typeof data === 'object' && Object.keys(data).length > 0) {
                     tripData = data;
                     renderApp();
                     updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
+                    return;
                 }
-            } catch(e) {
-                updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
-                const saved = localStorage.getItem('thailandData2026');
-                if(saved) tripData = JSON.parse(saved);
-                renderApp();
-            }
+            } catch(e) {}
+            
+            updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
+            const saved = localStorage.getItem('thailandData2026');
+            if(saved) tripData = JSON.parse(saved);
+            renderApp();
         }
 
         async function saveDataToSheet() {
@@ -177,6 +207,25 @@
             } catch(e) {
                 updateSyncStatus('❌ Errore salvataggio', 'bg-red-100 text-red-700');
             }
+        }
+
+        function importJSONPrompt() {
+            const raw = prompt("Incolla qui il contenuto del tuo file JSON:");
+            if(!raw) return;
+            try {
+                const parsed = JSON.parse(raw);
+                tripData = Array.isArray(parsed) ? { days: parsed } : parsed;
+                saveDataToSheet();
+                renderApp();
+                alert("✅ Dati importati e inviati con successo!");
+            } catch(e) {
+                alert("⚠️ Errore nel formato JSON.");
+            }
+        }
+
+        function exportJSONData() {
+            navigator.clipboard.writeText(JSON.stringify(tripData, null, 2));
+            alert("📋 JSON copiato negli appunti!");
         }
 
         function switchTab(tabId) {
@@ -199,7 +248,7 @@
         function renderItinerary() {
             const container = document.getElementById('days-container');
             if(!tripData.days || tripData.days.length === 0) {
-                container.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">Nessun dato sul Google Sheet. Inserisci tappe o importa il JSON iniziale.</div>`;
+                container.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">Nessun dato sul Google Sheet. Inserisci tappe o importa il JSON iniziale con il pulsante in alto a destra 📥.</div>`;
                 return;
             }
             container.innerHTML = tripData.days.map((day, dIdx) => `
