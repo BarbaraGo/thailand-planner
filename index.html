@@ -165,7 +165,7 @@
                             </div>
                             <div class="text-right">
                                 <span class="text-xs text-slate-400 block">Totale Speso</span>
-                                <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0 €</span>
+                                <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0,00 €</span>
                             </div>
                         </div>
 
@@ -254,6 +254,12 @@
 
         let tripData = { days: [], todos: [], notes: [], expenses: [] };
 
+        // Funzione di formattazione valuta stile italiano (es. 2.295,00€)
+        function formatEUR(amount) {
+            const num = parseFloat(amount) || 0;
+            return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "€";
+        }
+
         function initApp() {
             calculateCountdown();
             fetchDataFromSheet();
@@ -314,7 +320,7 @@
             }
             
             updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
-            const saved = localStorage.getItem('thailandData2026_v3');
+            const saved = localStorage.getItem('thailandData2026_v4');
             if(saved) {
                 try { tripData = JSON.parse(saved); } catch(err) {}
             }
@@ -323,7 +329,7 @@
         }
 
         async function saveDataToSheet() {
-            localStorage.setItem('thailandData2026_v3', JSON.stringify(tripData));
+            localStorage.setItem('thailandData2026_v4', JSON.stringify(tripData));
             updateSyncStatus('💾 Salvataggio...', 'bg-amber-100 text-amber-700');
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
@@ -402,7 +408,7 @@
                                 🚆 Trasporto: ${day.transport_status || 'Da Prenotare'}
                             </button>
                             <button onclick="editCostPrompt(${dIdx})" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 px-2 py-0.5 rounded-md font-bold transition">
-                                💶 ${day.cost || '0€'}
+                                💶 ${day.cost || '0,00€'}
                             </button>
                             <button onclick="addActivityPrompt(${dIdx})" class="p-1 text-xs text-brand-600" title="Aggiungi Attività"><i class="fa-solid fa-plus"></i></button>
                             <button onclick="deleteDay(${dIdx})" class="p-1 text-xs text-red-400" title="Elimina Giorno"><i class="fa-solid fa-trash"></i></button>
@@ -445,7 +451,6 @@
             let barbShouldPay = 0;
             let laurShouldPay = 0;
 
-            // Calcolo ESCLUSIVO basato sulle spese inserite a mano nella sezione budget
             if(tripData.expenses) {
                 tripData.expenses.forEach(exp => {
                     const amt = parseFloat(exp.amount) || 0;
@@ -467,26 +472,26 @@
                 });
             }
 
-            document.getElementById('total-budget-sum').innerText = total.toFixed(2) + " €";
+            document.getElementById('total-budget-sum').innerText = formatEUR(total);
 
             const barbBalance = barbTotalPaid - barbShouldPay; 
             let settlementText = "";
             if(Math.abs(barbBalance) < 0.05) {
                 settlementText = "<b>Siete perfettamente pari!</b> ✨";
             } else if(barbBalance > 0) {
-                settlementText = `<b>Laura deve a Barbara:</b> <span class="text-brand-600 font-bold">${barbBalance.toFixed(2)} €</span>`;
+                settlementText = `<b>Laura deve a Barbara:</b> <span class="text-brand-600 font-bold">${formatEUR(barbBalance)}</span>`;
             } else {
-                settlementText = `<b>Barbara deve a Laura:</b> <span class="text-brand-600 font-bold">${Math.abs(barbBalance).toFixed(2)} €</span>`;
+                settlementText = `<b>Barbara deve a Laura:</b> <span class="text-brand-600 font-bold">${formatEUR(Math.abs(barbBalance))}</span>`;
             }
 
             splitBox.innerHTML = `
                 <div class="bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-600">
                     <span class="block text-slate-400">Totale Speso Barbara</span>
-                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${barbTotalPaid.toFixed(2)} €</span>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${formatEUR(barbTotalPaid)}</span>
                 </div>
                 <div class="bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-600">
                     <span class="block text-slate-400">Totale Speso Laura</span>
-                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${laurTotalPaid.toFixed(2)} €</span>
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${formatEUR(laurTotalPaid)}</span>
                 </div>
                 <div class="bg-brand-50 dark:bg-brand-950/40 p-2.5 rounded-lg border border-brand-200 dark:border-brand-800 flex flex-col justify-center">
                     <span class="block text-brand-700 dark:text-brand-300 font-semibold">Situazione Debiti</span>
@@ -506,7 +511,7 @@
                         <div class="text-[10px] text-slate-400">Pagato da: <b>${exp.payer}</b> | Divisione: <b>${exp.split}</b></div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${parseFloat(exp.amount).toFixed(2)} €</span>
+                        <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${formatEUR(exp.amount)}</span>
                         <button onclick="openExpenseModal(${eIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteExpense(${eIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
                     </div>
@@ -698,7 +703,7 @@
             const date = prompt("Data (es. 27 dic):", "");
             const title = prompt("Titolo Tappa:", "");
             if(title) {
-                tripData.days.push({ id: id, date: date, title: title, hotel_status: "Da Prenotare", transport_status: "Da Prenotare", cost: "0€", activities: [] });
+                tripData.days.push({ id: id, date: date, title: title, hotel_status: "Da Prenotare", transport_status: "Da Prenotare", cost: "0,00€", activities: [] });
                 saveDataToSheet();
                 renderApp();
             }
