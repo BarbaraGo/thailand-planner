@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,7 +25,15 @@
     <meta name="apple-mobile-web-app-status-bar-style"
           content="default">
     
-    <meta name="theme-color" content="#ea580c">
+    <meta name="theme-color" content="#0f172a">
+    <script>
+      // Dark by default; preserve the visitor's explicit choice across sessions.
+      (function () {
+        var saved;
+        try { saved = localStorage.getItem("thaiPlannerTheme"); } catch (e) {}
+        document.documentElement.classList.toggle("dark", saved !== "light");
+      })();
+    </script>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -48,12 +56,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
-        /* Ordine sezioni su iPhone */
-        @media (max-width: 767px) {
-            #planner-sidebar {
-                display: contents;
-            }
-        }
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .drag-handle { cursor: grab; touch-action: none; }
         .drag-handle:active { cursor: grabbing; }
@@ -67,6 +69,39 @@
         .dark .thai-section { border-color:#475569; }
         .thai-pill { display:inline-block; border-radius:.5rem; padding:.15rem .4rem; background:#f1f5f9; font-size:.7rem; }
         .dark .thai-pill { background:#334155; }
+
+        /* Contrasto ottimizzato per la modalità notte, compreso il contenuto dinamico */
+        .dark { color-scheme: dark; }
+        .dark body { background-color: #0b1220; color: #f1f5f9; }
+        .dark input, .dark textarea, .dark select {
+            color: #f8fafc;
+            background-color: #18263a;
+            border-color: #64748b;
+        }
+        .dark input::placeholder, .dark textarea::placeholder { color: #cbd5e1; opacity: 1; }
+        .dark input:focus, .dark textarea:focus, .dark select:focus {
+            outline: 2px solid #fb923c;
+            outline-offset: 1px;
+            border-color: #fb923c;
+        }
+        .dark .thai-field { color:#f8fafc; background:#18263a; border-color:#64748b; }
+        .dark .thai-section { border-color:#64748b; }
+        .dark .thai-pill { color: #f1f5f9; background: #334155; }
+        .dark .thai-action { background: #9a3412; color: #fff7ed; }
+        .dark .text-slate-400, .dark .text-slate-500 { color: #cbd5e1 !important; }
+        .dark .text-slate-600, .dark .text-slate-700, .dark .text-slate-800 { color: #e2e8f0 !important; }
+        .dark .text-brand-600, .dark .text-brand-700 { color: #fdba74 !important; }
+        .dark .text-amber-900 { color: #fde68a !important; }
+        .dark .bg-amber-50 { background-color: #422006; }
+        .dark .bg-orange-50 { background-color: #431e0a; }
+        .dark .bg-brand-50 { background-color: #431e0a; }
+        .dark .bg-emerald-100 { background-color: #064e3b; }
+        .dark .text-emerald-800, .dark .text-emerald-700 { color: #a7f3d0 !important; }
+        .dark a:not([class*="text-"]) { color: #fdba74; }
+        .dark a:hover { text-decoration: underline; }
+        .dark button:focus-visible, .dark a:focus-visible { outline: 2px solid #fdba74; outline-offset: 2px; }
+
+
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
@@ -111,7 +146,7 @@
                     </button>
                     <button onclick="thaiSyncPending()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Riprova sincronizzazione"><i class="fa-solid fa-cloud-arrow-up"></i></button>
                     <button onclick="thaiResolveConflict()" id="thai-conflict-button" class="hidden p-2 text-red-600 rounded-lg text-xs font-bold" title="Ricarica dopo aver esportato backup">Risolvi conflitto</button>
-                    <button onclick="document.documentElement.classList.toggle('dark')" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Tema Notte/Giorno">
+                    <button onclick="thaiToggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Tema Notte/Giorno">
                         <i class="fa-solid fa-moon dark:hidden"></i>
                         <i class="fa-solid fa-sun hidden dark:inline"></i>
                     </button>
@@ -122,7 +157,7 @@
         <!-- Main Layout -->
         <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6">
             <!-- Sidebar -->
-            <aside id="planner-sidebar" class="w-full md:w-80 flex-shrink-0 flex flex-col space-y-4">
+            <aside class="w-full md:w-80 flex-shrink-0 flex flex-col space-y-4">
                 <nav class="order-1 md:order-1 bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
                     <button onclick="switchTab('itinerary')" data-tab="itinerary" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-brand-600 bg-brand-50 dark:bg-brand-900/30 dark:text-brand-400">
                         <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
@@ -316,6 +351,16 @@
         </form>
     </div>
     <script>
+        function thaiToggleTheme() {
+            const dark = document.documentElement.classList.toggle('dark');
+            try { localStorage.setItem('thaiPlannerTheme', dark ? 'dark' : 'light'); } catch (e) {}
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.content = dark ? '#0f172a' : '#ea580c';
+        }
+        (function () {
+            const meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.content = document.documentElement.classList.contains('dark') ? '#0f172a' : '#ea580c';
+        })();
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEctxIJynpq1Cy4oF1wOI-75Mlwgyd_NL7IT3v8eIvArkQdXkgwpCQtAj_0jMMAVqDAw/exec";
 
         let tripData = { days: [], todos: [], notes: [], expenses: [] };
@@ -810,8 +855,28 @@
         let thaiSummaryDay = 0;
 
         const thaiEsc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-        const thaiUrl = (v) => { try { const u = new URL(String(v), location.href); return ['https:', 'http:'].includes(u.protocol) ? u.href : ''; } catch (_) { return ''; } };
-        const thaiLink = (v, label='Apri link') => { const u=thaiUrl(v); return u ? `<a href="${thaiEsc(u)}" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline font-semibold">${thaiEsc(label)} ↗</a>` : ''; };
+        // Gli URL senza https:// non devono diventare percorsi relativi di GitHub Pages.
+        // Per Google Maps accettiamo anche un nome/indirizzo e apriamo una ricerca Maps.
+        function thaiUrl(value, isMap=false) {
+            const raw = String(value ?? '').trim();
+            if (!raw) return '';
+            let candidate = raw;
+            if (/^\/\//.test(candidate)) candidate = 'https:' + candidate;
+            else if (!/^[a-z][a-z0-9+.-]*:/i.test(candidate) &&
+                     /^(?:www\.|(?:[a-z0-9-]+\.)+[a-z]{2,})(?:[\/:?#]|$)/i.test(candidate)) {
+                candidate = 'https://' + candidate;
+            } else if (!/^[a-z][a-z0-9+.-]*:/i.test(candidate)) {
+                return isMap ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(raw) : '';
+            }
+            try {
+                const url = new URL(candidate);
+                return (url.protocol === 'https:' || url.protocol === 'http:') && url.hostname ? url.href : '';
+            } catch (_) { return ''; }
+        }
+        const thaiLink = (v, label='Apri link') => {
+            const u = thaiUrl(v, label === 'Google Maps');
+            return u ? `<a href="${thaiEsc(u)}" target="_blank" rel="noopener noreferrer" class="text-brand-600 underline font-semibold inline-flex items-center gap-1 py-1" aria-label="${thaiEsc(label)} (apri collegamento esterno)">${thaiEsc(label)} ↗</a>` : '';
+        };
         const thaiBtn = (label, handler, cls='') => `<button type="button" onclick="${handler}" class="thai-action ${cls}">${label}</button>`;
         const thaiValid = d => d && typeof d === 'object' && Array.isArray(d.days) && Array.isArray(d.todos) && Array.isArray(d.notes) && (d.expenses === undefined || Array.isArray(d.expenses));
         function thaiNormalize(d) {
@@ -906,7 +971,7 @@
             let control;
             if(type==='textarea') control=`<textarea ${attributes} rows="3">${v}</textarea>`;
             else if(type==='select') control=`<select ${attributes}>${options.map(o=>`<option value="${thaiEsc(o)}" ${o===value?'selected':''}>${thaiEsc(o)}</option>`).join('')}</select>`;
-            else control=`<input type="${type}" ${attributes} value="${v}" ${type==='number'?'min="0" step="0.01"':''}>`;
+            else control=`<input type="${type==='url'?'text':type}" ${attributes} ${type==='url'?'inputmode="url" autocapitalize="off" autocorrect="off"':''} value="${v}" ${type==='number'?'min="0" step="0.01"':''}>`;
             return `<div><label class="thai-label" for="${id}">${thaiEsc(label)}</label>${control}</div>`;
         }
         function thaiOpen(kind,dayIndex=-1,itemIndex=-1) {
@@ -932,7 +997,13 @@
                 const raw=document.getElementById('thai-field-'+k).value.trim();
                 data[k]=type==='number'?(raw===''?'':Number(raw)):raw;
             });
-            if(['link','maps'].some(k=>data[k] && !thaiUrl(data[k]))) { alert('Inserisci un link valido con https://');return; }
+            for (const key of ['link','maps']) {
+                if (data[key]) {
+                    const url = thaiUrl(data[key], key === 'maps');
+                    if (!url) { alert('Link non valido: inserisci un indirizzo web oppure, per Google Maps, il nome del luogo.'); return; }
+                    data[key] = url;
+                }
+            }
             if(kind==='day') {
                 if(itemIndex>=0) Object.assign(tripData.days[dayIndex],data);
                 else tripData.days.push({id:Math.max(0,...tripData.days.map(x=>Number(x.id)||0))+1, ...data, activities:[],transports:[],hotel_status:'Da Prenotare',transport_status:'Da Prenotare'});
