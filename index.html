@@ -211,6 +211,44 @@
 .thai-global-folds{display:flex;align-items:center;flex-wrap:wrap;gap:.5rem;margin:.4rem 0 .7rem}
 .thai-fold-shell{min-width:0}
 @media(max-width:767px){.thai-fold-toggle{min-height:42px}.thai-global-folds button{flex:1}}
+
+/* Pulsanti Comprimi/Espandi: colore per tipologia di blocco e stato. */
+.thai-fold-toggle { transition: background-color .16s, border-color .16s, color .16s; }
+.thai-global-folds .thai-fold-toggle { background:#dceeea; color:#195960; border-color:#81b9b5; }
+.dark .thai-global-folds .thai-fold-toggle { background:#25545a; color:#e0fcf8; border-color:#6aa9a5; }
+/* Giornate: azzurro polvere */
+[data-thai-fold-key^="day:"] > :not(.thai-fold-body) .thai-fold-toggle { background:#e2f1fc; color:#205574; border-color:#9fc8df; }
+.dark [data-thai-fold-key^="day:"] > :not(.thai-fold-body) .thai-fold-toggle { background:#315a70; color:#edf9ff; border-color:#719db6; }
+/* Hotel: salvia */
+[data-thai-fold-key$=":hotel"] > .thai-fold-header .thai-fold-toggle { background:#e1f3e7; color:#205e44; border-color:#a3d3b4; }
+.dark [data-thai-fold-key$=":hotel"] > .thai-fold-header .thai-fold-toggle { background:#34634f; color:#edfff4; border-color:#77ae90; }
+/* Trasporti: blu */
+[data-thai-fold-key$=":transports"] > .thai-fold-header .thai-fold-toggle { background:#e5f2ff; color:#235779; border-color:#a5c9e8; }
+.dark [data-thai-fold-key$=":transports"] > .thai-fold-header .thai-fold-toggle { background:#365d78; color:#f0faff; border-color:#7ca8c5; }
+/* Attivita e note: lavanda */
+[data-thai-fold-key$=":activities"] > .thai-fold-header .thai-fold-toggle,
+[data-thai-fold-key^="note:"] > .thai-fold-header .thai-fold-toggle { background:#f1eafd; color:#65478d; border-color:#cbb9e6; }
+.dark [data-thai-fold-key$=":activities"] > .thai-fold-header .thai-fold-toggle,
+.dark [data-thai-fold-key^="note:"] > .thai-fold-header .thai-fold-toggle { background:#584c76; color:#fbf2ff; border-color:#9585b4; }
+/* Voli: pesca chiaro */
+[data-thai-fold-key="flights"] > .thai-fold-header .thai-fold-toggle { background:#fff0db; color:#855522; border-color:#eec891; }
+.dark [data-thai-fold-key="flights"] > .thai-fold-header .thai-fold-toggle { background:#6c533b; color:#ffefdc; border-color:#ba946f; }
+/* Viaggiatrici: rosa cipria */
+[data-thai-fold-key="travellers"] > .thai-fold-header .thai-fold-toggle { background:#fbe9ef; color:#854e69; border-color:#e7b9ca; }
+.dark [data-thai-fold-key="travellers"] > .thai-fold-header .thai-fold-toggle { background:#664b62; color:#fff0f6; border-color:#ab839e; }
+/* Budget: verde acqua; To Do: azzurro */
+[data-thai-fold-key^="budget:"] > .thai-fold-header .thai-fold-toggle,
+[data-thai-fold-key^="expense:"] > .thai-fold-header .thai-fold-toggle { background:#e1f4ed; color:#22644d; border-color:#a4d6c4; }
+.dark [data-thai-fold-key^="budget:"] > .thai-fold-header .thai-fold-toggle,
+.dark [data-thai-fold-key^="expense:"] > .thai-fold-header .thai-fold-toggle { background:#315e55; color:#eafff7; border-color:#79afa2; }
+[data-thai-fold-key^="todo:"] > .thai-fold-header .thai-fold-toggle { background:#e8f2fb; color:#29567c; border-color:#adcbe6; }
+.dark [data-thai-fold-key^="todo:"] > .thai-fold-header .thai-fold-toggle { background:#34556b; color:#eaf8ff; border-color:#83a9c5; }
+/* Stato chiuso leggermente piu saturo, per distinguere Espandi da Comprimi. */
+.thai-fold-collapsed > .thai-fold-header .thai-fold-toggle,
+.thai-fold-collapsed > :not(.thai-fold-body) .thai-fold-toggle { box-shadow:inset 0 0 0 1px currentColor; }
+.thai-fold-toggle:focus-visible { outline:3px solid #73cfc5; outline-offset:2px; }
+@media (prefers-reduced-motion:reduce){.thai-fold-toggle{transition:none}}
+
 </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
@@ -1286,6 +1324,63 @@
         function deleteNote(i){thaiDelete('note',0,i);}
         function deleteExpense(i){thaiDelete('expense',0,i);}
         function thaiTransportLabel(t){return `${thaiEsc(t.type||'Trasporto')} · ${thaiEsc(t.from||'?')} → ${thaiEsc(t.to||'?')}`;}
+
+        // Le prenotazioni restano salvate una sola volta nel giorno di origine.
+        // Gli altri giorni visualizzano automaticamente il soggiorno secondo le date.
+        function thaiDateKey(value, defaultYear=2026) {
+            if(!value) return null;
+            const raw=String(value).trim().toLowerCase();
+            let d,m,y;
+            const iso=raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+            const numeric=raw.match(/^(\d{1,2})[\/\.\-](\d{1,2})(?:[\/\.\-](\d{2,4}))?/);
+            const months={gen:1,genn:1,jan:1,feb:2,febbraio:2,mar:3,apr:4,mag:5,may:5,giu:6,jun:6,lug:7,jul:7,ago:8,aug:8,set:9,sep:9,ott:10,oct:10,nov:11,dic:12,dec:12};
+            const named=raw.match(/^(\d{1,2})\s+([a-zà-ÿ]+)(?:\s+(\d{4}))?/);
+            if(iso){y=Number(iso[1]);m=Number(iso[2]);d=Number(iso[3]);}
+            else if(numeric){d=Number(numeric[1]);m=Number(numeric[2]);y=numeric[3]?Number(numeric[3]):defaultYear;}
+            else if(named){d=Number(named[1]);m=months[named[2].slice(0,3)];y=named[3]?Number(named[3]):defaultYear;}
+            else return null;
+            if(y<100)y+=2000;
+            // Il viaggio attraversa Capodanno: gennaio = 2027 se l'anno non è indicato.
+            if(!iso && !(numeric && numeric[3]) && !(named && named[3]) && m<=2 && defaultYear===2026) y=2027;
+            const ms=Date.UTC(y,m-1,d);
+            const check=new Date(ms);
+            return check.getUTCFullYear()===y && check.getUTCMonth()===m-1 && check.getUTCDate()===d ? ms : null;
+        }
+        function thaiHotelStayForDay(dayIndex) {
+            const days=tripData.days||[];
+            const current=days[dayIndex];
+            if(!current)return null;
+            const currentDate=thaiDateKey(current.date);
+            if(currentDate===null)return null;
+            // Una prenotazione inserita esplicitamente sul giorno prevale sulle altre.
+            if(current.hotel?.name) return {sourceIndex:dayIndex,hotel:current.hotel,checkout:false};
+            let checkoutRecord=null;
+            for(let i=0;i<days.length;i++) {
+                const hotel=days[i].hotel;
+                if(!hotel || !hotel.name || i===dayIndex)continue;
+                const start=thaiDateKey(hotel.checkin)||thaiDateKey(days[i].date);
+                const end=thaiDateKey(hotel.checkout);
+                if(start===null || end===null || end<=start)continue;
+                if(currentDate>=start && currentDate<end)return {sourceIndex:i,hotel,checkout:false};
+                if(currentDate===end && !checkoutRecord)checkoutRecord={sourceIndex:i,hotel,checkout:true};
+            }
+            return checkoutRecord;
+        }
+        function thaiSharedHotelCard(stay) {
+            if(!stay)return '';
+            const h=stay.hotel;
+            const label=stay.checkout?'🧳 Check-out oggi':(['Prenotato','Completato'].includes(h.status)?'🏨 Hotel prenotato per questa notte':'🏨 Hotel previsto per questa notte');
+            return `<div class="thai-section hotel-detail text-xs space-y-2" role="group" aria-label="Hotel collegato automaticamente">
+                <div class="flex flex-wrap justify-between items-center gap-2"><p class="font-bold">${label}</p><span class="text-xs opacity-75">Dal giorno ${thaiEsc(tripData.days[stay.sourceIndex].id||stay.sourceIndex+1)}</span></div>
+                <p class="font-semibold">${thaiEsc(h.name)}${h.address?' · '+thaiEsc(h.address):''}</p>
+                <p>Check-in: ${thaiEsc(h.checkin||'non indicato')} · Check-out: ${thaiEsc(h.checkout||'non indicato')}</p>
+                ${h.status?`<p>Stato: ${thaiEsc(h.status)}</p>`:''}
+                ${h.cost!=='' && h.cost!=null?`<p>💶 Prezzo totale soggiorno: ${formatEUR(h.cost)} <span class="opacity-75">(non per notte e non conteggiato due volte)</span></p>`:''}
+                ${h.cancellation?`<p>✅ Cancellazione: ${thaiEsc(h.cancellation)}</p>`:''}
+                <div class="flex gap-2 flex-wrap">${thaiBtn('✏️ Modifica prenotazione',`openHotelModal(${stay.sourceIndex})`)}${thaiLink(h.link,'Apri prenotazione')}</div>
+              </div>`;
+        }
+
         function thaiRenderSummary(){
             const el=document.getElementById('day-summary'); if(!el)return;
             if(!tripData.days.length){el.innerHTML='<p class="text-sm">Aggiungi una giornata per iniziare a pianificare.</p>';return;}
@@ -1293,7 +1388,7 @@
             const d=tripData.days[thaiSummaryDay];
             const acts=(d.activities||[]).slice().sort((a,b)=>(a.start||'99:99').localeCompare(b.start||'99:99'));
             el.innerHTML=`<div class="flex flex-wrap items-center justify-between gap-2"><h3 class="font-bold text-sm">📍 Riepilogo della giornata</h3><select aria-label="Seleziona giornata" onchange="thaiSummaryDay=Number(this.value);thaiRenderSummary()" class="bg-white dark:bg-slate-700 border rounded-lg p-1.5 text-xs">${tripData.days.map((x,i)=>`<option value="${i}" ${i===thaiSummaryDay?'selected':''}>${thaiEsc(x.date||'Giorno '+x.id)} — ${thaiEsc(x.title||'Tappa')}</option>`).join('')}</select></div>
-            <div class="mt-2 text-xs space-y-1"><p>🏨 ${thaiEsc(d.hotel?.name||d.hotel_status||'Hotel non inserito')}</p><p>🚆 ${(d.transports||[]).length} spostamenti · 🗓️ ${acts.length} attività</p>${acts.length?acts.map(a=>`<p>• ${thaiEsc(a.start||'—')} ${thaiEsc(a.title||a.desc||'Attività')}</p>`).join(''):'<p>Nessuna attività in programma.</p>'}</div>`;
+            <div class="mt-2 text-xs space-y-1"><p>🏨 ${thaiEsc(d.hotel?.name||thaiHotelStayForDay(thaiSummaryDay)?.hotel?.name||d.hotel_status||'Hotel non inserito')}</p><p>🚆 ${(d.transports||[]).length} spostamenti · 🗓️ ${acts.length} attività</p>${acts.length?acts.map(a=>`<p>• ${thaiEsc(a.start||'—')} ${thaiEsc(a.title||a.desc||'Attività')}</p>`).join(''):'<p>Nessuna attività in programma.</p>'}</div>`;
         }
         function renderItinerary(){
             thaiRenderSummary();
@@ -1303,10 +1398,13 @@
                 const activities=(d.activities||[]).map((a,j)=>({a,j})).sort((x,y)=>(x.a.start||'99:99').localeCompare(y.a.start||'99:99'));
                 const transport=(d.transports||[]);
                 const hotel=d.hotel;
+                const stay=thaiHotelStayForDay(i);
+                const sharedStay=stay && stay.sourceIndex!==i ? stay : null;
                 return `<article class="day-card bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                   <div class="flex justify-between items-start gap-2"><div class="flex gap-2 items-start"><span class="day-drag-handle cursor-grab p-1 text-slate-400">☷</span><div><p class="text-[11px] font-bold text-brand-600">GIORNO ${thaiEsc(d.id)} · ${thaiEsc(d.date||'')}</p><h3 class="font-bold">${thaiEsc(d.title||'Tappa')}</h3></div></div><div class="flex gap-2">${thaiBtn('✏️',`openDayModal(${i})`)}${thaiBtn('🗑️',`deleteDay(${i})`)}</div></div>
                   <div class="flex flex-wrap gap-2">${thaiBtn(hotel || d.link || d.cancellation || d.hotel_status === 'Prenotato' ? '🏨 Gestisci hotel' : '🏨 Aggiungi hotel',`openHotelModal(${i})`)}${thaiBtn('🚆 Aggiungi spostamento',`openTransportModal(${i})`)}${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}</div>
                   ${(hotel || d.link || d.cancellation || d.hotel_status === 'Prenotato') ? `<div class="thai-section hotel-detail text-xs space-y-2"><div class="flex items-center justify-between flex-wrap gap-2"><p class="font-bold">🏨 Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p><span class="flex flex-wrap gap-2"><button type="button" onclick="thaiOpenMove('hotel',${i})" class="thai-action" aria-label="Sposta hotel in un altro giorno">↔️ Sposta hotel</button><button type="button" onclick="thaiDeleteHotel(${i})" class="rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-2 text-rose-700 dark:text-rose-200 font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Elimina hotel dalla giornata">🗑️ Elimina hotel</button></span></div>${hotel?.name?`<p>${thaiEsc(hotel.name)} · ${thaiEsc(hotel.address||'')}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${hotel?.cost !== undefined && hotel?.cost !== null && hotel?.cost !== '' ? `<p class="font-bold text-sm">💶 Prezzo totale hotel: ${formatEUR(hotel.cost)} <span class="font-normal opacity-75">(non aggiunto automaticamente al budget)</span></p>` : ''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${(hotel?.cancellation||d.cancellation)?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(hotel?.cancellation||d.cancellation)}</p>`:''}</div>` : ''}
+                  ${thaiSharedHotelCard(sharedStay)}
                   ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<div class="thai-legacy"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-semibold">📌 Descrizione trasporto importata</span><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},\'transport_details\')`)}</div></div><p class="whitespace-pre-wrap mt-1">${thaiEsc(d.transport_details)}</p><p class="thai-help">È un testo salvato nel vecchio itinerario, non un biglietto o una spesa. Puoi rimuoverlo dopo aver creato lo spostamento qui sopra.</p></div>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('↔️ Sposta',`thaiOpenMove('transport',${i},${j})`)} ${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
                   ${d.cost?`<div class="thai-legacy text-xs"><div class="flex flex-wrap items-center justify-between gap-2"><b>💶 Importo del vecchio itinerario: ${thaiEsc(d.cost)}</b><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},'cost')`)}</div></div><p class="thai-help">È un valore generico importato: non è stato attribuito a hotel, trasporti o budget. Se è una spesa reale, registrala in Budget & Costi, poi rimuovi questo valore.</p></div>`:''}
                   ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
