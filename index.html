@@ -30,7 +30,7 @@
         .drag-handle:active { cursor: grabbing; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="fetchDataFromSheet()">
     <div id="app" class="flex flex-col min-h-screen">
         <!-- Top Bar -->
         <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
@@ -45,9 +45,9 @@
                 <div>
                     <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
                         Thailandia Live Planner 🌴
-                        <span id="sync-status" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">⚡ Google DB Collegato</span>
+                        <span id="sync-status" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">⌛ Connessione...</span>
                     </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Sincronizzazione automatica tra dispositivi</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Sincronizzazione automatica Google Sheet</p>
                 </div>
             </div>
 
@@ -139,7 +139,7 @@
                     <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex justify-between items-center">
                         <div>
                             <h2 class="font-bold text-lg">Programma Giornaliero</h2>
-                            <p class="text-xs text-slate-500">I dati sono salvati automaticamente su Google Sheets.</p>
+                            <p class="text-xs text-slate-500">I dati sono sincronizzati live con Google Sheets.</p>
                         </div>
                         <button onclick="addDayPrompt()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Giorno</button>
                     </div>
@@ -152,7 +152,7 @@
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
                             <div>
                                 <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-amber-500"></i> Riepilogo Budget & Costi</h2>
-                                <p class="text-xs text-slate-500">Monitoraggio spese e costi alberghi registrati nelle tappe.</p>
+                                <p class="text-xs text-slate-500">Monitoraggio spese registrate nelle tappe.</p>
                             </div>
                             <div class="text-right">
                                 <span class="text-xs text-slate-400 block">Totale parziale inserito</span>
@@ -189,7 +189,7 @@
     </div>
 
     <script>
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz0MEeS8GtlSKwBRjE02y-uk3vGmfgtyaw1FpSnqOMBFFJx7tlqnrdzDiNeJb9AoLOEMQ/exec";
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEctxIJynpq1Cy4oF1wOI-75Mlwgyd_NL7IT3v8eIvArkQdXkgwpCQtAj_0jMMAVqDAw/exec";
 
         let tripData = { days: [], todos: [], notes: [] };
 
@@ -219,33 +219,37 @@
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const data = await res.json();
-                if(data && typeof data === 'object' && Object.keys(data).length > 0) {
+                if(data && typeof data === 'object' && (data.days || data.todos)) {
                     tripData = data;
                     renderApp();
                     updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
                     return;
                 }
-            } catch(e) {}
+            } catch(e) {
+                console.error("Errore fetch:", e);
+            }
             
+            // Fallback locale se fallisce la rete
             updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
             const saved = localStorage.getItem('thailandData2026');
-            if(saved) tripData = JSON.parse(saved);
+            if(saved) {
+                try { tripData = JSON.parse(saved); } catch(err) {}
+            }
             renderApp();
         }
 
         async function saveDataToSheet() {
             localStorage.setItem('thailandData2026', JSON.stringify(tripData));
-            updateSyncStatus('💾 Salvataggio in corso...', 'bg-amber-100 text-amber-700');
+            updateSyncStatus('💾 Salvataggio...', 'bg-amber-100 text-amber-700');
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(tripData)
                 });
-                updateSyncStatus('⚡ Sincronizzato su Sheet', 'bg-emerald-100 text-emerald-700');
+                updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
             } catch(e) {
-                updateSyncStatus('❌ Errore salvataggio', 'bg-red-100 text-red-700');
+                updateSyncStatus('⚠️ Salvato in locale', 'bg-slate-100 text-slate-700');
             }
         }
 
@@ -257,7 +261,7 @@
                 tripData = Array.isArray(parsed) ? { days: parsed } : parsed;
                 saveDataToSheet();
                 renderApp();
-                alert("✅ Dati importati e inviati con successo!");
+                alert("✅ Dati importati e salvati sul Google Sheet!");
             } catch(e) {
                 alert("⚠️ Errore nel formato JSON.");
             }
@@ -289,7 +293,7 @@
         function renderItinerary() {
             const container = document.getElementById('days-container');
             if(!tripData.days || tripData.days.length === 0) {
-                container.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">Nessun dato sul Google Sheet. Inserisci tappe o importa il JSON iniziale con il pulsante in alto a destra 📥.</div>`;
+                container.innerHTML = `<div class="p-4 bg-amber-50 text-amber-800 rounded-xl text-xs">Nessun dato trovato. Importa il JSON iniziale con il pulsante 📥 in alto a destra.</div>`;
                 return;
             }
             container.innerHTML = tripData.days.map((day, dIdx) => `
@@ -357,7 +361,6 @@
             }
 
             container.innerHTML = tripData.days.map((day, dIdx) => {
-                let costVal = 0;
                 if(day.cost) {
                     const parsed = parseFloat(day.cost.replace(/[^0-9.,]/g, '').replace(',', '.'));
                     if(!isNaN(parsed)) total += parsed;
@@ -524,8 +527,6 @@
             if(title || text) { if(!tripData.notes) tripData.notes = []; tripData.notes.push({ title: title, text: text }); saveDataToSheet(); renderApp(); }
         }
         function deleteNote(idx) { tripData.notes.splice(idx, 1); saveDataToSheet(); renderApp(); }
-
-        fetchDataFromSheet();
     </script>
 </body>
 </html>
