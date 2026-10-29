@@ -80,9 +80,8 @@
 
         <!-- Main Layout -->
         <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6">
-            <!-- Sidebar (Mobile: ordinata con flex order) -->
+            <!-- Sidebar -->
             <aside class="w-full md:w-80 flex-shrink-0 flex flex-col space-y-4">
-                <!-- 1. Navigazione Tab -->
                 <nav class="order-1 md:order-1 bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
                     <button onclick="switchTab('itinerary')" data-tab="itinerary" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-brand-600 bg-brand-50 dark:bg-brand-900/30 dark:text-brand-400">
                         <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
@@ -102,7 +101,7 @@
                     </button>
                 </nav>
 
-                <!-- 2. Box Voli Saudia -->
+                <!-- Box Voli Saudia -->
                 <section class="order-3 md:order-2 bg-orange-50 dark:bg-orange-950/40 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-orange-200 dark:border-orange-800 shadow-sm space-y-3 text-xs">
                     <div class="flex justify-between items-center border-b border-orange-200 dark:border-orange-800 pb-2">
                         <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
@@ -130,7 +129,7 @@
                     </div>
                 </section>
 
-                <!-- 3. Box Viaggiatrici & Countdown -->
+                <!-- Box Viaggiatrici & Countdown -->
                 <section class="order-4 md:order-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2 text-xs">
                     <h2 class="font-bold text-sm flex items-center gap-2 text-brand-600 dark:text-brand-400">
                         <i class="fa-solid fa-user-group"></i> Le Viaggiatrici
@@ -142,7 +141,7 @@
                 </section>
             </aside>
 
-            <!-- Main Area (Su mobile appare subito dopo la nav) -->
+            <!-- Main Area -->
             <main class="order-2 md:order-2 flex-1 min-w-0">
                 <!-- Tab Itinerario -->
                 <section id="tab-itinerary" class="tab-content space-y-4">
@@ -162,10 +161,10 @@
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
                             <div>
                                 <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-amber-500"></i> Riepilogo Budget & Spese</h2>
-                                <p class="text-xs text-slate-500">Gestione spese condivise tra Barbara e Laura.</p>
+                                <p class="text-xs text-slate-500">Inserimento manuale e gestione spese condivise.</p>
                             </div>
                             <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Totale Complessivo Spese</span>
+                                <span class="text-xs text-slate-400 block">Totale Speso</span>
                                 <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0 €</span>
                             </div>
                         </div>
@@ -177,8 +176,8 @@
 
                         <!-- Pulsante aggiungi spesa -->
                         <div class="flex justify-between items-center pt-2">
-                            <h3 class="font-bold text-sm">Elenco Spese Extra / Extra Tappe</h3>
-                            <button onclick="addExpensePrompt()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Spesa</button>
+                            <h3 class="font-bold text-sm">Elenco Spese</h3>
+                            <button onclick="openExpenseModal()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition">+ Aggiungi Spesa</button>
                         </div>
 
                         <div id="expenses-list" class="space-y-2"></div>
@@ -207,6 +206,46 @@
                     </div>
                 </section>
             </main>
+        </div>
+    </div>
+
+    <!-- MODALE AGGIUNTA / MODIFICA SPESA -->
+    <div id="expense-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 shadow-xl space-y-4">
+            <h3 id="modal-title" class="font-bold text-base text-slate-800 dark:text-slate-100">Nuova Spesa</h3>
+            <input type="hidden" id="expense-edit-index" value="-1">
+            
+            <div class="space-y-1 text-xs">
+                <label class="font-semibold text-slate-600 dark:text-slate-300">Descrizione Spesa</label>
+                <input type="text" id="exp-title-input" placeholder="Es. Cena sul mare, Taxi, Hotel..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2">
+            </div>
+
+            <div class="space-y-1 text-xs">
+                <label class="font-semibold text-slate-600 dark:text-slate-300">Importo (€)</label>
+                <input type="number" step="0.01" id="exp-amount-input" placeholder="0.00" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2">
+            </div>
+
+            <div class="space-y-1 text-xs">
+                <label class="font-semibold text-slate-600 dark:text-slate-300">Chi ha anticipato i soldi?</label>
+                <select id="exp-payer-input" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2">
+                    <option value="Barbara">Barbara</option>
+                    <option value="Laura">Laura</option>
+                </select>
+            </div>
+
+            <div class="space-y-1 text-xs">
+                <label class="font-semibold text-slate-600 dark:text-slate-300">Come va divisa la spesa?</label>
+                <select id="exp-split-input" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2">
+                    <option value="uguale">Diviso in due (50% / 50%)</option>
+                    <option value="Barbara">Interamente a carico di Barbara</option>
+                    <option value="Laura">Interamente a carico di Laura</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeExpenseModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-bold">Annulla</button>
+                <button onclick="saveExpenseModal()" class="px-4 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition">Salva Spesa</button>
+            </div>
         </div>
     </div>
 
@@ -275,7 +314,7 @@
             }
             
             updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
-            const saved = localStorage.getItem('thailandData2026_v2');
+            const saved = localStorage.getItem('thailandData2026_v3');
             if(saved) {
                 try { tripData = JSON.parse(saved); } catch(err) {}
             }
@@ -284,7 +323,7 @@
         }
 
         async function saveDataToSheet() {
-            localStorage.setItem('thailandData2026_v2', JSON.stringify(tripData));
+            localStorage.setItem('thailandData2026_v3', JSON.stringify(tripData));
             updateSyncStatus('💾 Salvataggio...', 'bg-amber-100 text-amber-700');
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
@@ -406,29 +445,13 @@
             let barbShouldPay = 0;
             let laurShouldPay = 0;
 
-            // Calcolo costi dalle tappe (considerati divisi equamente tra Barbara e Laura)
-            if(tripData.days) {
-                tripData.days.forEach(day => {
-                    if(day.cost) {
-                        const parsed = parseFloat(day.cost.replace(/[^0-9.,]/g, '').replace(',', '.'));
-                        if(!isNaN(parsed)) {
-                            total += parsed;
-                            barbTotalPaid += parsed / 2;
-                            laurTotalPaid += parsed / 2;
-                            barbShouldPay += parsed / 2;
-                            laurShouldPay += parsed / 2;
-                        }
-                    }
-                });
-            }
-
-            // Calcolo spese extra
+            // Calcolo ESCLUSIVO basato sulle spese inserite a mano nella sezione budget
             if(tripData.expenses) {
                 tripData.expenses.forEach(exp => {
                     const amt = parseFloat(exp.amount) || 0;
                     total += amt;
                     const paidBy = exp.payer || 'Barbara';
-                    const splitType = exp.split || 'uguale'; // 'uguale', 'Barbara', 'Laura'
+                    const splitType = exp.split || 'uguale'; 
 
                     if(paidBy === 'Barbara') barbTotalPaid += amt;
                     else laurTotalPaid += amt;
@@ -446,10 +469,7 @@
 
             document.getElementById('total-budget-sum').innerText = total.toFixed(2) + " €";
 
-            // Calcolo bilancio Barbara vs Laura
-            // Barbara Balance = quanto ha pagato - quanto doveva pagare
             const barbBalance = barbTotalPaid - barbShouldPay; 
-            
             let settlementText = "";
             if(Math.abs(barbBalance) < 0.05) {
                 settlementText = "<b>Siete perfettamente pari!</b> ✨";
@@ -475,7 +495,7 @@
             `;
 
             if(!tripData.expenses || tripData.expenses.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400">Nessuna spesa extra inserita. Usa il pulsante "+ Aggiungi Spesa" per registrarne una.</p>`;
+                container.innerHTML = `<p class="text-xs text-slate-400">Nessuna spesa inserita. Clicca su "+ Aggiungi Spesa" per registrarne una.</p>`;
                 return;
             }
 
@@ -486,8 +506,8 @@
                         <div class="text-[10px] text-slate-400">Pagato da: <b>${exp.payer}</b> | Divisione: <b>${exp.split}</b></div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${exp.amount} €</span>
-                        <button onclick="editExpensePrompt(${eIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
+                        <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${parseFloat(exp.amount).toFixed(2)} €</span>
+                        <button onclick="openExpenseModal(${eIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
                         <button onclick="deleteExpense(${eIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
@@ -540,38 +560,63 @@
             }
         }
 
-        /* --- FUNZIONI DI GESTIONE SPESE --- */
-        function addExpensePrompt() {
-            const title = prompt("Descrizione spesa (es. cena, taxi, escursione):");
-            if(!title) return;
-            const amount = prompt("Importo in €:");
-            if(!amount || isNaN(amount)) return;
-            const payer = prompt("Chi ha anticipato i soldi? (Scrivi Barbara o Laura):", "Barbara");
-            if(payer !== "Barbara" && payer !== "Laura") return;
-            const split = prompt("Come dividere la spesa?\nScrivi:\n- 'uguale' (50 e 50)\n- 'Barbara' (tutto a carico di Barbara)\n- 'Laura' (tutto a carico di Laura)", "uguale");
-            if(!split) return;
+        /* --- GESTIONE MODALE SPESE --- */
+        function openExpenseModal(eIdx = -1) {
+            const modal = document.getElementById('expense-modal');
+            const titleEl = document.getElementById('modal-title');
+            const titleInput = document.getElementById('exp-title-input');
+            const amountInput = document.getElementById('exp-amount-input');
+            const payerInput = document.getElementById('exp-payer-input');
+            const splitInput = document.getElementById('exp-split-input');
+            const indexInput = document.getElementById('expense-edit-index');
 
-            if(!tripData.expenses) tripData.expenses = [];
-            tripData.expenses.push({ title, amount: parseFloat(amount), payer, split });
-            saveDataToSheet();
-            renderApp();
+            indexInput.value = eIdx;
+
+            if(eIdx >= 0) {
+                const exp = tripData.expenses[eIdx];
+                titleEl.innerText = "Modifica Spesa";
+                titleInput.value = exp.title || '';
+                amountInput.value = exp.amount || '';
+                payerInput.value = exp.payer || 'Barbara';
+                splitInput.value = exp.split || 'uguale';
+            } else {
+                titleEl.innerText = "Nuova Spesa";
+                titleInput.value = '';
+                amountInput.value = '';
+                payerInput.value = 'Barbara';
+                splitInput.value = 'uguale';
+            }
+
+            modal.classList.remove('hidden');
         }
 
-        function editExpensePrompt(eIdx) {
-            const exp = tripData.expenses[eIdx];
-            const title = prompt("Modifica descrizione:", exp.title);
-            if(!title) return;
-            const amount = prompt("Modifica importo in €:", exp.amount);
-            if(!amount || isNaN(amount)) return;
-            const payer = prompt("Chi ha pagato? (Barbara o Laura):", exp.payer);
-            const split = prompt("Divisione ('uguale', 'Barbara', 'Laura'):", exp.split || 'uguale');
+        function closeExpenseModal() {
+            document.getElementById('expense-modal').classList.add('hidden');
+        }
 
-            exp.title = title;
-            exp.amount = parseFloat(amount);
-            exp.payer = payer;
-            exp.split = split;
+        function saveExpenseModal() {
+            const title = document.getElementById('exp-title-input').value.trim();
+            const amount = parseFloat(document.getElementById('exp-amount-input').value);
+            const payer = document.getElementById('exp-payer-input').value;
+            const split = document.getElementById('exp-split-input').value;
+            const eIdx = parseInt(document.getElementById('expense-edit-index').value);
+
+            if(!title || isNaN(amount)) {
+                alert("Inserisci una descrizione e un importo valido.");
+                return;
+            }
+
+            if(!tripData.expenses) tripData.expenses = [];
+
+            if(eIdx >= 0) {
+                tripData.expenses[eIdx] = { title, amount, payer, split };
+            } else {
+                tripData.expenses.push({ title, amount, payer, split });
+            }
+
             saveDataToSheet();
             renderApp();
+            closeExpenseModal();
         }
 
         function deleteExpense(eIdx) {
