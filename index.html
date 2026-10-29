@@ -191,7 +191,15 @@
         .tab-btn:focus-visible, button:focus-visible { outline:2px solid #75cdc4; outline-offset:3px; }
         @media (prefers-reduced-motion:reduce) { .tab-btn { transition:none; } }
 
-    </style>
+    
+    /* Dati importati dal vecchio foglio, gestibili senza aprire Sheets */
+    .thai-legacy {padding: 0.8rem; border-radius: .8rem; background:#fff8ec; border:1px solid #f2d9aa; color:#674d2c;}
+    .thai-help {font-size: .73rem; line-height:1.5; margin-top:.4rem; opacity:.88;}
+    html.dark .thai-legacy {background:#403b32; border-color:#857052; color:#f8e7c7;}
+    .thai-expense-icon {flex:none; display:inline-flex; justify-content:center; align-items:center; width:2.15rem;height:2.15rem;border-radius:.65rem;background:#e2f4f2;font-size:1.15rem;}
+    html.dark .thai-expense-icon {background:#30565b;}
+    .todo-drag-handle:active {cursor:grabbing;}
+</style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
     <div id="app" class="flex flex-col min-h-screen">
@@ -1050,7 +1058,7 @@
 
         // Modale condivisa: tutti i campi sono mantenuti in strutture compatibili con il vecchio JSON.
         const THAI_FIELDS = {
-          day:[['date','Data / etichetta (es. 27 dic)','text'],['title','Titolo tappa','text',true],['notes','Note della giornata','textarea'],['transport_details','Spostamenti precedenti (testo libero)','textarea'],['cancellation','Cancellazione / condizioni','text'],['link','Link prenotazione','url'],['cost','Costo stimato, come nel planner originale','text']],
+          day:[['date','Data / etichetta (es. 27 dic)','text'],['title','Titolo tappa','text',true],['notes','Note della giornata','textarea'],['transport_details','Vecchia descrizione trasporti (puoi cancellarla)','textarea'],['cancellation','Condizioni cancellazione hotel','text'],['link','Link prenotazione','url'],['cost','Costo generico precedente (senza categoria; cancellabile)','text']],
           activity:[['title','Attività','text',true],['start','Ora inizio','time'],['end','Ora fine','time'],['desc','Descrizione / note','textarea'],['maps','Link Google Maps','url'],['link','Altro link','url']],
           transport:[['type','Mezzo di trasporto','select',false,['Aereo','Treno','Bus','Traghetto','Taxi','Auto','Altro']],['from','Partenza da','text',true],['to','Destinazione','text',true],['departure','Orario partenza','time'],['arrival','Orario arrivo','time'],['date','Data (facoltativa)','text'],['cost','Costo (€)','number'],['status','Stato','select',false,['Da prenotare','Prenotato','Completato']],['reference','Codice prenotazione','text'],['link','Link biglietto / prenotazione','url'],['notes','Note','textarea']],
           hotel:[['name','Nome hotel','text'],['address','Indirizzo','text'],['checkin','Check-in (data e ora)','text'],['checkout','Check-out (data e ora)','text'],['cost','Costo (€)','number'],['status','Stato','select',false,['Da prenotare','Prenotato','Completato']],['reference','Codice prenotazione','text'],['link','Link Booking / struttura','url'],['notes','Note','textarea']],
@@ -1172,19 +1180,23 @@
                   <div class="flex justify-between items-start gap-2"><div class="flex gap-2 items-start"><span class="day-drag-handle cursor-grab p-1 text-slate-400">☷</span><div><p class="text-[11px] font-bold text-brand-600">GIORNO ${thaiEsc(d.id)} · ${thaiEsc(d.date||'')}</p><h3 class="font-bold">${thaiEsc(d.title||'Tappa')}</h3></div></div><div class="flex gap-2">${thaiBtn('✏️',`openDayModal(${i})`)}${thaiBtn('🗑️',`deleteDay(${i})`)}</div></div>
                   <div class="flex flex-wrap gap-2">${thaiBtn('🏨 Gestisci hotel',`openHotelModal(${i})`)}${thaiBtn('🚆 Aggiungi spostamento',`openTransportModal(${i})`)}${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}</div>
                   <div class="thai-section hotel-detail text-xs space-y-1"><p class="font-bold">🏨 Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p>${hotel?.name?`<p>${thaiEsc(hotel.name)} · ${thaiEsc(hotel.address||'')}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${d.cancellation?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(d.cancellation)}</p>`:''}</div>
-                  ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${!transport.length && d.transport_details?`<p class="whitespace-pre-wrap"><b>Dettagli trasporto precedenti:</b> ${thaiEsc(d.transport_details)}</p>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
+                  ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<div class="thai-legacy"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-semibold">📌 Descrizione trasporto importata</span><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},\'transport_details\')`)}</div></div><p class="whitespace-pre-wrap mt-1">${thaiEsc(d.transport_details)}</p><p class="thai-help">È un testo salvato nel vecchio itinerario, non un biglietto o una spesa. Puoi rimuoverlo dopo aver creato lo spostamento qui sopra.</p></div>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
+                  ${d.cost?`<div class="thai-legacy text-xs"><div class="flex flex-wrap items-center justify-between gap-2"><b>💶 Importo del vecchio itinerario: ${thaiEsc(d.cost)}</b><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},'cost')`)}</div></div><p class="thai-help">È un valore generico importato: non è stato attribuito a hotel, trasporti o budget. Se è una spesa reale, registrala in Budget & Costi, poi rimuovi questo valore.</p></div>`:''}
                   ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
-                  <div class="flex justify-between gap-2 items-center"><h4 class="font-bold text-sm">Attività (${activities.length})</h4>${d.cost?`<span class="text-xs text-slate-600 dark:text-slate-300" title="Valore storico indicativo, separato da hotel, trasporti e budget">💶 Costo storico giornata: ${thaiEsc(d.cost)} <span class="opacity-80">(non incluso automaticamente nel budget)</span></span>`:''}</div>
+                  <div class="flex justify-between gap-2 items-center"><h4 class="font-bold text-sm">Attività (${activities.length})</h4></div>
                   <div class="space-y-2">${activities.map(({a,j})=>`<div class="activity-detail bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs flex justify-between gap-2"><div class="min-w-0"><p class="font-semibold">${a.start?`<span class="text-brand-600">${thaiEsc(a.start)}${a.end?'–'+thaiEsc(a.end):''} · </span>`:''}${thaiEsc(a.title||a.desc||'Attività')}</p>${a.desc&&a.title?`<p class="mt-1 whitespace-pre-wrap">${thaiEsc(a.desc)}</p>`:''}<div class="flex gap-3 mt-1">${thaiLink(a.maps,'Google Maps')} ${thaiLink(a.link,'Apri link')}</div></div><div class="flex gap-1 items-start">${thaiBtn('✏️',`openActivityModal(${i},${j})`)}${thaiBtn('🗑️',`deleteActivity(${i},${j})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività aggiunta.</p>'}</div>
                   ${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}
                 </article>`;
             }).join('');
         }
         function renderTodos(){
-            document.getElementById('todo-list').innerHTML=(tripData.todos||[]).map((t,i)=>`<div class="flex justify-between items-center gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-xs"><label class="flex gap-2 items-center min-w-0"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span class="${t.done?'line-through text-slate-400':''}">${thaiEsc(t.text||'')}${t.due?` <small>(${thaiEsc(t.due)})</small>`:''}${t.owner?` <small>· ${thaiEsc(t.owner)}</small>`:''}</span></label><div class="flex gap-1">${thaiBtn('✏️',`openTodoModal(${i})`)}${thaiBtn('🗑️',`deleteTodo(${i})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività da fare.</p>';
+            document.getElementById('todo-list').innerHTML=(tripData.todos||[]).map((t,i)=>`<div class="thai-todo-row flex justify-between items-center gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-xs"><span class="todo-drag-handle touch-none cursor-grab text-lg text-slate-400 select-none px-2" role="img" aria-label="Trascina per riordinare" title="Trascina per riordinare">☷</span><label class="flex gap-2 items-center min-w-0 flex-1"><input type="checkbox" ${t.done?'checked':''} onchange="toggleTodo(${i})"><span class="${t.done?'line-through text-slate-400':''}">${thaiEsc(t.text||'')}${t.due?` <small>(${thaiEsc(t.due)})</small>`:''}${t.owner?` <small>· ${thaiEsc(t.owner)}</small>`:''}</span></label><div class="flex gap-1">${thaiBtn('✏️',`openTodoModal(${i})`)}${thaiBtn('🗑️',`deleteTodo(${i})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività da fare.</p>';
         }
         function renderNotes(){
             document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>`<div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-between gap-2"><b>${thaiEsc(n.title||'Nota')}</b><span class="flex gap-1">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div><p class="whitespace-pre-wrap">${thaiEsc(n.text||'')}</p>${thaiLink(n.link,'Link utile')}</div>`).join('')||'<p class="text-xs text-slate-400">Nessuna nota.</p>';
+        }
+        function thaiExpenseIcon(category){
+            return ({'Hotel':'🏨','Cibo':'🍜','Trasporti':'🚆','Attività':'🎟️','Shopping':'🛍️','Altro':'🧾'})[category||'Altro'] || '🧾';
         }
         function renderBudget(){
             const arr=tripData.expenses||[];let total=0,barbPaid=0,lauraPaid=0,barbOwes=0;
@@ -1204,7 +1216,7 @@
             const filtered=arr.map((e,i)=>({e,i})).filter(({e})=>category==='all'||(e.category||'Altro')===category);
             const fs=filtered.reduce((sum,{e})=>sum+(Number(e.amount)||0),0);
             document.getElementById('expense-filter-sum').textContent=`${filtered.length} spese · ${formatEUR(fs)}`;
-            document.getElementById('expenses-list').innerHTML=filtered.map(({e,i})=>`<div class="flex justify-between gap-2 items-center bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-xs"><div><b>${thaiEsc(e.title||'Spesa')}</b><p class="text-slate-500">${thaiEsc(e.category||'Altro')} · ${thaiEsc(e.payer||'Barbara')} · ${thaiEsc(e.split||'uguale')}</p></div><div class="flex gap-2 items-center"><b>${formatEUR(e.amount)}</b>${thaiBtn('✏️',`openExpenseModal(${i})`)}${thaiBtn('🗑️',`deleteExpense(${i})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna spesa in questa categoria.</p>';
+            document.getElementById('expenses-list').innerHTML=filtered.map(({e,i})=>`<div class="flex justify-between gap-2 items-center bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-xs"><div class="flex items-start gap-2 min-w-0"><span class="thai-expense-icon" aria-hidden="true">${thaiExpenseIcon(e.category)}</span><div><b>${thaiEsc(e.title||'Spesa')}</b><p class="text-slate-500 dark:text-slate-300">${thaiEsc(e.category||'Altro')} · ${thaiEsc(e.payer||'Barbara')} · ${thaiEsc(e.split||'uguale')}</p></div></div><div class="flex gap-2 items-center"><b>${formatEUR(e.amount)}</b>${thaiBtn('✏️',`openExpenseModal(${i})`)}${thaiBtn('🗑️',`deleteExpense(${i})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna spesa in questa categoria.</p>';
         }
         function openExpenseModal(i=-1){
             document.getElementById('expense-edit-index').value=i;
@@ -1227,12 +1239,31 @@
             if(i>=0)tripData.expenses[i]={...tripData.expenses[i],...x};else tripData.expenses.push(x);
             closeExpenseModal();saveDataToSheet();renderApp();
         }
+        function thaiClearLegacy(dayIndex,field){
+            if(!['transport_details','cost'].includes(field) || !tripData.days[dayIndex]) return;
+            const name=field==='cost'?'il vecchio importo':'la vecchia descrizione del trasporto';
+            if(!confirm(`Rimuovere ${name} da questa giornata? La modifica verrà sincronizzata con il database.`))return;
+            tripData.days[dayIndex][field]='';
+            saveDataToSheet();renderApp();
+        }
         function renderApp(){renderItinerary();renderBudget();renderTodos();renderNotes();initDragAndDrop();}
-        let thaiSortable;
+        let thaiSortable, thaiTodoSortable;
         function initDragAndDrop(){
-            const el=document.getElementById('days-container'); if(!el||!window.Sortable)return;
-            if(thaiSortable)thaiSortable.destroy();
-            thaiSortable=new Sortable(el,{handle:'.day-drag-handle',animation:150,onEnd:evt=>{const moved=tripData.days.splice(evt.oldIndex,1)[0];tripData.days.splice(evt.newIndex,0,moved);saveDataToSheet();renderApp();}});
+            if(!window.Sortable)return;
+            const el=document.getElementById('days-container');
+            if(thaiSortable){thaiSortable.destroy();thaiSortable=null;}
+            if(el)thaiSortable=new Sortable(el,{handle:'.day-drag-handle',animation:150,onEnd:evt=>{
+                if(evt.oldIndex===evt.newIndex)return;
+                const moved=tripData.days.splice(evt.oldIndex,1)[0];tripData.days.splice(evt.newIndex,0,moved);
+                saveDataToSheet();renderApp();
+            }});
+            const todos=document.getElementById('todo-list');
+            if(thaiTodoSortable){thaiTodoSortable.destroy();thaiTodoSortable=null;}
+            if(todos)thaiTodoSortable=new Sortable(todos,{handle:'.todo-drag-handle',animation:150,delayOnTouchOnly:true,delay:120,touchStartThreshold:5,onEnd:evt=>{
+                if(evt.oldIndex===evt.newIndex)return;
+                const moved=tripData.todos.splice(evt.oldIndex,1)[0];tripData.todos.splice(evt.newIndex,0,moved);
+                saveDataToSheet();renderApp();
+            }});
         }
         async function exportJSONData(){
             const raw=JSON.stringify(tripData,null,2);
