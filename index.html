@@ -25,7 +25,7 @@
     <meta name="apple-mobile-web-app-status-bar-style"
           content="default">
     
-    <meta name="theme-color" content="#102c35">
+    <meta name="theme-color" content="#10242c">
     <script>
       // Dark by default; preserve the visitor's explicit choice across sessions.
       (function () {
@@ -122,6 +122,75 @@
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
 
 
+
+        /* Thai Planner UI vNext: palette pastello con gerarchia cromatica leggibile */
+        :root {
+          --thai-sea:#81d5cf; --thai-ocean:#8ec6ed; --thai-peach:#f8cda9;
+          --thai-lilac:#c6bbf2; --thai-sand:#f6dfb9;
+        }
+        @media (max-width: 767px) {
+          /* Permette l'ordine reale: menu > contenuto > voli > viaggiatrici. */
+          #planner-sidebar { display:contents; }
+          #planner-sidebar > nav { order:1; }
+          main { order:2; }
+          #planner-sidebar > .flight-card { order:3; }
+          #planner-sidebar > .travellers-card { order:4; }
+          .planner-nav { gap:.35rem; }
+          .planner-nav .tab-btn { min-height:48px; justify-content:flex-start; }
+          input, select, textarea { font-size:16px !important; }
+          .thai-modal-panel { max-height:86dvh; }
+          .budget-stat { min-height:124px; }
+        }
+        .planner-nav, .flight-card, .travellers-card, .day-card, .day-summary-card, .budget-stat {
+          box-shadow:0 8px 28px rgba(12, 34, 42, .07);
+        }
+        .flight-card { background:#fff4e7 !important; border-color:#f2d7b5 !important; color:#543c2c !important; }
+        .flight-card .text-slate-600, .flight-card .text-slate-400 { color:#765843 !important; }
+        .flight-card h2 { color:#875d32; }
+        .travellers-card { background:#f2efff !important; border-color:#dfd7fa !important; color:#3d365d !important; }
+        .travellers-card h2 { color:#584d8b !important; }
+        .day-summary-card { background:#ecf7ff !important; border-color:#c6e3f5 !important; }
+        .hotel-detail { background:#f0faf5; border-color:#c2e5d5; }
+        .transport-detail { background:#eef6ff; border-color:#cee1f6; }
+        .activity-detail { border-left:3px solid #8acbc6 !important; }
+        .budget-stat { padding:1rem; border:1px solid transparent; border-radius:1rem; display:flex; flex-direction:column; gap:.45rem; }
+        .budget-stat-head { display:flex; align-items:center; gap:.5rem; font-size:.78rem; font-weight:700; }
+        .budget-stat-icon { display:inline-grid; place-items:center; width:2rem; height:2rem; border-radius:.65rem; background:rgba(255,255,255,.55); }
+        .budget-stat-value { font-size:clamp(1.35rem, 3vw, 1.7rem); line-height:1.25; font-variant-numeric:tabular-nums; }
+        .budget-stat-note { font-size:.72rem; opacity:.85; }
+        .budget-stat-result { font-size:.86rem; line-height:1.6; font-weight:550; }
+        .budget-stat-result b { font-size:1rem; }
+        .budget-barbara { background:#e6f5fe; border-color:#b9dbed; color:#19465f; }
+        .budget-laura { background:#eddefb; border-color:#d6c0f0; color:#4b326c; }
+        .budget-balance { background:#dff6e9; border-color:#b2dec5; color:#1c5745; }
+        .dark .flight-card { background:#42372f !important; border-color:#80634a !important; color:#fff0dd !important; }
+        .dark .flight-card h2, .dark .flight-card .text-brand-600, .dark .flight-card .text-brand-700 { color:#ffddb0 !important; }
+        .dark .flight-card .text-slate-600, .dark .flight-card .text-slate-400, .dark .flight-card .text-slate-300 { color:#f2d9bf !important; }
+        .dark .flight-card .bg-sky-100 { background:#6a503b !important; color:#fff0db !important; }
+        .dark .flight-card .border-teal-200, .dark .flight-card .border-teal-800 { border-color:#80634a !important; }
+        .dark .travellers-card { background:#34334d !important; border-color:#676184 !important; color:#f2edff !important; }
+        .dark .travellers-card h2 { color:#dfd3ff !important; }
+        .dark .travellers-card .dark\:bg-slate-700\/50 { background:#44415d !important; }
+        .dark .day-summary-card { background:#213d53 !important; border-color:#517893 !important; }
+        .dark .hotel-detail { background:#1f413a; border-color:#416d5e; }
+        .dark .transport-detail { background:#213e51; border-color:#456b84; }
+        .dark .activity-detail { background:#25414a !important; border-color:#45656d !important; border-left:3px solid #8acbc6 !important; }
+        .dark .budget-barbara { background:#203e53; border-color:#47718a; color:#d9efff; }
+        .dark .budget-laura { background:#3b304e; border-color:#706088; color:#f0e6ff; }
+        .dark .budget-balance { background:#1d483e; border-color:#447965; color:#ddf8e8; }
+        .dark .budget-stat-icon { background:rgba(255,255,255,.1); }
+        .dark .budget-stat-note { color:inherit !important; }
+        .dark .budget-stat-result { color:inherit; }
+        .dark .budget-stat-result b { color:#baf4d5; }
+        .dark .notes-page #notes-container > div { background:#35334b !important; border-color:#686184 !important; color:#eee8fc; }
+        .dark .notes-page #notes-container > div b { color:#e6d7ff; }
+        .dark .checklist-page #todo-list > div { background:#263c4a !important; border-color:#49687a !important; }
+        .dark .budget-page #expenses-list > div { background:#233f4a !important; border-color:#42616c !important; }
+        .dark .planner-nav .tab-btn.active { background:#285c62 !important; color:#dbfaf3 !important; }
+        .tab-btn { transition:background .15s ease, color .15s ease; }
+        .tab-btn:focus-visible, button:focus-visible { outline:2px solid #75cdc4; outline-offset:3px; }
+        @media (prefers-reduced-motion:reduce) { .tab-btn { transition:none; } }
+
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
@@ -177,8 +246,8 @@
         <!-- Main Layout -->
         <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6">
             <!-- Sidebar -->
-            <aside class="w-full md:w-80 flex-shrink-0 flex flex-col space-y-4">
-                <nav class="order-1 md:order-1 bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
+            <aside id="planner-sidebar" class="w-full md:w-80 flex-shrink-0 flex flex-col space-y-4">
+                <nav aria-label="Sezioni del planner" class="planner-nav order-1 md:order-1 bg-white dark:bg-slate-800 p-2 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 grid grid-cols-2 md:grid-cols-1 gap-1">
                     <button onclick="switchTab('itinerary')" data-tab="itinerary" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-brand-600 bg-brand-50 dark:bg-brand-900/30 dark:text-brand-400">
                         <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
                         <span>Itinerario</span>
@@ -198,7 +267,7 @@
                 </nav>
 
                 <!-- Box Voli Saudia -->
-                <section class="order-3 md:order-2 bg-teal-50 dark:bg-teal-950/30 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-teal-200 dark:border-teal-800 shadow-sm space-y-3 text-xs">
+                <section class="flight-card order-3 md:order-2 bg-teal-50 dark:bg-teal-950/30 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-teal-200 dark:border-teal-800 shadow-sm space-y-3 text-xs">
                     <div class="flex justify-between items-center border-b border-teal-200 dark:border-teal-800 pb-2">
                         <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
                         <span class="bg-sky-100 text-sky-900 dark:bg-sky-900 dark:text-sky-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: 7XJFTQ</span>
@@ -226,7 +295,7 @@
                 </section>
 
                 <!-- Box Viaggiatrici & Countdown -->
-                <section class="order-4 md:order-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2 text-xs">
+                <section class="travellers-card order-4 md:order-3 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-2 text-xs">
                     <h2 class="font-bold text-sm flex items-center gap-2 text-brand-600 dark:text-brand-400">
                         <i class="fa-solid fa-user-group"></i> Le Viaggiatrici
                     </h2>
@@ -248,12 +317,12 @@
                         </div>
                         <button onclick="openDayModal()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold">+ Aggiungi Giorno</button>
                     </div>
-                    <div id="day-summary" class="bg-teal-50 dark:bg-slate-800 rounded-2xl p-4 border border-teal-200 dark:border-slate-700"></div>
+                    <div id="day-summary" class="day-summary-card bg-teal-50 dark:bg-slate-800 rounded-2xl p-4 border border-teal-200 dark:border-slate-700"></div>
                     <div id="days-container" class="space-y-4"></div>
                 </section>
 
                 <!-- Tab Budget -->
-                <section id="tab-budget" class="tab-content hidden space-y-4">
+                <section id="tab-budget" class="tab-content budget-page hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
                             <div>
@@ -267,7 +336,7 @@
                         </div>
 
                         <!-- Box Debiti / Crediti tra Barbara e Laura -->
-                        <div id="split-summary-box" class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 dark:bg-slate-700/40 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                        <div id="split-summary-box" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm" aria-live="polite">
                             <!-- Popolato via JS -->
                         </div>
 
@@ -289,7 +358,7 @@
                 </section>
 
                 <!-- Tab Checklist -->
-                <section id="tab-checklist" class="tab-content hidden space-y-4">
+                <section id="tab-checklist" class="tab-content checklist-page hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
                             <h2 class="font-bold text-lg"><i class="fa-solid fa-clipboard-check text-brand-500"></i> To Do Checklist</h2>
@@ -300,7 +369,7 @@
                 </section>
 
                 <!-- Tab Note -->
-                <section id="tab-notes" class="tab-content hidden space-y-4">
+                <section id="tab-notes" class="tab-content notes-page hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
                             <h2 class="font-bold text-lg"><i class="fa-solid fa-note-sticky text-teal-500"></i> Note Generali & Link Utili</h2>
@@ -1099,14 +1168,14 @@
                 const activities=(d.activities||[]).map((a,j)=>({a,j})).sort((x,y)=>(x.a.start||'99:99').localeCompare(y.a.start||'99:99'));
                 const transport=(d.transports||[]);
                 const hotel=d.hotel;
-                return `<article class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+                return `<article class="day-card bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
                   <div class="flex justify-between items-start gap-2"><div class="flex gap-2 items-start"><span class="day-drag-handle cursor-grab p-1 text-slate-400">☷</span><div><p class="text-[11px] font-bold text-brand-600">GIORNO ${thaiEsc(d.id)} · ${thaiEsc(d.date||'')}</p><h3 class="font-bold">${thaiEsc(d.title||'Tappa')}</h3></div></div><div class="flex gap-2">${thaiBtn('✏️',`openDayModal(${i})`)}${thaiBtn('🗑️',`deleteDay(${i})`)}</div></div>
                   <div class="flex flex-wrap gap-2">${thaiBtn('🏨 Gestisci hotel',`openHotelModal(${i})`)}${thaiBtn('🚆 Aggiungi spostamento',`openTransportModal(${i})`)}${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}</div>
-                  <div class="thai-section text-xs space-y-1"><p class="font-bold">🏨 Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p>${hotel?.name?`<p>${thaiEsc(hotel.name)} · ${thaiEsc(hotel.address||'')}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${d.cancellation?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(d.cancellation)}</p>`:''}</div>
-                  ${(transport.length || d.transport_details)?`<div class="thai-section text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${!transport.length && d.transport_details?`<p class="whitespace-pre-wrap"><b>Dettagli trasporto precedenti:</b> ${thaiEsc(d.transport_details)}</p>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
+                  <div class="thai-section hotel-detail text-xs space-y-1"><p class="font-bold">🏨 Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p>${hotel?.name?`<p>${thaiEsc(hotel.name)} · ${thaiEsc(hotel.address||'')}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${d.cancellation?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(d.cancellation)}</p>`:''}</div>
+                  ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${!transport.length && d.transport_details?`<p class="whitespace-pre-wrap"><b>Dettagli trasporto precedenti:</b> ${thaiEsc(d.transport_details)}</p>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
                   ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
                   <div class="flex justify-between gap-2 items-center"><h4 class="font-bold text-sm">Attività (${activities.length})</h4>${d.cost?`<span class="text-xs text-slate-600 dark:text-slate-300" title="Valore storico indicativo, separato da hotel, trasporti e budget">💶 Costo storico giornata: ${thaiEsc(d.cost)} <span class="opacity-80">(non incluso automaticamente nel budget)</span></span>`:''}</div>
-                  <div class="space-y-2">${activities.map(({a,j})=>`<div class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs flex justify-between gap-2"><div class="min-w-0"><p class="font-semibold">${a.start?`<span class="text-brand-600">${thaiEsc(a.start)}${a.end?'–'+thaiEsc(a.end):''} · </span>`:''}${thaiEsc(a.title||a.desc||'Attività')}</p>${a.desc&&a.title?`<p class="mt-1 whitespace-pre-wrap">${thaiEsc(a.desc)}</p>`:''}<div class="flex gap-3 mt-1">${thaiLink(a.maps,'Google Maps')} ${thaiLink(a.link,'Apri link')}</div></div><div class="flex gap-1 items-start">${thaiBtn('✏️',`openActivityModal(${i},${j})`)}${thaiBtn('🗑️',`deleteActivity(${i},${j})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività aggiunta.</p>'}</div>
+                  <div class="space-y-2">${activities.map(({a,j})=>`<div class="activity-detail bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs flex justify-between gap-2"><div class="min-w-0"><p class="font-semibold">${a.start?`<span class="text-brand-600">${thaiEsc(a.start)}${a.end?'–'+thaiEsc(a.end):''} · </span>`:''}${thaiEsc(a.title||a.desc||'Attività')}</p>${a.desc&&a.title?`<p class="mt-1 whitespace-pre-wrap">${thaiEsc(a.desc)}</p>`:''}<div class="flex gap-3 mt-1">${thaiLink(a.maps,'Google Maps')} ${thaiLink(a.link,'Apri link')}</div></div><div class="flex gap-1 items-start">${thaiBtn('✏️',`openActivityModal(${i},${j})`)}${thaiBtn('🗑️',`deleteActivity(${i},${j})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività aggiunta.</p>'}</div>
                   ${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}
                 </article>`;
             }).join('');
@@ -1127,7 +1196,10 @@
             document.getElementById('total-budget-sum').textContent=formatEUR(total);
             const balance=barbPaid-barbOwes;
             const result=Math.abs(balance)<0.005?'Siete pari ✨':balance>0?`Laura deve a Barbara: <b>${formatEUR(balance)}</b>`:`Barbara deve a Laura: <b>${formatEUR(-balance)}</b>`;
-            document.getElementById('split-summary-box').innerHTML=`<div class="thai-section bg-white dark:bg-slate-800">Barbara ha pagato<br><b>${formatEUR(barbPaid)}</b></div><div class="thai-section bg-white dark:bg-slate-800">Laura ha pagato<br><b>${formatEUR(lauraPaid)}</b></div><div class="thai-section bg-teal-50 dark:bg-teal-950/30"><b>Situazione debiti</b><br>${result}</div>`;
+            document.getElementById('split-summary-box').innerHTML=`
+              <section class="budget-stat budget-barbara" aria-label="Totale pagato da Barbara"><div class="budget-stat-head"><span class="budget-stat-icon" aria-hidden="true">🐨</span><span>Barbara ha pagato</span></div><strong class="budget-stat-value">${formatEUR(barbPaid)}</strong><p class="budget-stat-note">Spese anticipate</p></section>
+              <section class="budget-stat budget-laura" aria-label="Totale pagato da Laura"><div class="budget-stat-head"><span class="budget-stat-icon" aria-hidden="true">🥙</span><span>Laura ha pagato</span></div><strong class="budget-stat-value">${formatEUR(lauraPaid)}</strong><p class="budget-stat-note">Spese anticipate</p></section>
+              <section class="budget-stat budget-balance" aria-label="Saldo tra viaggiatrici"><div class="budget-stat-head"><span class="budget-stat-icon" aria-hidden="true">⚖️</span><span>Situazione debiti</span></div><div class="budget-stat-result">${result}</div><p class="budget-stat-note">Saldo calcolato sulle spese</p></section>`;
             const category=document.getElementById('expense-category-filter')?.value||'all';
             const filtered=arr.map((e,i)=>({e,i})).filter(({e})=>category==='all'||(e.category||'Altro')===category);
             const fs=filtered.reduce((sum,{e})=>sum+(Number(e.amount)||0),0);
