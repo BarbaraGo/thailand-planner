@@ -165,7 +165,7 @@
                             </div>
                             <div class="text-right">
                                 <span class="text-xs text-slate-400 block">Totale Speso</span>
-                                <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0,00 €</span>
+                                <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0,00€</span>
                             </div>
                         </div>
 
@@ -254,10 +254,12 @@
 
         let tripData = { days: [], todos: [], notes: [], expenses: [] };
 
-        // Funzione di formattazione valuta stile italiano (es. 2.295,00€)
+        // Funzione di formattazione importi con punto per migliaia e virgola per decimali (es. 2.295,00€)
         function formatEUR(amount) {
             const num = parseFloat(amount) || 0;
-            return num.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + "€";
+            const parts = num.toFixed(2).split('.');
+            parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            return parts.join(',') + "€";
         }
 
         function initApp() {
@@ -320,7 +322,7 @@
             }
             
             updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
-            const saved = localStorage.getItem('thailandData2026_v4');
+            const saved = localStorage.getItem('thailandData2026_v5');
             if(saved) {
                 try { tripData = JSON.parse(saved); } catch(err) {}
             }
@@ -329,7 +331,7 @@
         }
 
         async function saveDataToSheet() {
-            localStorage.setItem('thailandData2026_v4', JSON.stringify(tripData));
+            localStorage.setItem('thailandData2026_v5', JSON.stringify(tripData));
             updateSyncStatus('💾 Salvataggio...', 'bg-amber-100 text-amber-700');
             try {
                 await fetch(GOOGLE_SCRIPT_URL, {
