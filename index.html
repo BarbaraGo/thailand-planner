@@ -330,7 +330,24 @@
 .thai-todo-progress{height:6px;background:#d8e7e7;border-radius:10px;overflow:hidden;margin-bottom:1rem}
 .thai-todo-progress>div{background:#4aada0;height:100%;transition:width .2s}
 @media(max-width:480px){.thai-todo-row{gap:.35rem;padding:.55rem!important}.thai-todo-action{width:34px;height:36px}.thai-todo-drag{padding:.24rem}.thai-todo-text{font-size:.84rem}}
-</style>
+
+/* Mobile: non nascondere i controlli Comprimi/Espandi dietro le azioni giornata. */
+@media (max-width: 767px) {
+  #tab-itinerary .thai-global-folds { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:.5rem; width:100%; }
+  #tab-itinerary .thai-global-folds .thai-fold-toggle { min-width:0; white-space:normal; line-height:1.25; padding:.65rem .35rem; min-height:46px; text-align:center; }
+  #days-container .thai-day-header { display:flex; flex-wrap:wrap; align-items:flex-start; gap:.55rem; }
+  #days-container .thai-day-header > :first-child { min-width:0; flex:1 1 145px; }
+  #days-container .thai-day-actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:.4rem; flex:1 1 100%; width:100%; }
+  #days-container .thai-day-collapse-action { min-width:112px; min-height:44px; flex:0 0 auto; }
+  #days-container .thai-fold-header { min-width:0; gap:.4rem; }
+  #days-container .thai-fold-header > :first-child { min-width:0; overflow-wrap:anywhere; }
+  #days-container .thai-fold-header .thai-fold-toggle { flex:0 0 auto; min-height:44px; }
+}
+@media (max-width:360px) {
+  #tab-itinerary .thai-global-folds { grid-template-columns:minmax(0,1fr); }
+}
+
+    </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
     <div id="app" class="flex flex-col min-h-screen">
@@ -1780,12 +1797,15 @@
             card.dataset.thaiFoldKey=key;
             const header=card.firstElementChild;
             if(!header)return;
+            header.classList.add('thai-day-header');
             const body=document.createElement('div');body.className='thai-fold-body space-y-3';
             while(header.nextSibling)body.appendChild(header.nextSibling);
             card.appendChild(body);
             const btn=document.createElement('button');btn.type='button';btn.className='thai-fold-toggle';
             btn.setAttribute('aria-label','Comprimi o espandi la giornata');
             const right=header.lastElementChild || header;
+            right.classList.add('thai-day-actions');
+            btn.classList.add('thai-day-collapse-action');
             right.appendChild(btn);
             btn.addEventListener('click',()=>{thaiFoldChoices[key]=!thaiFoldState(key);thaiRememberFolds();thaiUpdateFold(card,key,body,btn);});
             thaiUpdateFold(card,key,body,btn);
