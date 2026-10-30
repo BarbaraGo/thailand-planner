@@ -370,32 +370,139 @@
   #tab-itinerary button, #tab-budget button, #tab-notes button, #tab-checklist button {touch-action:manipulation}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Thai Planner UX/UI refresh: layout coerente senza cambiare le funzioni. */
+.thai-header{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,auto) auto;
+  grid-template-areas:"brand converter tools";
+  gap:.75rem 1rem;
+  align-items:center;
+}
+.thai-header-brand{grid-area:brand}
+.thai-header-actions{display:contents}
+.thai-converter{grid-area:converter;justify-content:flex-end}
+.thai-header-tools{grid-area:tools;justify-content:flex-end}
+.thai-title-mobile{display:none}
+.thai-header-title{min-width:0;font-size:1rem;line-height:1.25;flex-wrap:wrap;column-gap:.5rem;row-gap:.2rem}
+#sync-status{display:inline-flex;align-items:center;max-width:100%;white-space:normal;line-height:1.2}
+.thai-header-tools>button,.thai-header-tools>details>summary{border:1px solid transparent}
+.thai-header-tools>button:hover,.thai-header-tools>details>summary:hover{border-color:#b7d8d6}
+.thai-header-tools>button:focus-visible,.thai-header-tools>details>summary:focus-visible{outline:2px solid #60bfb5;outline-offset:2px}
+.thai-converter #thai-rate-label{white-space:normal;line-height:1.25;font-variant-numeric:tabular-nums}
+.thai-converter input{font-variant-numeric:tabular-nums}
+#thai-tools-menu[open]>summary{background:#e1f2ef;color:#205c62}
+.dark #thai-tools-menu[open]>summary{background:#315b62;color:#dffbf4}
+
+/* Schede: gerarchia, ritmo verticale e superfici omogenee. */
+#planner-sidebar .planner-nav,#planner-sidebar .flight-card,#planner-sidebar .travellers-card,
+#days-container .day-card,.day-summary-card,#tab-budget>div,#tab-notes>div,#tab-checklist>div{
+  border-radius:1rem;
+}
+#days-container .day-card{padding:1rem;min-width:0}
+#days-container .day-card>div{min-width:0}
+#days-container .day-card h3{font-size:1rem;line-height:1.4;overflow-wrap:anywhere}
+#days-container .day-card .thai-section{border-radius:.85rem;padding:.8rem;line-height:1.55}
+#days-container .activity-detail{line-height:1.5}
+#days-container .thai-legacy{line-height:1.5}
+#days-container .day-card a{overflow-wrap:anywhere}
+.planner-nav .tab-btn{border-radius:.8rem;font-size:.875rem;line-height:1.35}
+.thai-action{line-height:1.3;white-space:normal;text-align:center;justify-content:center;max-width:100%;transition:background-color .15s ease,filter .15s ease}
+.thai-budget-link,.dark .thai-budget-link{
+  display:inline-flex!important;
+  width:auto!important;
+  min-height:30px!important;
+  max-width:max-content;
+  padding:.25rem .5rem!important;
+  font-size:.7rem!important;
+  font-weight:650!important;
+  line-height:1.15!important;
+  border-radius:.5rem!important;
+  vertical-align:middle;
+  white-space:nowrap;
+}
+.thai-budget-link{background:#e0f1ea!important;color:#27664f!important;border:1px solid #bedeca}
+.dark .thai-budget-link{background:#285548!important;color:#dbf8eb!important;border:1px solid #4e8572}
+.thai-budget-link:hover{filter:brightness(.95)}
+#tab-budget .budget-stat{min-width:0}
+#tab-budget .budget-stat-value{overflow-wrap:anywhere}
+#tab-budget .thai-forecast-row{gap:.6rem}
+#tab-budget .thai-forecast-actions button{min-height:36px}
+.thai-modal-panel,.thai-flight-modal-panel{border-radius:1rem}
+.thai-field{max-width:100%}
+@media(min-width:768px){
+  .thai-header{grid-template-columns:minmax(190px,1fr) auto auto}
+  .thai-converter{flex-wrap:nowrap}
+  #days-container .day-card{padding:1.1rem 1.25rem}
+  .planner-nav .tab-btn:hover{background:rgba(79,157,150,.12)}
+}
+@media(max-width:767px){
+  .thai-header{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"brand tools" "converter converter";
+    padding:.65rem .8rem;
+    column-gap:.35rem;row-gap:.55rem;
+  }
+  .thai-title-desktop,.thai-header-subtitle{display:none}
+  .thai-title-mobile{display:inline}
+  .thai-header-title{font-size:.9rem;gap:.25rem;align-items:center}
+  .thai-header-flag{padding:.4rem}
+  .thai-header-flag svg{width:25px;height:17px}
+  #sync-status{font-size:.6rem;padding:.1rem .4rem}
+  .thai-header-brand{gap:.5rem}
+  .thai-header-tools{gap:0}
+  .thai-header-tools>button,.thai-header-tools>details>summary{min-width:40px;min-height:40px;padding:.55rem}
+  .thai-converter{justify-content:space-between;gap:.4rem;flex-wrap:nowrap;width:100%}
+  .thai-converter>div{padding:.25rem .4rem;gap:.3rem;min-width:0}
+  .thai-converter input{width:3.1rem;min-width:0;font-size:16px!important;padding:.3rem .15rem}
+  #thb-input{width:3.8rem}
+  .thai-converter #thai-rate-label{font-size:.65rem;max-width:46%;min-width:0;padding:.35rem .45rem;min-height:36px}
+  #thai-tools-menu>summary+div{max-width:calc(100vw - 1.5rem)}
+  .planner-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem}
+  .planner-nav .tab-btn{min-width:0;min-height:44px;padding:.7rem .75rem;gap:.4rem}
+  .planner-nav .tab-btn span{overflow-wrap:anywhere}
+  #days-container .day-card{padding:.8rem}
+  #days-container .day-card .thai-section{padding:.7rem}
+  #days-container .day-card>div.flex.flex-wrap.gap-2{gap:.4rem}
+  #days-container .day-card>div.flex.flex-wrap.gap-2 .thai-action{font-size:.72rem;padding:.45rem .6rem}
+  .thai-forecast-row{align-items:flex-start}
+  .thai-modal-panel{max-height:90dvh}
+  #tab-budget>div{padding:1rem}
+}
+@media(max-width:360px){
+  .thai-header{padding:.55rem .55rem}
+  .thai-header-title{font-size:.82rem}
+  .thai-header-tools>button,.thai-header-tools>details>summary{min-width:36px;min-height:40px;padding:.45rem}
+  .thai-converter>div i{display:none}
+  .thai-converter #thai-rate-label{font-size:.59rem}
+}
+
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
     <div id="app" class="flex flex-col min-h-screen">
         <!-- Top Bar -->
-        <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-800/90 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center space-x-3">
-                <div class="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-md">
+        <header class="thai-header sticky top-0 z-40 bg-white/95 dark:bg-slate-800/95 backdrop-blur border-b border-slate-200 dark:border-slate-700 px-4 lg:px-8 py-3">
+            <div class="thai-header-brand flex items-center gap-2.5 min-w-0">
+                <div class="thai-header-flag bg-white dark:bg-slate-800 p-2 rounded-xl shadow-sm shrink-0">
                     <svg viewBox="0 0 30 20" width="30" height="20" role="img" class="rounded-sm">
                         <rect width="30" height="20" fill="#a51931" />
                         <rect y="3.333" width="30" height="13.334" fill="#f4f5f8" />
                         <rect y="6.667" width="30" height="6.666" fill="#2d2a4a" />
                     </svg>
                 </div>
-                <div>
-                    <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
-                        Thailandia Live Planner 🌴
+                <div class="min-w-0">
+                    <h1 class="thai-header-title font-bold text-lg leading-tight flex items-center gap-2">
+                        <span class="thai-title-desktop">Thailandia Live Planner 🌴</span><span class="thai-title-mobile">Thai Planner 🌴</span>
                         <span id="sync-status" class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">⌛ Connessione...</span>
                     </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400">Sincronizzazione automatica Google Sheet</p>
+                    <p class="thai-header-subtitle text-xs text-slate-500 dark:text-slate-400">Sincronizzazione automatica Google Sheet</p>
                 </div>
             </div>
 
             <!-- Convertitore sempre visibile, anche su iPhone -->
-            <div class="flex flex-wrap items-center gap-2 ml-auto">
-                <div class="flex flex-wrap items-center gap-2 min-w-0">
+            <div class="thai-header-actions">
+                <div class="thai-converter flex flex-wrap items-center gap-2 min-w-0">
                     <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl px-2 py-1.5 text-xs">
                         <i class="fa-solid fa-coins text-teal-500" aria-hidden="true"></i>
                         <input type="number" id="eur-input" placeholder="€" aria-label="Importo in euro" oninput="convertCurrency('eur')" class="w-14 sm:w-16 min-w-0 bg-white dark:bg-slate-800 rounded border px-1 py-1.5 text-center" />
@@ -405,7 +512,7 @@
                     <button type="button" onclick="thaiUpdateExchangeRate(true)" id="thai-rate-label" class="text-[11px] text-sky-700 dark:text-sky-200 rounded-lg border border-sky-200 dark:border-sky-700 px-2 py-2 min-h-[40px]" title="Aggiorna il cambio EUR/THB online" aria-label="Aggiorna il cambio EUR/THB online">Cambio EUR/THB: caricamento…</button>
                 </div>
                 <!-- Barra compatta: aggiorna, tema, strumenti -->
-                <div class="flex items-center gap-1 ml-auto">
+                <div class="thai-header-tools flex items-center gap-1">
                     <button type="button" onclick="thaiRefresh()" class="p-2.5 min-w-[44px] min-h-[44px] text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition" title="Aggiorna i dati dal database" aria-label="Aggiorna i dati dal database"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button>
                     <button type="button" onclick="thaiToggleTheme()" class="p-2.5 min-w-[44px] min-h-[44px] text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition" title="Cambia modalità giorno o notte" aria-label="Cambia modalità giorno o notte"><i class="fa-solid fa-moon dark:hidden" aria-hidden="true"></i><i class="fa-solid fa-sun hidden dark:inline" aria-hidden="true"></i></button>
                     <details id="thai-tools-menu" class="relative">
@@ -1321,10 +1428,10 @@
                   <div class="flex justify-between items-start gap-2"><div class="flex gap-2 items-start"><span class="day-drag-handle cursor-grab p-1 text-slate-400">☷</span><div><p class="text-[11px] font-bold text-brand-600">GIORNO ${thaiEsc(d.id)} · ${thaiEsc(d.date||'')}</p><h3 class="font-bold">${thaiEsc(d.title||'Tappa')}</h3></div></div><div class="flex gap-2">${thaiBtn('✏️',`openDayModal(${i})`)}${thaiBtn('🗑️',`deleteDay(${i})`)}</div></div>
                   <div class="flex flex-wrap gap-2">${thaiBtn(hotel || d.link || d.cancellation || d.hotel_status === 'Prenotato' ? '🏨 Gestisci hotel' : '🏨 Aggiungi hotel',`openHotelModal(${i})`)}${thaiBtn('🛫 Aggiungi volo interno',`thaiEditFlight(-1,${i})`)}${thaiBtn('🚆 Aggiungi spostamento',`openTransportModal(${i})`)}${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}</div>
                   ${thaiDomesticForDay(i)}${checkoutStays.map(stay=>thaiSharedHotelCard(stay,d.date)).join('')}
-                  ${(hotel?.name) ? `<div class="thai-section hotel-detail text-xs space-y-2"><div class="flex items-center justify-between flex-wrap gap-2"><p class="font-bold">🏨 ${hotel?.checkin && thaiDateKey(hotel.checkin)===thaiDateKey(d.date)?'Check-in oggi · ':''}Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p><span class="flex flex-wrap gap-2"><button type="button" onclick="thaiOpenMove('hotel',${i})" class="thai-action" aria-label="Sposta hotel in un altro giorno">↔️ Sposta hotel</button><button type="button" onclick="thaiDeleteHotel(${i})" class="rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-2 text-rose-700 dark:text-rose-200 font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Elimina hotel dalla giornata">🗑️ Elimina hotel</button></span></div>${hotel?.name?`<p class="thai-hotel-name"><strong>${thaiEsc(hotel.name)}</strong></p>`:''}${thaiHotelNightLabel(hotel,d.date)?`<span class="thai-night-tag">${thaiEsc(thaiHotelNightLabel(hotel,d.date))}</span>`:''}${hotel?.address?`<p>${thaiHotelAddress(hotel.address)}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${hotel?.cost !== undefined && hotel?.cost !== null && hotel?.cost !== '' ? `<p class="font-bold text-sm">💶 Prezzo totale hotel: ${formatEUR(hotel.cost)} <span class="font-normal opacity-75">(non aggiunto automaticamente al budget)</span></p>` : ''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.cost!==''&&hotel?.cost!=null?thaiBtn('💶 Collega al budget',`thaiLinkBookingCost('hotel',${i})`):''}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${(hotel?.cancellation||d.cancellation)?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(hotel?.cancellation||d.cancellation)}</p>`:''}</div>` : ''}
+                  ${(hotel?.name) ? `<div class="thai-section hotel-detail text-xs space-y-2"><div class="flex items-center justify-between flex-wrap gap-2"><p class="font-bold">🏨 ${hotel?.checkin && thaiDateKey(hotel.checkin)===thaiDateKey(d.date)?'Check-in oggi · ':''}Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p><span class="flex flex-wrap gap-2"><button type="button" onclick="thaiOpenMove('hotel',${i})" class="thai-action" aria-label="Sposta hotel in un altro giorno">↔️ Sposta hotel</button><button type="button" onclick="thaiDeleteHotel(${i})" class="rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-2 text-rose-700 dark:text-rose-200 font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Elimina hotel dalla giornata">🗑️ Elimina hotel</button></span></div>${hotel?.name?`<p class="thai-hotel-name"><strong>${thaiEsc(hotel.name)}</strong></p>`:''}${thaiHotelNightLabel(hotel,d.date)?`<span class="thai-night-tag">${thaiEsc(thaiHotelNightLabel(hotel,d.date))}</span>`:''}${hotel?.address?`<p>${thaiHotelAddress(hotel.address)}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${hotel?.cost !== undefined && hotel?.cost !== null && hotel?.cost !== '' ? `<p class="font-bold text-sm">💶 Prezzo totale hotel: ${formatEUR(hotel.cost)} <span class="font-normal opacity-75">(non aggiunto automaticamente al budget)</span></p>` : ''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.cost!==''&&hotel?.cost!=null?thaiBtn('💶 Budget',`thaiLinkBookingCost('hotel',${i})`,'thai-budget-link'):''}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${(hotel?.cancellation||d.cancellation)?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(hotel?.cancellation||d.cancellation)}</p>`:''}</div>` : ''}
                   ${otherStays.map(stay=>thaiSharedHotelCard(stay,d.date)).join('')}
                   
-                  ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<div class="thai-legacy"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-semibold">📌 Descrizione trasporto importata</span><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},\'transport_details\')`)}</div></div><p class="whitespace-pre-wrap mt-1">${thaiEsc(d.transport_details)}</p><p class="thai-help">È un testo salvato nel vecchio itinerario, non un biglietto o una spesa. Puoi rimuoverlo dopo aver creato lo spostamento qui sopra.</p></div>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('↔️ Sposta',`thaiOpenMove('transport',${i},${j})`)} ${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)} ${thaiBtn('💶 Collega al budget',`thaiLinkBookingCost('transport',${i},${j})`)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
+                  ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<div class="thai-legacy"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-semibold">📌 Descrizione trasporto importata</span><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},\'transport_details\')`)}</div></div><p class="whitespace-pre-wrap mt-1">${thaiEsc(d.transport_details)}</p><p class="thai-help">È un testo salvato nel vecchio itinerario, non un biglietto o una spesa. Puoi rimuoverlo dopo aver creato lo spostamento qui sopra.</p></div>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('↔️ Sposta',`thaiOpenMove('transport',${i},${j})`)} ${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)} ${thaiBtn('💶 Budget',`thaiLinkBookingCost('transport',${i},${j})`,'thai-budget-link')}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
                   ${d.cost?`<div class="thai-legacy text-xs"><div class="flex flex-wrap items-center justify-between gap-2"><b>💶 Importo del vecchio itinerario: ${thaiEsc(d.cost)}</b><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},'cost')`)}</div></div><p class="thai-help">È un valore generico importato: non è stato attribuito a hotel, trasporti o budget. Se è una spesa reale, registrala in Budget & Costi, poi rimuovi questo valore.</p></div>`:''}
                   ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
                   
