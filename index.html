@@ -773,7 +773,7 @@
                 const res=await fetch('https://api.frankfurter.dev/v2/rate/eur/thb',{cache:'no-store'});
                 if(!res.ok)throw Error('HTTP '+res.status);
                 const q=await res.json(),rate=Number(q.rate);
-                if(!(rate>0&&rate<1000)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(q.date||'')))throw Error('Formato cambio non valido');
+                if(!(rate>0&&rate<1000)||!/^\d{4}-\d{2}-\d{2}$/.test(String(q.date||'')))throw Error('Formato cambio non valido');
                 localStorage.setItem(THAI_FX_CACHE,JSON.stringify({rate,date:q.date,checkedAt:Date.now()}));
                 thaiFxStatus='online';
                 const eur=document.getElementById('eur-input'),thb=document.getElementById('thb-input');
