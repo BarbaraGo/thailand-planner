@@ -1563,7 +1563,7 @@
             </div>`).join('')||'<p class="text-sm opacity-75 p-3">Nessuna attività da fare. Aggiungi la prima!</p>';
         }
         function renderNotes(){
-            document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>`<div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-between gap-2"><b>${thaiEsc(n.title||'Nota')}</b><span class="flex gap-1">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div><p class="whitespace-pre-wrap">${thaiEsc(n.text||'')}</p>${thaiLink(n.link,'Link utile')}</div>`).join('')||'<p class="text-xs text-slate-400">Nessuna nota.</p>';
+            document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>`<div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-end gap-2"><span class="flex gap-1">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div><p class="whitespace-pre-wrap">${thaiEsc(n.text||'')}</p>${thaiLink(n.link,'Link utile')}</div>`).join('')||'<p class="text-xs text-slate-400">Nessuna nota.</p>';
         }
         function thaiExpenseIcon(category){
             return ({'Hotel':'🏨','Cibo':'🍜','Trasporti':'🚆','Attività':'🎟️','Shopping':'🛍️','Altro':'🧾'})[category||'Altro'] || '🧾';
