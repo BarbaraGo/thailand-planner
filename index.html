@@ -393,35 +393,42 @@
                 </div>
             </div>
 
-            <div class="thai-global-folds" role="group" aria-label="Comprimi o espandi i blocchi di tutte le sezioni"><button type="button" class="thai-fold-toggle thai-global-collapse" onclick="thaiSetAllFolds(true)">▴ Comprimi tutto</button><button type="button" class="thai-fold-toggle thai-global-expand" onclick="thaiSetAllFolds(false)">▾ Espandi tutto</button></div>
-            <!-- Convertitore e Tasti di Azione -->
-            <div class="flex items-center flex-wrap gap-2">
-                <div class="bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-xl text-xs flex items-center gap-2 border border-slate-200 dark:border-slate-600">
-                    <i class="fa-solid fa-coins text-teal-500"></i>
-                    <input type="number" id="eur-input" placeholder="€" oninput="convertCurrency('eur')" class="w-14 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
-                    <span>=</span>
-                    <input type="number" id="thb-input" placeholder="THB" oninput="convertCurrency('thb')" class="w-16 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
-                </div>
-
-                <button type="button" onclick="thaiEditExchangeRate()" id="thai-rate-label" class="text-xs text-sky-700 dark:text-sky-200 rounded-lg border border-sky-200 dark:border-sky-700 px-2 py-2 min-h-[40px]" title="Aggiorna manualmente il cambio EUR/THB">1 € = 38.5 THB · manuale</button>
-                <div class="flex items-center space-x-1">
-                    <button onclick="importJSONPrompt()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Importa JSON">
-                        <i class="fa-solid fa-file-import text-brand-600 dark:text-brand-400"></i>
-                    </button>
-                    <button onclick="exportJSONData()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Esporta JSON">
-                        <i class="fa-solid fa-download"></i>
-                    </button>
-                    <button type="button" onclick="thaiShowBackups()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm" title="Backup e ripristino">🗂️</button>
-                    <button onclick="thaiRefresh()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Aggiorna Dati ora">
-                        <i class="fa-solid fa-rotate"></i>
-                    </button>
-                    <button onclick="thaiSyncPending()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Riprova sincronizzazione"><i class="fa-solid fa-cloud-arrow-up"></i></button>
-                    <button onclick="thaiResolveConflict()" id="thai-conflict-button" class="hidden p-2 text-red-600 rounded-lg text-xs font-bold" title="Ricarica dopo aver esportato backup">Risolvi conflitto</button>
-                    <button onclick="thaiToggleTheme()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Tema Notte/Giorno">
-                        <i class="fa-solid fa-moon dark:hidden"></i>
-                        <i class="fa-solid fa-sun hidden dark:inline"></i>
-                    </button>
-                </div>
+            <!-- Azioni frequenti: sincronizzazione e tema. Altri strumenti nel menu. -->
+            <div class="flex items-center gap-2 ml-auto">
+                <button type="button" onclick="thaiRefresh()" class="p-2.5 min-w-[44px] min-h-[44px] text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition" title="Aggiorna i dati dal database" aria-label="Aggiorna i dati dal database">
+                    <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                </button>
+                <button type="button" onclick="thaiToggleTheme()" class="p-2.5 min-w-[44px] min-h-[44px] text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition" title="Passa da giorno a notte e viceversa" aria-label="Cambia modalità giorno o notte">
+                    <i class="fa-solid fa-moon dark:hidden" aria-hidden="true"></i>
+                    <i class="fa-solid fa-sun hidden dark:inline" aria-hidden="true"></i>
+                </button>
+                <details id="thai-tools-menu" class="relative">
+                    <summary class="list-none cursor-pointer p-2.5 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-slate-600 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition" title="Altri strumenti e impostazioni" aria-label="Apri altri strumenti e impostazioni" style="list-style:none">
+                        <i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+                    </summary>
+                    <div class="absolute right-0 top-full mt-2 w-[min(92vw,310px)] max-h-[75vh] overflow-y-auto z-50 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-2xl shadow-2xl p-3 space-y-2 text-sm">
+                        <div class="font-bold text-slate-800 dark:text-slate-100 px-2 pb-1">Strumenti e impostazioni</div>
+                        <div class="bg-slate-100 dark:bg-slate-700 rounded-xl p-2">
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-200 mb-2">Convertitore EUR / THB</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="eur-input" placeholder="€" aria-label="Importo in euro" oninput="convertCurrency('eur')" class="w-20 min-w-0 flex-1 bg-white dark:bg-slate-800 px-2 py-2 rounded border text-center">
+                                <span>=</span>
+                                <input type="number" id="thb-input" placeholder="THB" aria-label="Importo in baht" oninput="convertCurrency('thb')" class="w-24 min-w-0 flex-1 bg-white dark:bg-slate-800 px-2 py-2 rounded border text-center">
+                            </div>
+                            <button type="button" onclick="thaiEditExchangeRate()" id="thai-rate-label" class="mt-2 text-xs text-sky-700 dark:text-sky-200 underline text-left" title="Modifica il tasso di cambio EUR/THB">1 € = 38.5 THB · manuale</button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="thaiSetAllFolds(true)" class="thai-action rounded-lg p-2 min-h-[42px] text-xs" title="Comprimi tutti i blocchi">▴ Comprimi tutto</button>
+                            <button type="button" onclick="thaiSetAllFolds(false)" class="thai-action rounded-lg p-2 min-h-[42px] text-xs" title="Espandi tutti i blocchi">▾ Espandi tutto</button>
+                        </div>
+                        <button type="button" onclick="thaiSyncPending()" class="w-full text-left p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" title="Riprova a inviare le modifiche non sincronizzate"><i class="fa-solid fa-cloud-arrow-up mr-2" aria-hidden="true"></i> Riprova sincronizzazione</button>
+                        <button type="button" onclick="thaiShowBackups()" class="w-full text-left p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" title="Consulta e ripristina i backup">🗂️ Backup e ripristino</button>
+                        <div class="border-t border-slate-200 dark:border-slate-600 my-1"></div>
+                        <button type="button" onclick="exportJSONData()" class="w-full text-left p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" title="Scarica una copia JSON dei dati"><i class="fa-solid fa-download mr-2" aria-hidden="true"></i> Esporta dati JSON</button>
+                        <button type="button" onclick="importJSONPrompt()" class="w-full text-left p-2.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700" title="Importa dati da un file JSON"><i class="fa-solid fa-file-import mr-2" aria-hidden="true"></i> Importa dati JSON</button>
+                        <button type="button" onclick="thaiResolveConflict()" id="thai-conflict-button" class="hidden w-full text-left p-2.5 rounded-lg text-red-600 font-bold" title="Risolvi un conflitto di sincronizzazione dopo aver esportato un backup">⚠ Risolvi conflitto</button>
+                    </div>
+                </details>
             </div>
         </header>
 
