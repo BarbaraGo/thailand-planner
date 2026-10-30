@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thai Planner</title>
+    <meta name="description" content="Planner Thailandia: itinerario, budget, hotel e attività. Le modifiche offline sono sincronizzate alla riconnessione.">
     
     <!-- Icona iPhone -->
     <link rel="apple-touch-icon"
@@ -345,6 +346,30 @@
   #tab-itinerary .thai-global-folds { grid-template-columns:minmax(0,1fr); }
 }
 
+
+/* Thai Planner - UX stabilizzata: leggibilità e budget previsionale */
+.thai-forecast-stat { background:rgba(255,255,255,.72);border:1px solid #b5d9dd;border-radius:.85rem;padding:.7rem;display:flex;flex-direction:column;gap:.35rem;min-width:0 }
+.thai-forecast-stat span { font-size:.7rem;color:#34566b;font-weight:600 }
+.thai-forecast-stat strong { font-size:clamp(.95rem,2vw,1.25rem);font-variant-numeric:tabular-nums;overflow-wrap:anywhere }
+.dark .thai-forecast-stat{background:#244650;border-color:#487982}
+.dark .thai-forecast-stat span{color:#c3e9ea}
+.thai-forecast-row { display:flex;align-items:center;flex-wrap:wrap;gap:.65rem;border:1px solid #c4dadb;border-radius:.85rem;padding:.7rem;background:rgba(255,255,255,.65) }
+.dark .thai-forecast-row{background:#203a49;border-color:#496e77}
+.thai-forecast-actions{display:flex;gap:.3rem;flex-wrap:wrap;width:100%;justify-content:flex-end}
+.thai-forecast-actions button {min-height:40px;padding:.4rem .65rem;border-radius:.65rem;border:1px solid #a9cfd0;font-size:.78rem;font-weight:600}
+.dark .thai-forecast-actions button {border-color:#67939c;color:#e4f8f7}
+#thai-forecast-modal .thai-field {width:100%;display:block;margin-top:.35rem;min-height:44px}
+@media(max-width:767px){
+  #tab-budget > div {padding:1rem!important}
+  #tab-budget .budget-stat {min-height:0;padding:.85rem}
+  #tab-budget .budget-stat-value {font-size:1.25rem}
+  #thai-forecast-panel {padding:.85rem}
+  .thai-forecast-row > strong {margin-left:auto}
+  .thai-forecast-actions {justify-content:flex-start}
+  .thai-forecast-actions button {flex:1 1 auto}
+  #tab-itinerary button, #tab-budget button, #tab-notes button, #tab-checklist button {touch-action:manipulation}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
@@ -378,6 +403,7 @@
                     <input type="number" id="thb-input" placeholder="THB" oninput="convertCurrency('thb')" class="w-16 bg-white dark:bg-slate-800 px-1.5 py-0.5 rounded border text-center">
                 </div>
 
+                <button type="button" onclick="thaiEditExchangeRate()" id="thai-rate-label" class="text-xs text-sky-700 dark:text-sky-200 rounded-lg border border-sky-200 dark:border-sky-700 px-2 py-2 min-h-[40px]" title="Aggiorna manualmente il cambio EUR/THB">1 € = 38.5 THB · manuale</button>
                 <div class="flex items-center space-x-1">
                     <button onclick="importJSONPrompt()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Importa JSON">
                         <i class="fa-solid fa-file-import text-brand-600 dark:text-brand-400"></i>
@@ -425,7 +451,7 @@
                 <section class="flight-card order-3 md:order-2 bg-teal-50 dark:bg-teal-950/30 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-teal-200 dark:border-teal-800 shadow-sm space-y-3 text-xs">
                     <div class="flex justify-between items-center border-b border-teal-200 dark:border-teal-800 pb-2">
                         <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
-                        <span class="bg-sky-100 text-sky-900 dark:bg-sky-900 dark:text-sky-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: 7XJFTQ</span>
+                        <span class="bg-sky-100 text-sky-900 dark:bg-sky-900 dark:text-sky-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: consulta prenotazione privata</span>
                     </div>
                     <div class="space-y-1.5">
                         <p class="font-bold text-brand-700 dark:text-brand-400 flex items-center gap-1">
@@ -480,14 +506,15 @@
                 <!-- Tab Budget -->
                 <section id="tab-budget" class="tab-content budget-page hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
-                        <div class="flex justify-between items-center border-b border-slate-100 dark:border-slate-700 pb-3">
+                        <div class="flex flex-wrap justify-between items-start gap-3 border-b border-slate-100 dark:border-slate-700 pb-3">
                             <div>
                                 <h2 class="font-bold text-lg"><i class="fa-solid fa-wallet text-teal-500"></i> Riepilogo Budget & Spese</h2>
                                 <p class="text-xs text-slate-500">Inserimento manuale e gestione spese condivise.</p>
                             </div>
-                            <div class="text-right">
-                                <span class="text-xs text-slate-400 block">Totale Speso</span>
-                                <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0,00€</span>
+                            <div class="flex flex-col items-end gap-2 text-right shrink-0">
+                                <button type="button" onclick="openExpenseModal()" class="px-3 py-2 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition min-h-[44px]">+ Aggiungi spesa</button>
+                                <div><span class="text-xs text-slate-500 dark:text-slate-300 block">Totale speso</span>
+                                <span id="total-budget-sum" class="text-xl font-bold text-brand-600">0,00€</span></div>
                             </div>
                         </div>
 
@@ -510,6 +537,25 @@
                             <p class="text-xs text-slate-600 dark:text-slate-300">È una stima 50/50 sulle spese già inserite, non include costi futuri non ancora registrati. La ripartizione effettiva è indicata sotto.</p>
                         </section>
 
+                        <!-- Budget previsionale separato dalle spese effettive -->
+                        <section id="thai-forecast-panel" class="rounded-2xl border border-cyan-200 dark:border-cyan-700/60 bg-cyan-50 dark:bg-cyan-950/25 p-4 space-y-3" aria-label="Previsione di spesa">
+                          <div class="flex flex-wrap gap-2 justify-between items-start">
+                            <div><h3 class="font-bold text-base">🔮 Previsione completa del viaggio</h3><p class="text-xs text-slate-600 dark:text-slate-300">Spese pagate + costi previsti ancora da pagare. Non inserire qui importi già presenti nell'elenco spese.</p></div>
+                            <button onclick="thaiOpenForecast()" type="button" class="thai-action min-h-[44px]">+ Aggiungi previsione</button>
+                          </div>
+                          <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                            <div class="thai-forecast-stat"><span>Già pagato</span><strong id="thai-forecast-paid">0,00 €</strong></div>
+                            <div class="thai-forecast-stat"><span>Da pagare</span><strong id="thai-forecast-unpaid">0,00 €</strong></div>
+                            <div class="thai-forecast-stat"><span>Totale previsto</span><strong id="thai-forecast-total">0,00 €</strong></div>
+                            <div class="thai-forecast-stat"><span>Media 50/50</span><strong id="thai-forecast-half">0,00 €</strong></div>
+                          </div>
+                          <div class="grid grid-cols-2 gap-2">
+                            <div class="budget-stat budget-barbara"><span class="text-xs font-semibold">🐨 Barbara · quota prevista</span><strong id="thai-forecast-barbara" class="text-xl">0,00 €</strong></div>
+                            <div class="budget-stat budget-laura"><span class="text-xs font-semibold">🥙 Laura · quota prevista</span><strong id="thai-forecast-laura" class="text-xl">0,00 €</strong></div>
+                          </div>
+                          <div id="thai-forecast-list" class="space-y-2"></div>
+                        </section>
+
                         <!-- Box Debiti / Crediti tra Barbara e Laura -->
                         <section id="thai-budget-balance-panel" class="rounded-xl border border-slate-200 dark:border-slate-700 p-3"><div id="split-summary-box" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm" aria-live="polite">
                             <!-- Popolato via JS -->
@@ -528,7 +574,7 @@
                         <!-- Pulsante aggiungi spesa -->
                         <div class="flex justify-between items-center pt-2">
                             <h3 class="font-bold text-sm">Elenco Spese</h3>
-                            <button onclick="openExpenseModal()" class="px-3 py-1.5 bg-brand-500 text-white rounded-xl text-xs font-bold hover:bg-brand-600 transition">+ Aggiungi Spesa</button>
+
                         </div>
 
                         <div class="flex flex-wrap items-center gap-2 text-xs">
@@ -615,6 +661,30 @@
     </div>
 
     <!-- Indicatore trascina verso il basso per aggiornare su mobile -->
+    <div id="thai-conflict-modal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/70 p-3" role="dialog" aria-modal="true" aria-labelledby="thai-conflict-title">
+      <div class="max-w-xl w-full max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 p-5 space-y-3 shadow-xl">
+        <h2 id="thai-conflict-title" class="text-lg font-bold">⚠️ Modifiche su due dispositivi</h2>
+        <p class="text-sm">Scegli quale versione mantenere per ogni sezione. Se entrambi avete modificato la stessa sezione, controlla il backup prima di decidere: non viene fatta una fusione delle singole righe.</p>
+        <div id="thai-conflict-choices" class="space-y-2"></div>
+        <div class="flex flex-wrap gap-2 justify-end">
+          <button type="button" class="thai-action" onclick="thaiDownloadBackup()">Scarica copia locale</button>
+          <button type="button" class="thai-action" onclick="thaiCloseConflictModal()">Annulla</button>
+          <button type="button" class="rounded-lg bg-brand-600 text-white px-3 py-2 font-bold" onclick="thaiApplyConflictResolution()">Conferma scelta e sincronizza</button>
+        </div>
+      </div>
+    </div>
+    <div id="thai-forecast-modal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/65 p-4" role="dialog" aria-modal="true" aria-labelledby="thai-forecast-title">
+      <form onsubmit="thaiSaveForecast(event)" class="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl bg-white dark:bg-slate-800 p-5 space-y-3 shadow-xl">
+        <h2 id="thai-forecast-title" class="font-bold text-lg">Spesa futura prevista</h2>
+        <input type="hidden" id="forecast-edit-index" value="-1">
+        <label class="block text-sm font-semibold">Descrizione<input id="forecast-title" class="thai-field" required maxlength="120" placeholder="Es. Hotel ancora da pagare"></label>
+        <label class="block text-sm font-semibold">Costo previsto (€)<input id="forecast-amount" class="thai-field" required type="number" min="0" step="0.01"></label>
+        <label class="block text-sm font-semibold">Categoria<select id="forecast-category" class="thai-field"><option>Hotel</option><option>Cibo</option><option>Trasporti</option><option>Attività</option><option>Shopping</option><option>Altro</option></select></label>
+        <label class="block text-sm font-semibold">A carico di<select id="forecast-split" class="thai-field"><option value="uguale">50% Barbara · 50% Laura</option><option value="Barbara">Barbara 100%</option><option value="Laura">Laura 100%</option></select></label>
+        <p class="text-xs text-slate-600 dark:text-slate-300">Quando paghi questa spesa, usa “Segna come pagata”: verrà spostata nelle spese effettive.</p>
+        <div class="flex gap-2 justify-end"><button type="button" onclick="thaiCloseForecast()" class="thai-action">Annulla</button><button type="submit" class="rounded-lg px-4 py-2 bg-brand-600 text-white font-semibold">Salva previsione</button></div>
+      </form>
+    </div>
     <div id="thai-pull-indicator" role="status" aria-live="polite" class="fixed z-50 left-1/2 top-3 -translate-x-1/2 rounded-full bg-slate-800 text-white shadow-xl border border-slate-600 px-4 py-2 text-xs font-semibold pointer-events-none" style="opacity:0;transform:translate(-50%,-110%);transition:opacity 150ms ease,transform 150ms ease;white-space:nowrap">
         ↓ Trascina per aggiornare
     </div>
@@ -657,7 +727,7 @@
         })();
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEctxIJynpq1Cy4oF1wOI-75Mlwgyd_NL7IT3v8eIvArkQdXkgwpCQtAj_0jMMAVqDAw/exec";
 
-        let tripData = { days: [], todos: [], notes: [], expenses: [] };
+        let tripData = { days: [], todos: [], notes: [], expenses: [], plannedExpenses: [] };
 
         // Funzione di formattazione importi con punto per migliaia e virgola per decimali (es. 2.295,00€)
         function formatEUR(amount) {
@@ -665,11 +735,6 @@
             const parts = num.toFixed(2).split('.');
             parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             return parts.join(',') + "€";
-        }
-
-        function initApp() {
-            calculateCountdown();
-            fetchDataFromSheet();
         }
 
         function calculateCountdown() {
@@ -692,7 +757,7 @@
         function convertCurrency(source) {
             const eurInput = document.getElementById('eur-input');
             const thbInput = document.getElementById('thb-input');
-            const rate = 38.5; 
+            const rate = thaiExchangeRate(); 
             if(source === 'eur') {
                 const val = parseFloat(eurInput.value);
                 thbInput.value = isNaN(val) ? '' : (val * rate).toFixed(0);
@@ -702,72 +767,26 @@
             }
         }
 
+        function thaiExchangeRate() {
+            const parsed=Number(localStorage.getItem('thai_exchange_rate')||'38.5');
+            return Number.isFinite(parsed)&&parsed>0?parsed:38.5;
+        }
+        function thaiEditExchangeRate(){
+            const entered=prompt('Tasso manuale: quanti THB per 1 EUR? (Non è un cambio live)', String(thaiExchangeRate()));
+            if(entered===null)return;
+            const rate=Number(entered.replace(',','.'));
+            if(!Number.isFinite(rate)||rate<=0||rate>1000){alert('Inserisci un tasso valido.');return;}
+            localStorage.setItem('thai_exchange_rate',String(rate));
+            thaiRenderExchangeRate();
+            convertCurrency('eur');
+        }
+        function thaiRenderExchangeRate(){const el=document.getElementById('thai-rate-label');if(el)el.textContent='1 € = '+thaiExchangeRate()+' THB · manuale';}
         function updateSyncStatus(status, colorClass) {
             const el = document.getElementById('sync-status');
             if(el) {
                 el.innerText = status;
                 el.className = `text-[10px] font-semibold px-2 py-0.5 rounded-full ${colorClass}`;
             }
-        }
-
-        async function fetchDataFromSheet() {
-            updateSyncStatus('⌛ Sincronizzazione...', 'bg-sky-100 text-sky-800');
-            try {
-                const res = await fetch(GOOGLE_SCRIPT_URL);
-                const data = await res.json();
-                if(data && typeof data === 'object' && (data.days || data.todos)) {
-                    tripData = data;
-                    if(!tripData.expenses) tripData.expenses = [];
-                    renderApp();
-                    updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
-                    return;
-                }
-            } catch(e) {
-                console.error("Errore fetch:", e);
-            }
-            
-            updateSyncStatus('⚠️ Sincronizzazione locale', 'bg-slate-100 text-slate-700');
-            const saved = localStorage.getItem('thailandData2026_v5');
-            if(saved) {
-                try { tripData = JSON.parse(saved); } catch(err) {}
-            }
-            if(!tripData.expenses) tripData.expenses = [];
-            renderApp();
-        }
-
-        async function saveDataToSheet() {
-            localStorage.setItem('thailandData2026_v5', JSON.stringify(tripData));
-            updateSyncStatus('💾 Salvataggio...', 'bg-sky-100 text-sky-800');
-            try {
-                await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(tripData)
-                });
-                updateSyncStatus('⚡ Sincronizzato Live', 'bg-emerald-100 text-emerald-700');
-            } catch(e) {
-                updateSyncStatus('⚠️ Salvato in locale', 'bg-slate-100 text-slate-700');
-            }
-        }
-
-        function importJSONPrompt() {
-            const raw = prompt("Incolla qui il contenuto del tuo file JSON:");
-            if(!raw) return;
-            try {
-                const parsed = JSON.parse(raw);
-                tripData = Array.isArray(parsed) ? { days: parsed, todos: [], notes: [], expenses: [] } : parsed;
-                if(!tripData.expenses) tripData.expenses = [];
-                saveDataToSheet();
-                renderApp();
-                alert("✅ Dati importati e salvati sul Google Sheet!");
-            } catch(e) {
-                alert("⚠️ Errore nel formato JSON.");
-            }
-        }
-
-        function exportJSONData() {
-            navigator.clipboard.writeText(JSON.stringify(tripData, null, 2));
-            alert("📋 JSON copiato negli appunti!");
         }
 
         function switchTab(tabId) {
@@ -780,372 +799,40 @@
             document.querySelector(`[data-tab="${tabId}"]`).classList.add('active', 'bg-brand-50', 'text-brand-600', 'dark:bg-brand-900/30');
         }
 
-        function renderApp() {
-            renderItinerary();
-            renderBudget();
-            renderTodos();
-            renderNotes();
-            initDragAndDrop();
-        }
-
-        function renderItinerary() {
-            const container = document.getElementById('days-container');
-            if(!tripData.days || tripData.days.length === 0) {
-                container.innerHTML = `<div class="p-4 bg-sky-50 text-sky-800 rounded-xl text-xs">Nessun dato trovato. Importa il JSON iniziale con il pulsante 📥 in alto a destra.</div>`;
-                return;
-            }
-            container.innerHTML = tripData.days.map((day, dIdx) => `
-                <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
-                    <div class="flex justify-between items-start border-b border-slate-100 dark:border-slate-700 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="drag-handle text-slate-400 p-1"><i class="fa-solid fa-grip-vertical"></i></span>
-                            <div>
-                                <span class="text-[10px] font-bold text-brand-500 uppercase">Giorno ${day.id} - ${day.date || ''}</span>
-                                <h3 class="font-bold text-base flex items-center gap-2">
-                                    ${day.title || 'Tappa'}
-                                    <button onclick="editDayPrompt(${dIdx})" class="text-slate-400 hover:text-brand-500 text-xs" title="Modifica"><i class="fa-solid fa-pen"></i></button>
-                                </h3>
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
-                            <button onclick="toggleHotelStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.hotel_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200'}">
-                                🏨 Hotel: ${day.hotel_status || 'Da Prenotare'}
-                            </button>
-                            <button onclick="toggleTransportStatus(${dIdx})" class="px-2 py-0.5 rounded-md transition ${day.transport_status === 'Prenotato' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}">
-                                🚆 Trasporto: ${day.transport_status || 'Da Prenotare'}
-                            </button>
-                            <button onclick="editCostPrompt(${dIdx})" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 px-2 py-0.5 rounded-md font-bold transition">
-                                💶 ${day.cost || '0,00€'}
-                            </button>
-                            <button onclick="addActivityPrompt(${dIdx})" class="p-1 text-xs text-brand-600" title="Aggiungi Attività"><i class="fa-solid fa-plus"></i></button>
-                            <button onclick="deleteDay(${dIdx})" class="p-1 text-xs text-red-400" title="Elimina Giorno"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-
-                    ${day.transport_details || day.notes || day.cancellation || day.link ? `
-                        <div class="text-xs bg-slate-50 dark:bg-slate-700/30 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50 space-y-1 text-slate-600 dark:text-slate-300">
-                            ${day.transport_details ? `<p><b>Spostamenti:</b> ${day.transport_details}</p>` : ''}
-                            ${day.notes ? `<p><b>Note:</b> ${day.notes}</p>` : ''}
-                            ${day.cancellation ? `<p class="text-emerald-600 dark:text-emerald-400"><b>Cancellazione:</b> ${day.cancellation}</p>` : ''}
-                            ${day.link ? `<p><a href="${day.link}" target="_blank" class="text-brand-600 underline font-semibold inline-flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Vedi Prenotazione Booking</a></p>` : ''}
-                        </div>
-                    ` : ''}
-
-                    <div class="activities-list space-y-2" data-day-idx="${dIdx}">
-                        ${(day.activities || []).map((act, aIdx) => `
-                            <div class="bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs flex justify-between items-center">
-                                <div class="flex items-center gap-2 flex-1">
-                                    <span class="drag-handle text-slate-400"><i class="fa-solid fa-grip-vertical"></i></span>
-                                    <span>${act.title || act.desc || ''}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="editActivityPrompt(${dIdx}, ${aIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
-                                    <button onclick="deleteActivity(${dIdx}, ${aIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderBudget() {
-            const container = document.getElementById('expenses-list');
-            const splitBox = document.getElementById('split-summary-box');
-            let total = 0;
-            let barbTotalPaid = 0;
-            let laurTotalPaid = 0;
-            let barbShouldPay = 0;
-            let laurShouldPay = 0;
-
-            if(tripData.expenses) {
-                tripData.expenses.forEach(exp => {
-                    const amt = parseFloat(exp.amount) || 0;
-                    total += amt;
-                    const paidBy = exp.payer || 'Barbara';
-                    const splitType = exp.split || 'uguale'; 
-
-                    if(paidBy === 'Barbara') barbTotalPaid += amt;
-                    else laurTotalPaid += amt;
-
-                    if(splitType === 'uguale') {
-                        barbShouldPay += amt / 2;
-                        laurShouldPay += amt / 2;
-                    } else if(splitType === 'Barbara') {
-                        barbShouldPay += amt;
-                    } else if(splitType === 'Laura') {
-                        laurShouldPay += amt;
-                    }
-                });
-            }
-
-            document.getElementById('total-budget-sum').innerText = formatEUR(total);
-
-            const barbBalance = barbTotalPaid - barbShouldPay; 
-            let settlementText = "";
-            if(Math.abs(barbBalance) < 0.05) {
-                settlementText = "<b>Siete perfettamente pari!</b> ✨";
-            } else if(barbBalance > 0) {
-                settlementText = `<b>Laura deve a Barbara:</b> <span class="text-brand-600 font-bold">${formatEUR(barbBalance)}</span>`;
-            } else {
-                settlementText = `<b>Barbara deve a Laura:</b> <span class="text-brand-600 font-bold">${formatEUR(Math.abs(barbBalance))}</span>`;
-            }
-
-            splitBox.innerHTML = `
-                <div class="bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <span class="block text-slate-400">Totale Speso Barbara</span>
-                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${formatEUR(barbTotalPaid)}</span>
-                </div>
-                <div class="bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-200 dark:border-slate-600">
-                    <span class="block text-slate-400">Totale Speso Laura</span>
-                    <span class="text-sm font-bold text-slate-800 dark:text-slate-100">💶 ${formatEUR(laurTotalPaid)}</span>
-                </div>
-                <div class="bg-brand-50 dark:bg-brand-950/30 p-2.5 rounded-lg border border-brand-200 dark:border-brand-800 flex flex-col justify-center">
-                    <span class="block text-brand-700 dark:text-brand-300 font-semibold">Situazione Debiti</span>
-                    <span class="text-xs">${settlementText}</span>
-                </div>
-            `;
-
-            if(!tripData.expenses || tripData.expenses.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-400">Nessuna spesa inserita. Clicca su "+ Aggiungi Spesa" per registrarne una.</p>`;
-                return;
-            }
-
-            container.innerHTML = tripData.expenses.map((exp, eIdx) => `
-                <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-3 rounded-xl text-xs border border-slate-200 dark:border-slate-700">
-                    <div class="space-y-0.5">
-                        <span class="font-bold text-slate-800 dark:text-slate-200">${exp.title}</span>
-                        <div class="text-[10px] text-slate-400">Pagato da: <b>${exp.payer}</b> | Divisione: <b>${exp.split}</b></div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-bold text-sm bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-600">💶 ${formatEUR(exp.amount)}</span>
-                        <button onclick="openExpenseModal(${eIdx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteExpense(${eIdx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderTodos() {
-            const container = document.getElementById('todo-list');
-            container.innerHTML = (tripData.todos || []).map((t, idx) => `
-                <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-700/50 p-2.5 rounded-xl text-xs border border-slate-200 dark:border-slate-700">
-                    <div class="flex items-center gap-2 flex-1">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${idx})">
-                        <span class="${t.done ? 'line-through text-slate-400' : ''}">${t.text}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="editTodoPrompt(${idx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="deleteTodo(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderNotes() {
-            const container = document.getElementById('notes-container');
-            container.innerHTML = (tripData.notes || []).map((n, idx) => `
-                <div class="p-3 bg-sky-50 dark:bg-sky-950/30 rounded-xl text-xs space-y-1 border border-sky-200 dark:border-sky-900">
-                    <div class="flex justify-between font-bold text-sky-900 dark:text-sky-200">
-                        <span>${n.title || 'Nota'}</span>
-                        <div class="flex items-center gap-2">
-                            <button onclick="editNotePrompt(${idx})" class="text-slate-400 hover:text-brand-500"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="deleteNote(${idx})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>
-                    <p class="text-slate-700 dark:text-slate-300">${n.text}</p>
-                </div>
-            `).join('');
-        }
-
-        function initDragAndDrop() {
-            const daysContainer = document.getElementById('days-container');
-            if(daysContainer) {
-                new Sortable(daysContainer, {
-                    handle: '.drag-handle', animation: 150,
-                    onEnd: (evt) => {
-                        const moved = tripData.days.splice(evt.oldIndex, 1)[0];
-                        tripData.days.splice(evt.newIndex, 0, moved);
-                        saveDataToSheet();
-                    }
-                });
-            }
-        }
-
         /* --- GESTIONE MODALE SPESE --- */
-        function openExpenseModal(eIdx = -1) {
-            const modal = document.getElementById('expense-modal');
-            const titleEl = document.getElementById('modal-title');
-            const titleInput = document.getElementById('exp-title-input');
-            const amountInput = document.getElementById('exp-amount-input');
-            const payerInput = document.getElementById('exp-payer-input');
-            const splitInput = document.getElementById('exp-split-input');
-            const indexInput = document.getElementById('expense-edit-index');
-
-            indexInput.value = eIdx;
-
-            if(eIdx >= 0) {
-                const exp = tripData.expenses[eIdx];
-                titleEl.innerText = "Modifica Spesa";
-                titleInput.value = exp.title || '';
-                amountInput.value = exp.amount || '';
-                payerInput.value = exp.payer || 'Barbara';
-                splitInput.value = exp.split || 'uguale';
-            } else {
-                titleEl.innerText = "Nuova Spesa";
-                titleInput.value = '';
-                amountInput.value = '';
-                payerInput.value = 'Barbara';
-                splitInput.value = 'uguale';
-            }
-
-            modal.classList.remove('hidden');
-        }
-
         function closeExpenseModal() {
             document.getElementById('expense-modal').classList.add('hidden');
         }
 
-        function saveExpenseModal() {
-            const title = document.getElementById('exp-title-input').value.trim();
-            const amount = parseFloat(document.getElementById('exp-amount-input').value);
-            const payer = document.getElementById('exp-payer-input').value;
-            const split = document.getElementById('exp-split-input').value;
-            const eIdx = parseInt(document.getElementById('expense-edit-index').value);
-
-            if(!title || isNaN(amount)) {
-                alert("Inserisci una descrizione e un importo valido.");
-                return;
-            }
-
-            if(!tripData.expenses) tripData.expenses = [];
-
-            if(eIdx >= 0) {
-                tripData.expenses[eIdx] = { title, amount, payer, split };
-            } else {
-                tripData.expenses.push({ title, amount, payer, split });
-            }
-
-            saveDataToSheet();
-            renderApp();
-            closeExpenseModal();
-        }
-
-        function deleteExpense(eIdx) {
-            tripData.expenses.splice(eIdx, 1);
-            saveDataToSheet();
-            renderApp();
-        }
-
-        /* --- ALTRE FUNZIONI DI MODIFICA --- */
-        function editDayPrompt(dIdx) {
-            const d = tripData.days[dIdx];
-            const newTitle = prompt("Titolo del giorno:", d.title || "");
-            if(newTitle !== null) d.title = newTitle;
-            const newTransport = prompt("Dettagli Spostamenti:", d.transport_details || "");
-            if(newTransport !== null) d.transport_details = newTransport;
-            const newNotes = prompt("Note extra:", d.notes || "");
-            if(newNotes !== null) d.notes = newNotes;
-            saveDataToSheet();
-            renderApp();
-        }
-
-        function editCostPrompt(dIdx) {
-            const current = tripData.days[dIdx].cost || "";
-            const newCost = prompt("Inserisci il costo (es. 81€):", current);
-            if(newCost !== null) {
-                tripData.days[dIdx].cost = newCost;
-                saveDataToSheet();
-                renderApp();
-            }
-        }
-
-        function toggleHotelStatus(dIdx) {
-            const current = tripData.days[dIdx].hotel_status;
-            tripData.days[dIdx].hotel_status = (current === 'Prenotato') ? 'Da Prenotare' : 'Prenotato';
-            saveDataToSheet();
-            renderApp();
-        }
-
-        function toggleTransportStatus(dIdx) {
-            const current = tripData.days[dIdx].transport_status;
-            tripData.days[dIdx].transport_status = (current === 'Prenotato') ? 'Da Prenotare' : 'Prenotato';
-            saveDataToSheet();
-            renderApp();
-        }
-
-        function editActivityPrompt(dIdx, aIdx) {
-            const currentText = tripData.days[dIdx].activities[aIdx].title || tripData.days[dIdx].activities[aIdx].desc || "";
-            const newText = prompt("Modifica attività:", currentText);
-            if(newText) {
-                tripData.days[dIdx].activities[aIdx].title = newText;
-                saveDataToSheet();
-                renderApp();
-            }
-        }
-
-        function editTodoPrompt(idx) {
-            const newText = prompt("Modifica To-Do:", tripData.todos[idx].text);
-            if(newText) {
-                tripData.todos[idx].text = newText;
-                saveDataToSheet();
-                renderApp();
-            }
-        }
-
-        function editNotePrompt(idx) {
-            const newTitle = prompt("Modifica Titolo Nota:", tripData.notes[idx].title);
-            const newText = prompt("Modifica Testo Nota:", tripData.notes[idx].text);
-            if(newTitle || newText) {
-                if(newTitle) tripData.notes[idx].title = newTitle;
-                if(newText) tripData.notes[idx].text = newText;
-                saveDataToSheet();
-                renderApp();
-            }
-        }
-
-        function deleteDay(dIdx) { tripData.days.splice(dIdx, 1); saveDataToSheet(); renderApp(); }
-        function addDayPrompt() {
-            const id = tripData.days.length + 1;
-            const date = prompt("Data (es. 27 dic):", "");
-            const title = prompt("Titolo Tappa:", "");
-            if(title) {
-                tripData.days.push({ id: id, date: date, title: title, hotel_status: "Da Prenotare", transport_status: "Da Prenotare", cost: "0,00€", activities: [] });
-                saveDataToSheet();
-                renderApp();
-            }
-        }
-        function addActivityPrompt(dIdx) {
-            const title = prompt("Attività:");
-            if(title) {
-                if(!tripData.days[dIdx].activities) tripData.days[dIdx].activities = [];
-                tripData.days[dIdx].activities.push({ title: title });
-                saveDataToSheet(); renderApp();
-            }
-        }
-        function deleteActivity(dIdx, aIdx) { tripData.days[dIdx].activities.splice(aIdx, 1); saveDataToSheet(); renderApp(); }
-        function addTodoPrompt() {
-            const text = prompt("Nuova task:");
-            if(text) { if(!tripData.todos) tripData.todos = []; tripData.todos.push({ text: text, done: false }); saveDataToSheet(); renderApp(); }
-        }
-        function toggleTodo(idx) { tripData.todos[idx].done = !tripData.todos[idx].done; saveDataToSheet(); }
-        function deleteTodo(idx) { tripData.todos.splice(idx, 1); saveDataToSheet(); renderApp(); }
-        function addNotePrompt() {
-            const title = prompt("Titolo:"); const text = prompt("Testo:");
-            if(title || text) { if(!tripData.notes) tripData.notes = []; tripData.notes.push({ title: title, text: text }); saveDataToSheet(); renderApp(); }
-        }
-        function deleteNote(idx) { tripData.notes.splice(idx, 1); saveDataToSheet(); renderApp(); }
 
         /* THAI PLANNER 2 - estensioni basate su index-old.html */
         const THAI_STORAGE = 'thailandData2026_v5';
         const THAI_PENDING = 'thailandPending_v2';
         let thaiDirty = localStorage.getItem(THAI_PENDING) === '1';
+        let thaiAccessKey=sessionStorage.getItem('thaiPlannerAccessKey')||'';
+        function thaiAskAccessKey(){
+            const key=prompt('Inserisci il codice di accesso Thai Planner configurato in Apps Script:');
+            if(key===null)return false;
+            thaiAccessKey=key.trim();sessionStorage.setItem('thaiPlannerAccessKey',thaiAccessKey);
+            return !!thaiAccessKey;
+        }
+        function thaiRemoteUrl(){const u=new URL(GOOGLE_SCRIPT_URL);if(thaiAccessKey)u.searchParams.set('key',thaiAccessKey);return u.href;}
+        function thaiAuthError(d){
+            if(d && (d.status==='unauthorized'||d.status==='setup_required')){
+                if(d.status==='setup_required'){alert(d.message);return true;}
+                updateSyncStatus('🔒 Accesso richiesto','bg-amber-100 text-amber-800');
+                if(thaiAskAccessKey())setTimeout(()=>thaiDirty?thaiSyncPending():fetchDataFromSheet(),30);
+                return true;
+            }
+            return false;
+        }
         let thaiSaving = false;
         let thaiSequence = 0;
         let thaiContext = null;
         let thaiSyncTimer = null;
         let thaiConflict = false;
         let thaiLoadStarted = false;
+        let thaiSyncError='';
         let thaiSummaryDay = 0;
 
         const thaiEsc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1178,9 +865,10 @@
             return `<a href="${thaiEsc(href)}" target="_blank" rel="noopener noreferrer" class="thai-hotel-map-link" aria-label="Apri indirizzo hotel su Google Maps">📍 ${thaiEsc(val)} <span aria-hidden="true">↗</span></a>`;
         };
         const thaiBtn = (label, handler, cls='') => `<button type="button" onclick="${handler}" class="thai-action ${cls}">${label}</button>`;
-        const thaiValid = d => d && typeof d === 'object' && Array.isArray(d.days) && Array.isArray(d.todos) && Array.isArray(d.notes) && (d.expenses === undefined || Array.isArray(d.expenses));
+        const thaiValid = d => d && typeof d === 'object' && Array.isArray(d.days) && Array.isArray(d.todos) && Array.isArray(d.notes) && (d.expenses === undefined || Array.isArray(d.expenses)) && (d.plannedExpenses === undefined || Array.isArray(d.plannedExpenses));
         function thaiNormalize(d) {
             if (!Array.isArray(d.expenses)) d.expenses=[];
+            if(!Array.isArray(d.plannedExpenses))d.plannedExpenses=[];
             d.days.forEach(day => { if(!Array.isArray(day.activities)) day.activities=[]; if(!Array.isArray(day.transports)) day.transports=[]; });
             return d;
         }
@@ -1191,11 +879,12 @@
         function thaiShowSync() {
             document.getElementById('thai-conflict-button')?.classList.toggle('hidden',!thaiConflict);
             if(thaiConflict) updateSyncStatus('⚠️ Conflitto dati: esporta JSON', 'bg-red-100 text-red-700');
-            else if(thaiDirty) updateSyncStatus(navigator.onLine ? '💾 Modifiche da sincronizzare' : '📴 Salvato offline', 'bg-sky-100 text-sky-800');
+            else if(thaiDirty) updateSyncStatus(thaiSyncError || (navigator.onLine ? '💾 Modifiche da sincronizzare' : '📴 Salvato offline'), 'bg-sky-100 text-sky-800');
             else updateSyncStatus('✅ Sincronizzato', 'bg-emerald-100 text-emerald-700');
         }
         function initApp() {
-            calculateCountdown();
+            calculateCountdown();thaiRenderExchangeRate();
+            if('serviceWorker' in navigator)navigator.serviceWorker.register('/thailand-planner/sw.js').catch(e=>console.warn('Offline shell:',e));
             try { const cache=JSON.parse(localStorage.getItem(THAI_STORAGE)||'null'); if(thaiValid(cache)) { tripData=thaiNormalize(cache); renderApp(); } } catch(e) { console.warn('Cache non valida',e); }
             if(thaiDirty) { thaiShowSync(); if(navigator.onLine) setTimeout(thaiSyncPending,500); }
             else fetchDataFromSheet();
@@ -1206,9 +895,10 @@
             thaiLoadStarted=true;
             updateSyncStatus('⌛ Caricamento...', 'bg-sky-100 text-sky-800');
             try {
-                const response=await fetch(GOOGLE_SCRIPT_URL,{cache:'no-store'});
+                const response=await fetch(thaiRemoteUrl(),{cache:'no-store'});
                 if(!response.ok) throw Error('HTTP '+response.status);
                 const data=await response.json();
+                if(thaiAuthError(data))return;
                 if(!thaiValid(data)) throw Error(data.message || 'Dati server non validi');
                 if(thaiDirty) { thaiShowSync(); return; }
                 tripData=thaiNormalize(data);
@@ -1231,9 +921,10 @@
             const payload=JSON.stringify(tripData);
             updateSyncStatus('⌛ Invio modifiche...', 'bg-sky-100 text-sky-800');
             try {
-                const res=await fetch(GOOGLE_SCRIPT_URL, {method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:payload});
+                const res=await fetch(GOOGLE_SCRIPT_URL, {method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...JSON.parse(payload),_accessKey:thaiAccessKey})});
                 if(!res.ok) throw Error('HTTP '+res.status);
                 const ack=await res.json();
+                if(thaiAuthError(ack))return;
                 if(ack.status==='conflict') {
                     thaiConflict=true;
                     throw Error('Un altro dispositivo ha aggiornato i dati. Esporta il JSON locale prima di ricaricare.');
@@ -1241,14 +932,14 @@
                 if(ack.status!=='success') throw Error(ack.message || 'Salvataggio non confermato');
                 if(Number.isInteger(ack.revision)) tripData._revision=ack.revision;
                 if(seq===thaiSequence) {
-                    thaiDirty=false;
+                    thaiSyncError='';thaiDirty=false;
                     localStorage.removeItem(THAI_PENDING);
                     localStorage.setItem(THAI_STORAGE,JSON.stringify(tripData));
                 } else {
                     localStorage.setItem(THAI_STORAGE,JSON.stringify(tripData));
                 }
                 thaiShowSync();
-            } catch(e) { console.warn('Salvataggio non confermato:',e); thaiShowSync(); }
+            } catch(e) { console.warn('Salvataggio non confermato:',e);thaiSyncError='⚠️ Salvataggio non confermato'; thaiShowSync(); }
             finally { thaiSaving=false; if(thaiDirty && !thaiConflict && seq!==thaiSequence) setTimeout(thaiSyncPending,200); }
         }
         window.addEventListener('online',()=>{ if(thaiDirty) thaiSyncPending(); else fetchDataFromSheet(); });
@@ -1563,10 +1254,62 @@
             </div>`).join('')||'<p class="text-sm opacity-75 p-3">Nessuna attività da fare. Aggiungi la prima!</p>';
         }
         function renderNotes(){
-            document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>`<div class="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 rounded-xl p-3 text-xs space-y-1"><div class="flex justify-end gap-2"><span class="flex gap-1">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div><p class="whitespace-pre-wrap">${thaiEsc(n.text||'')}</p>${thaiLink(n.link,'Link utile')}</div>`).join('')||'<p class="text-xs text-slate-400">Nessuna nota.</p>';
+            document.getElementById('notes-container').innerHTML=(tripData.notes||[]).map((n,i)=>{
+                const url=thaiUrl(n.link);
+                const shown=String(n.link||'').trim();
+                const linked=url?`<a href="${thaiEsc(url)}" target="_blank" rel="noopener noreferrer" class="text-brand-600 dark:text-teal-200 underline break-all inline-block py-1" title="Apri il collegamento esterno">${thaiEsc(shown)} <span aria-hidden="true">↗</span></a>`:'';
+                return `<article class="bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 rounded-xl p-3 text-sm space-y-2"><div class="flex items-start justify-between gap-3"><strong class="min-w-0 text-sky-900 dark:text-sky-100 font-bold break-words">${thaiEsc(n.title||'Nota')}</strong><span class="flex gap-1 shrink-0">${thaiBtn('✏️',`openNoteModal(${i})`)}${thaiBtn('🗑️',`deleteNote(${i})`)}</span></div>${n.text?`<p class="whitespace-pre-wrap break-words text-slate-800 dark:text-slate-100">${thaiEsc(n.text)}</p>`:''}${linked}</article>`;
+            }).join('')||'<p class="text-sm text-slate-400">Nessuna nota.</p>';
         }
         function thaiExpenseIcon(category){
             return ({'Hotel':'🏨','Cibo':'🍜','Trasporti':'🚆','Attività':'🎟️','Shopping':'🛍️','Altro':'🧾'})[category||'Altro'] || '🧾';
+        }
+        function thaiOpenForecast(i=-1){
+            const e=i>=0?tripData.plannedExpenses[i]:{};
+            document.getElementById('forecast-edit-index').value=i;
+            document.getElementById('forecast-title').value=e.title||'';
+            document.getElementById('forecast-amount').value=e.amount??'';
+            document.getElementById('forecast-category').value=e.category||'Altro';
+            document.getElementById('forecast-split').value=e.split||'uguale';
+            document.getElementById('thai-forecast-title').textContent=i>=0?'Modifica previsione':'Spesa futura prevista';
+            const m=document.getElementById('thai-forecast-modal');m.classList.remove('hidden');m.classList.add('flex');
+            document.getElementById('forecast-title').focus();
+        }
+        function thaiCloseForecast(){const m=document.getElementById('thai-forecast-modal');m.classList.add('hidden');m.classList.remove('flex');}
+        function thaiSaveForecast(event){
+            event.preventDefault();
+            const title=document.getElementById('forecast-title').value.trim();
+            const raw=document.getElementById('forecast-amount').value;
+            const amount=Number(raw);
+            if(!title||raw===''||!Number.isFinite(amount)||amount<0){alert('Inserisci nome e costo valido');return;}
+            const i=Number(document.getElementById('forecast-edit-index').value);
+            const val={title,amount,category:document.getElementById('forecast-category').value,split:document.getElementById('forecast-split').value};
+            if(i>=0)tripData.plannedExpenses[i]={...tripData.plannedExpenses[i],...val};else tripData.plannedExpenses.push(val);
+            thaiCloseForecast();saveDataToSheet();renderApp();
+        }
+        function thaiDeleteForecast(i){
+            if(!confirm('Eliminare questa previsione?'))return;
+            tripData.plannedExpenses.splice(i,1);saveDataToSheet();renderApp();
+        }
+        function thaiForecastPaid(i){
+            if(!confirm('Spostare questa previsione nelle spese già pagate?'))return;
+            const item=tripData.plannedExpenses[i];if(!item)return;
+            const paidBy=prompt('Chi ha pagato questa spesa? Scrivi Barbara oppure Laura:','Barbara');
+            if(paidBy===null)return;
+            const payer=paidBy.trim().toLowerCase()==='laura'?'Laura':paidBy.trim().toLowerCase()==='barbara'?'Barbara':null;
+            if(!payer){alert('Inserisci Barbara o Laura.');return;}
+            tripData.expenses.push({title:item.title,amount:item.amount,category:item.category,split:item.split,payer});
+            tripData.plannedExpenses.splice(i,1);saveDataToSheet();renderApp();
+        }
+        function thaiRenderForecast(paid,shares){
+            const items=tripData.plannedExpenses||[];
+            const unpaid=items.reduce((sum,item)=>sum+(Number(item.amount)||0),0);
+            let b=shares.Barbara,l=shares.Laura;
+            items.forEach(e=>{const amount=Number(e.amount)||0;const bs=e.split==='Barbara'?amount:e.split==='Laura'?0:amount/2;b+=bs;l+=amount-bs;});
+            const put=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=formatEUR(v);};
+            put('thai-forecast-paid',paid);put('thai-forecast-unpaid',unpaid);put('thai-forecast-total',paid+unpaid);
+            put('thai-forecast-half',(paid+unpaid)/2);put('thai-forecast-barbara',b);put('thai-forecast-laura',l);
+            document.getElementById('thai-forecast-list').innerHTML=items.map((e,i)=>`<article class="thai-forecast-row"><span class="text-xl" aria-hidden="true">${thaiExpenseIcon(e.category)}</span><div class="flex-1 min-w-0"><strong class="block break-words">${thaiEsc(e.title)}</strong><span class="text-xs opacity-80">${thaiEsc(e.category||'Altro')} · ${e.split==='uguale'?'50/50':thaiEsc(e.split)}</span></div><strong>${formatEUR(e.amount)}</strong><div class="thai-forecast-actions"><button type="button" onclick="thaiOpenForecast(${i})">✏️ Modifica</button><button type="button" onclick="thaiForecastPaid(${i})">✓ Pagata</button><button type="button" onclick="thaiDeleteForecast(${i})">🗑️ Elimina</button></div></article>`).join('')||'<p class="text-xs opacity-80">Non hai ancora inserito spese future. Le prenotazioni nell’itinerario non vengono conteggiate automaticamente.</p>';
         }
         function renderBudget(){
             const arr=tripData.expenses||[];let total=0,barbPaid=0,lauraPaid=0,barbOwes=0;
@@ -1587,6 +1330,7 @@
                 categoryShares[category].Barbara+=b;
                 categoryShares[category].Laura+=l;
             });
+            thaiRenderForecast(total,shares);
             document.getElementById('personal-budget-summary').innerHTML=`
               <div class="budget-stat budget-barbara" aria-label="Costo del viaggio per Barbara"><div class="budget-stat-head"><span class="budget-stat-icon" aria-hidden="true">🐨</span><span>Spesa di Barbara</span></div><strong class="budget-stat-value">${formatEUR(shares.Barbara)}</strong><p class="budget-stat-note">Quota personale del totale</p></div>
               <div class="budget-stat budget-laura" aria-label="Costo del viaggio per Laura"><div class="budget-stat-head"><span class="budget-stat-icon" aria-hidden="true">🥙</span><span>Spesa di Laura</span></div><strong class="budget-stat-value">${formatEUR(shares.Laura)}</strong><p class="budget-stat-note">Quota personale del totale</p></div>`;
@@ -1684,7 +1428,7 @@
         function importJSONPrompt(){
             const raw=prompt('Incolla il JSON da importare:');if(!raw)return;
             try{let d=JSON.parse(raw);if(Array.isArray(d))d={days:d,todos:[],notes:[],expenses:[]};if(!thaiValid(d))throw Error('Formato dati non valido');
-                if(!confirm('Importare il JSON e sostituire tutti i dati attuali?'))return;
+                if(!confirm('Importare il JSON e sostituire tutti i dati attuali? Prima esporta una copia dei tuoi dati.'))return;
                 tripData=thaiNormalize(d);thaiConflict=false;saveDataToSheet();renderApp();alert('Dati importati localmente. Controlla lo stato di sincronizzazione prima di chiudere.');
             }catch(e){alert('JSON non valido: '+e.message);}
         }
@@ -1749,11 +1493,50 @@
             }, {passive:true});
             document.addEventListener('touchcancel', function(){tracking=false;distance=0;hide();}, {passive:true});
         })();
-        function thaiResolveConflict(){thaiClearConflictAfterBackup();}
-        window.thaiClearConflictAfterBackup = function(){
-            if(!confirm('Hai esportato un backup? Procedendo perderai le modifiche locali in conflitto.'))return;
-            thaiConflict=false;thaiDirty=false;localStorage.removeItem(THAI_PENDING);fetchDataFromSheet();
-        };
+        let thaiConflictRemote=null;
+        const THAI_MERGE_FIELDS=[['days','Itinerario, hotel e trasporti'],['todos','To Do'],['notes','Note'],['expenses','Spese pagate'],['plannedExpenses','Spese future previste']];
+        async function thaiResolveConflict(){
+            if(!thaiConflict)return;
+            try{
+                const res=await fetch(thaiRemoteUrl(),{cache:'no-store'});
+                if(!res.ok)throw Error('HTTP '+res.status);
+                const data=await res.json();
+                if(!thaiValid(data))throw Error(data.message||'Risposta non valida');
+                thaiConflictRemote=thaiNormalize(data);
+                const container=document.getElementById('thai-conflict-choices');
+                container.innerHTML=THAI_MERGE_FIELDS.map(([key,label])=>{
+                    const local=tripData[key]||[];
+                    const remote=thaiConflictRemote[key]||[];
+                    const changed=JSON.stringify(local)!==JSON.stringify(remote);
+                    return `<label class="block rounded-lg border border-slate-300 dark:border-slate-600 p-3 space-y-1"><strong class="block">${thaiEsc(label)}</strong><span class="text-xs">Telefono: ${local.length} elementi · Server: ${remote.length} elementi ${changed?'· ⚠️ Diversi':'· Uguali'}</span><select class="thai-field" data-thai-conflict-field="${key}"><option value="remote">Mantieni versione sul server</option><option value="local" ${changed?'selected':''}>Mantieni versione su questo telefono</option></select></label>`;
+                }).join('');
+                const m=document.getElementById('thai-conflict-modal');m.classList.remove('hidden');m.classList.add('flex');
+            }catch(err){alert('Impossibile confrontare le versioni: '+err.message+'\nEsporta il JSON locale e riprova.');}
+        }
+        function thaiCloseConflictModal(){const m=document.getElementById('thai-conflict-modal');m.classList.add('hidden');m.classList.remove('flex');}
+        async function thaiApplyConflictResolution(){
+            if(!thaiConflictRemote)return;
+            if(!confirm('Confermi la scelta? Per ciascuna sezione verrà conservata una sola versione. Il backup locale verrà scaricato prima del salvataggio.'))return;
+            await thaiDownloadBackup();
+            const resolved=structuredClone(thaiConflictRemote);
+            document.querySelectorAll('[data-thai-conflict-field]').forEach(select=>{
+                const field=select.dataset.thaiConflictField;
+                if(select.value==='local')resolved[field]=structuredClone(tripData[field]||[]);
+            });
+            resolved._revision=thaiConflictRemote._revision;
+            tripData=thaiNormalize(resolved);
+            thaiConflict=false;thaiDirty=true;thaiSequence++;
+            thaiCloseConflictModal();thaiPersist();renderApp();thaiShowSync();thaiSyncPending();
+        }
+        function thaiDownloadBackup(){
+            const data=JSON.stringify(tripData,null,2);
+            const blob=new Blob([data],{type:'application/json'});
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');a.href=url;a.download='thai-planner-copia-locale-'+new Date().toISOString().slice(0,10)+'.json';
+            document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+            return Promise.resolve();
+        }
+
 
 
         // Collassi UI: preferenze locali al dispositivo, non al database condiviso.
@@ -1824,6 +1607,8 @@
             if(travellers)thaiWrapFold(travellers,'travellers','👥 Le viaggiatrici');
             const budget=document.querySelector('#tab-budget > div');
             if(budget){
+                const forecast=budget.querySelector('#thai-forecast-panel');
+                if(forecast)thaiWrapFold(forecast,'budget:forecast','🔮 Previsione del viaggio');
                 const estimate=budget.querySelector('section[aria-label="Stima budget a testa"]');
                 if(estimate)thaiWrapFold(estimate,'budget:estimate','🌊 Stima a testa');
                 const balances=budget.querySelector('#thai-budget-balance-panel');
@@ -1831,7 +1616,7 @@
                 const personal=budget.querySelector('section[aria-label="Quanto costa il viaggio a persona"]');
                 if(personal)thaiWrapFold(personal,'budget:personal','💳 Spesa a persona');
             }
-            document.querySelectorAll('#notes-container > div').forEach((node,i)=>thaiWrapFold(node,'note:'+i,'📝 '+(tripData.notes?.[i]?.title||'Nota')));
+            // Le note sono sempre leggibili: nessun Comprimi/Espandi sulle singole note.
             // To Do volutamente compatti: non aggiungere un pannello Comprimi per ogni voce.
             document.querySelectorAll('#expenses-list > .thai-expense-card').forEach(node=>{
                 const key=node.dataset.thaiFoldKey;
