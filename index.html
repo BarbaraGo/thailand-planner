@@ -563,6 +563,80 @@
   #tab-budget .thai-category-grid{font-size:.67rem;gap:.35rem}
   #tab-budget .thai-forecast-actions button{padding:.3rem .4rem}
 }
+
+/* Spaziature uniformi dei pannelli dopo il wrapping Comprimi/Espandi.
+   I contenuti vengono spostati in .thai-fold-body: le classi space-y
+   sul contenitore originale non sono piu' applicate ai singoli riquadri. */
+:root { --thai-card-gap: .85rem; }
+[data-thai-fold-key]:not([data-thai-fold-key^="expense:"]) > .thai-fold-body {
+  display:flex;
+  flex-direction:column;
+  gap:var(--thai-card-gap);
+  min-width:0;
+}
+[data-thai-fold-key]:not([data-thai-fold-key^="expense:"]) > .thai-fold-body > * {
+  margin-top:0!important;
+  margin-bottom:0!important;
+  min-width:0;
+}
+[data-thai-fold-key^="day:"] > .thai-fold-body {
+  gap:var(--thai-card-gap);
+}
+[data-thai-fold-key$=":activities"] > .thai-fold-body {
+  gap:var(--thai-card-gap);
+}
+[data-thai-fold-key$=":activities"] > .thai-fold-body > .activity-detail {
+  margin:0!important;
+}
+#thai-forecast-list,
+#expenses-list {
+  display:flex;
+  flex-direction:column;
+  gap:var(--thai-card-gap)!important;
+}
+#thai-forecast-list > *,
+#expenses-list > * {
+  margin:0!important;
+}
+#tab-budget #thai-forecast-panel > .thai-fold-body {
+  gap:var(--thai-card-gap)!important;
+}
+#tab-budget #thai-forecast-panel > .thai-fold-body > .grid {
+  gap:var(--thai-card-gap)!important;
+}
+#tab-budget #thai-forecast-panel .thai-forecast-row {
+  margin:0!important;
+}
+#tab-budget section[aria-label="Quanto costa il viaggio a persona"] > .thai-fold-body {
+  gap:var(--thai-card-gap)!important;
+}
+#tab-budget #personal-budget-summary,
+#tab-budget #split-summary-box {
+  gap:var(--thai-card-gap)!important;
+}
+#tab-budget .thai-forecast-row {
+  padding:.8rem .9rem;
+}
+#tab-budget .thai-forecast-row > .thai-forecast-actions {
+  margin-top:.1rem;
+}
+#tab-budget .thai-forecast-row + .thai-forecast-row {
+  margin-top:0!important;
+}
+#tab-budget .thai-expense-card {
+  margin:0!important;
+}
+#tab-budget .thai-forecast-stat,
+#tab-budget #thai-forecast-panel .budget-stat {
+  margin:0;
+}
+@media(max-width:767px){
+  :root { --thai-card-gap:.7rem; }
+  #tab-budget #thai-forecast-panel > .thai-fold-body > .grid {
+    gap:.7rem!important;
+  }
+  #tab-budget #thai-forecast-panel .thai-forecast-row { padding:.7rem .75rem; }
+}
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
