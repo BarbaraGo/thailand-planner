@@ -1,5 +1,5 @@
 /* Thai Planner: static shell only. Never cache script.google.com responses or user data. */
-const CACHE_NAME='thai-planner-shell-v3';
+const CACHE_NAME='thai-planner-shell-v4';
 const SCOPE='/thailand-planner/';
 const BASE= SCOPE;
 const EXTERNAL_ASSETS=[
