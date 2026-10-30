@@ -486,6 +486,83 @@
   .thai-converter #thai-rate-label{font-size:.59rem}
 }
 
+
+/* Budget UI refinement: dimensioni coerenti, spazi ridotti, nessun contenuto modificato. */
+#tab-budget > div{gap:1rem}
+#tab-budget .thai-fold-header{margin-bottom:.45rem;gap:.55rem}
+#tab-budget .thai-fold-header > :first-child{min-width:0;overflow-wrap:anywhere}
+#tab-budget .thai-fold-body{min-width:0}
+#tab-budget section[aria-label="Quanto costa il viaggio a persona"]{gap:.6rem}
+#tab-budget section[aria-label="Quanto costa il viaggio a persona"] .thai-fold-body{gap:.7rem}
+#tab-budget .thai-budget-intro{line-height:1.45;max-width:65ch;margin:0}
+#tab-budget .budget-stat{gap:.32rem;padding:.8rem .9rem;min-height:0;box-shadow:none}
+#tab-budget .budget-stat-head{gap:.45rem;font-size:.76rem;line-height:1.3}
+#tab-budget .budget-stat-icon{width:1.8rem;height:1.8rem;font-size:.95rem;border-radius:.55rem}
+#tab-budget .budget-stat-value{font-size:clamp(1.1rem,2vw,1.5rem);line-height:1.2;overflow-wrap:anywhere}
+#tab-budget .budget-stat-note{font-size:.7rem;line-height:1.3}
+#tab-budget .budget-stat-result{font-size:.83rem;line-height:1.4}
+#tab-budget .budget-stat-result b{font-size:.92rem}
+#tab-budget #personal-budget-summary{gap:.65rem}
+#tab-budget #split-summary-box{gap:.65rem}
+#tab-budget .thai-category-summary{padding:.8rem .9rem;font-size:.78rem;min-width:0}
+#tab-budget .thai-category-summary p{margin-bottom:.4rem}
+#tab-budget .thai-category-grid{gap:.4rem .8rem;align-items:baseline}
+#tab-budget .thai-category-grid span,#tab-budget .thai-category-grid b{min-width:0;overflow-wrap:anywhere}
+#tab-budget .thai-category-grid span:nth-child(3n+2),
+#tab-budget .thai-category-grid span:nth-child(3n+3){white-space:nowrap;font-variant-numeric:tabular-nums}
+#tab-budget #thai-forecast-panel{padding:.85rem;gap:.7rem}
+#tab-budget #thai-forecast-panel .thai-fold-body{gap:.75rem}
+#tab-budget #thai-forecast-panel .thai-forecast-stat{padding:.65rem .75rem;gap:.22rem;min-height:0}
+#tab-budget #thai-forecast-panel .thai-forecast-stat span{font-size:.69rem;line-height:1.3}
+#tab-budget #thai-forecast-panel .thai-forecast-stat strong{font-size:clamp(.95rem,1.65vw,1.25rem);line-height:1.25;white-space:normal}
+#tab-budget #thai-forecast-panel .budget-stat strong{font-size:clamp(1.05rem,1.8vw,1.4rem);line-height:1.2}
+#tab-budget #thai-forecast-panel button[onclick="thaiOpenForecast()"]{min-height:36px;padding:.4rem .65rem;font-size:.74rem;flex:0 0 auto}
+#tab-budget #thai-forecast-list{gap:.55rem}
+#tab-budget .thai-forecast-row{display:grid;grid-template-columns:1.8rem minmax(0,1fr) auto;align-items:center;gap:.5rem .7rem;padding:.65rem .75rem}
+#tab-budget .thai-forecast-icon{grid-column:1;grid-row:1}
+#tab-budget .thai-forecast-row>div.flex-1{grid-column:2;grid-row:1}
+#tab-budget .thai-forecast-row>strong{grid-column:3;grid-row:1;white-space:nowrap;font-variant-numeric:tabular-nums;font-size:.95rem;margin:0}
+#tab-budget .thai-forecast-actions{grid-column:2 / -1;grid-row:2;justify-content:flex-end;gap:.35rem}
+#tab-budget .thai-forecast-actions button{flex:0 0 auto;min-height:34px;padding:.3rem .55rem;font-size:.73rem}
+#tab-budget .thai-expense-heading{margin:.25rem 0 0;font-size:.9rem}
+#tab-budget #expenses-list{gap:.6rem}
+#tab-budget .thai-expense-card{padding:.7rem .8rem}
+#tab-budget .thai-expense-head{gap:.6rem}
+#tab-budget .thai-expense-name{font-size:.85rem}
+#tab-budget .thai-expense-meta{font-size:.72rem}
+#tab-budget .thai-expense-icon{width:1.85rem;height:1.85rem;font-size:1rem}
+#tab-budget .thai-expense-amount{font-size:.95rem}
+#tab-budget .thai-expense-details{margin-top:.6rem;padding-top:.55rem}
+#tab-budget .thai-expense-actions{margin-top:.6rem;gap:.4rem}
+#tab-budget .thai-expense-actions button{min-height:36px;padding:.35rem .7rem;font-size:.75rem}
+#tab-budget #expense-filter-sum{font-variant-numeric:tabular-nums}
+@media(max-width:767px){
+  #tab-budget>div{padding:.8rem!important;gap:.8rem}
+  #tab-budget .thai-category-grid{gap:.4rem .45rem;font-size:.7rem}
+  #tab-budget .thai-category-summary{padding:.7rem}
+  #tab-budget .thai-category-grid span:nth-child(3n+2),
+  #tab-budget .thai-category-grid span:nth-child(3n+3){white-space:normal;text-align:right}
+  #tab-budget #personal-budget-summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem}
+  #tab-budget #personal-budget-summary .budget-stat{padding:.6rem;gap:.25rem}
+  #tab-budget #personal-budget-summary .budget-stat-head{font-size:.7rem;flex-wrap:wrap}
+  #tab-budget #personal-budget-summary .budget-stat-value{font-size:clamp(.95rem,3.5vw,1.25rem)}
+  #tab-budget #personal-budget-summary .budget-stat-note{font-size:.66rem}
+  #tab-budget .thai-forecast-row{grid-template-columns:1.5rem minmax(0,1fr) auto;gap:.45rem;padding:.6rem}
+  #tab-budget .thai-forecast-row>strong{font-size:.82rem}
+  #tab-budget .thai-forecast-actions{grid-column:1 / -1;justify-content:flex-start;flex-wrap:wrap}
+  #tab-budget .thai-forecast-actions button{flex:0 1 auto;font-size:.7rem;min-height:36px}
+  #tab-budget #thai-forecast-panel .grid.grid-cols-2.gap-2.sm\\:grid-cols-4{gap:.45rem}
+  #tab-budget #thai-forecast-panel .thai-forecast-stat{padding:.55rem}
+  #tab-budget #thai-forecast-panel .thai-forecast-stat strong{font-size:clamp(.85rem,3.5vw,1.05rem)}
+  #tab-budget .thai-expense-head{gap:.4rem}
+  #tab-budget .thai-expense-amount{font-size:.84rem}
+  #tab-budget .thai-expense-chevron{width:35px;min-width:35px;height:38px}
+}
+@media(max-width:360px){
+  #tab-budget #personal-budget-summary{grid-template-columns:1fr}
+  #tab-budget .thai-category-grid{font-size:.67rem;gap:.35rem}
+  #tab-budget .thai-forecast-actions button{padding:.3rem .4rem}
+}
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
@@ -635,7 +712,7 @@
                         <!-- Budget previsionale separato dalle spese effettive -->
                         <section id="thai-forecast-panel" class="rounded-2xl border border-cyan-200 dark:border-cyan-700/60 bg-cyan-50 dark:bg-cyan-950/25 p-4 space-y-3" aria-label="Previsione di spesa">
                           <div class="flex flex-wrap gap-2 justify-between items-start">
-                            <div><h3 class="font-bold text-base">🔮 Previsione completa del viaggio</h3><p class="text-xs text-slate-600 dark:text-slate-300">Spese pagate + costi previsti ancora da pagare. Non inserire qui importi già presenti nell'elenco spese.</p></div>
+                            <p class="thai-budget-intro text-xs text-slate-600 dark:text-slate-300">Spese pagate + costi ancora da pagare. Le spese già registrate non vanno inserite nuovamente.</p>
                             <button onclick="thaiOpenForecast()" type="button" class="thai-action min-h-[44px]">+ Aggiungi previsione</button>
                           </div>
                           <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -658,19 +735,13 @@
 
                         <!-- Quota effettiva di spesa per ciascuna persona -->
                         <section aria-label="Quanto costa il viaggio a persona" class="space-y-3">
-                            <div>
-                                <h3 class="font-bold text-sm">💳 Spesa effettiva a persona</h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-300">Quanto spetta a ciascuna, indipendentemente da chi ha anticipato i soldi.</p>
-                            </div>
+                            <p class="thai-budget-intro text-xs text-slate-500 dark:text-slate-300">Quota di spesa di ciascuna, indipendentemente da chi ha anticipato il denaro.</p>
                             <div id="personal-budget-summary" class="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-live="polite"></div>
-                            <div id="personal-category-summary" class="rounded-xl border border-slate-200 dark:border-slate-600 p-3 text-xs space-y-2"></div>
+                            <div id="personal-category-summary" class="thai-category-summary rounded-xl border border-slate-200 dark:border-slate-600 p-3 text-xs space-y-2"></div>
                         </section>
 
                         <!-- Pulsante aggiungi spesa -->
-                        <div class="flex justify-between items-center pt-2">
-                            <h3 class="font-bold text-sm">Elenco Spese</h3>
-
-                        </div>
+                        <h3 class="thai-expense-heading font-bold text-sm">Elenco spese</h3>
 
                         <div class="flex flex-wrap items-center gap-2 text-xs">
                             <label for="expense-category-filter" class="font-semibold">Filtra categoria</label>
@@ -1521,7 +1592,7 @@
             const put=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=formatEUR(v);};
             put('thai-forecast-paid',paid);put('thai-forecast-unpaid',unpaid);put('thai-forecast-total',paid+unpaid);
             put('thai-forecast-half',(paid+unpaid)/2);put('thai-forecast-barbara',b);put('thai-forecast-laura',l);
-            document.getElementById('thai-forecast-list').innerHTML=items.map((e,i)=>`<article class="thai-forecast-row"><span class="text-xl" aria-hidden="true">${thaiExpenseIcon(e.category)}</span><div class="flex-1 min-w-0"><strong class="block break-words">${thaiEsc(e.title)}</strong><span class="text-xs opacity-80">${thaiEsc(e.category||'Altro')} · ${e.split==='uguale'?'50/50':thaiEsc(e.split)}</span></div><strong>${formatEUR(e.amount)}</strong><div class="thai-forecast-actions"><button type="button" onclick="thaiOpenForecast(${i})">✏️ Modifica</button><button type="button" onclick="thaiForecastPaid(${i})">✓ Pagata</button><button type="button" onclick="thaiDeleteForecast(${i})">🗑️ Elimina</button></div></article>`).join('')||'<p class="text-xs opacity-80">Non hai ancora inserito spese future. Le prenotazioni nell’itinerario non vengono conteggiate automaticamente.</p>';
+            document.getElementById('thai-forecast-list').innerHTML=items.map((e,i)=>`<article class="thai-forecast-row"><span class="thai-forecast-icon text-xl" aria-hidden="true">${thaiExpenseIcon(e.category)}</span><div class="flex-1 min-w-0"><strong class="block break-words">${thaiEsc(e.title)}</strong><span class="text-xs opacity-80">${thaiEsc(e.category||'Altro')} · ${e.split==='uguale'?'50/50':thaiEsc(e.split)}</span></div><strong>${formatEUR(e.amount)}</strong><div class="thai-forecast-actions"><button type="button" onclick="thaiOpenForecast(${i})">✏️ Modifica</button><button type="button" onclick="thaiForecastPaid(${i})">✓ Pagata</button><button type="button" onclick="thaiDeleteForecast(${i})">🗑️ Elimina</button></div></article>`).join('')||'<p class="text-xs opacity-80">Non hai ancora inserito spese future. Le prenotazioni nell’itinerario non vengono conteggiate automaticamente.</p>';
         }
         function renderBudget(){
             const arr=tripData.expenses||[];let total=0,barbPaid=0,lauraPaid=0,barbOwes=0;
@@ -1548,7 +1619,7 @@
               <div class="budget-stat budget-laura" aria-label="Costo del viaggio per Laura"><div class="budget-stat-head"><span class="budget-stat-icon" aria-hidden="true">🥙</span><span>Spesa di Laura</span></div><strong class="budget-stat-value">${formatEUR(shares.Laura)}</strong><p class="budget-stat-note">Quota personale del totale</p></div>`;
             document.getElementById('personal-category-summary').innerHTML=`
               <p class="font-bold mb-2">Ripartizione per categoria</p>
-              <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3 gap-y-2 items-center">
+              <div class="thai-category-grid grid grid-cols-[minmax(0,1fr)_auto_auto] gap-x-3 gap-y-2 items-center">
                 <span class="text-slate-500 dark:text-slate-300">Categoria</span><b class="text-right">Barbara</b><b class="text-right">Laura</b>
                 ${Object.entries(categoryShares).sort((a,b)=>a[0].localeCompare(b[0],'it')).map(([cat,v])=>`<span>${thaiExpenseIcon(cat)} ${thaiEsc(cat)}</span><span class="text-right tabular-nums">${formatEUR(v.Barbara)}</span><span class="text-right tabular-nums">${formatEUR(v.Laura)}</span>`).join('')||'<span class="col-span-3 text-slate-500 dark:text-slate-300">Nessuna spesa registrata.</span>'}
               </div>`;
