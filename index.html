@@ -411,6 +411,7 @@
                     <button onclick="exportJSONData()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Esporta JSON">
                         <i class="fa-solid fa-download"></i>
                     </button>
+                    <button type="button" onclick="thaiShowBackups()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm" title="Backup e ripristino">🗂️</button>
                     <button onclick="thaiRefresh()" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg text-sm transition" title="Aggiorna Dati ora">
                         <i class="fa-solid fa-rotate"></i>
                     </button>
@@ -433,6 +434,7 @@
                         <i class="fa-solid fa-calendar-days text-base w-5 text-center"></i>
                         <span>Itinerario</span>
                     </button>
+                    <button onclick="switchTab('today')" data-tab="today" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50"><i class="fa-solid fa-sun text-base w-5 text-center"></i><span>Oggi</span></button>
                     <button onclick="switchTab('budget')" data-tab="budget" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition text-left text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
                         <i class="fa-solid fa-wallet text-base w-5 text-center"></i>
                         <span>Budget & Costi</span>
@@ -447,32 +449,10 @@
                     </button>
                 </nav>
 
-                <!-- Box Voli Saudia -->
-                <section class="flight-card order-3 md:order-2 bg-teal-50 dark:bg-teal-950/30 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-teal-200 dark:border-teal-800 shadow-sm space-y-3 text-xs">
-                    <div class="flex justify-between items-center border-b border-teal-200 dark:border-teal-800 pb-2">
-                        <h2 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-plane text-brand-600"></i> Voli Saudia</h2>
-                        <span class="bg-sky-100 text-sky-900 dark:bg-sky-900 dark:text-sky-200 px-2 py-0.5 rounded text-[10px] font-mono font-bold">PNR: consulta prenotazione privata</span>
-                    </div>
-                    <div class="space-y-1.5">
-                        <p class="font-bold text-brand-700 dark:text-brand-400 flex items-center gap-1">
-                            <i class="fa-solid fa-plane-departure"></i> ANDATA · 26–27 Dic
-                        </p>
-                        <div class="pl-3 border-l-2 border-brand-300 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
-                            <p><b>SV 206:</b> FCO 09:30 → RUH 16:30</p>
-                            <p class="text-slate-400 italic">Scalo a Riad (RUH): 10h 05m</p>
-                            <p><b>SV 847:</b> RUH 02:35 (+1) → BKK 13:40</p>
-                        </div>
-                    </div>
-                    <div class="space-y-1.5 pt-2 border-t border-teal-200 dark:border-teal-800">
-                        <p class="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
-                            <i class="fa-solid fa-plane-arrival"></i> RITORNO · 10–11 Gen
-                        </p>
-                        <div class="pl-3 border-l-2 border-emerald-300 space-y-1 text-[11px] text-slate-600 dark:text-slate-300">
-                            <p><b>SV 846:</b> BKK 15:20 → RUH 19:10</p>
-                            <p class="text-slate-400 italic">Scalo a Riad (RUH): 6h 45m</p>
-                            <p><b>SV 201:</b> RUH 01:55 (+1) → FCO 06:15</p>
-                        </div>
-                    </div>
+                <!-- Voli caricati soltanto dal database autenticato -->
+                <section class="flight-card order-3 md:order-2 bg-amber-50 dark:bg-amber-950/20 text-slate-800 dark:text-slate-100 p-4 rounded-2xl border border-amber-200 dark:border-amber-800 shadow-sm space-y-3 text-xs">
+                  <div class="flex items-center justify-between gap-2 flex-wrap"><h2 class="font-bold text-base">✈️ Voli e prenotazioni</h2><button onclick="thaiEditFlight()" class="thai-action">+ Aggiungi volo</button></div>
+                  <div id="thai-flights-list" class="space-y-2"><p>Accedi per visualizzare i voli.</p></div>
                 </section>
 
                 <!-- Box Viaggiatrici & Countdown -->
@@ -503,6 +483,7 @@
                     <div id="days-container" class="space-y-4"></div>
                 </section>
 
+                <section id="tab-today" class="tab-content hidden space-y-3"><div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-teal-200 dark:border-teal-800"><div class="flex flex-wrap justify-between gap-2 items-center"><h2 class="font-bold text-lg">☀️ La tua giornata</h2><select id="thai-today-day" class="thai-field max-w-[220px]" onchange="thaiRenderToday()" aria-label="Seleziona giornata"></select></div><p class="text-xs opacity-75">Durante il viaggio viene selezionato automaticamente il giorno corrente. Puoi cambiare giornata dal menu.</p></div><div id="thai-today-content" class="space-y-3"></div></section>
                 <!-- Tab Budget -->
                 <section id="tab-budget" class="tab-content budget-page hidden space-y-4">
                     <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
@@ -714,6 +695,8 @@
             </div>
         </form>
     </div>
+    <div id="thai-flight-modal" class="hidden fixed inset-0 z-[90] bg-black/65 items-center justify-center p-3 overflow-y-auto"><div class="bg-white dark:bg-slate-800 w-full max-w-xl rounded-xl p-5 my-8 mx-auto space-y-3"><h2 class="text-lg font-bold">✈️ Gestisci volo</h2><form onsubmit="thaiSaveFlight(event)" class="grid sm:grid-cols-2 gap-3"><label class="text-sm font-medium">Andata / Ritorno<input id="thai-flight-route" type="text" class="thai-field w-full" ></label><label class="text-sm font-medium">Compagnia<input id="thai-flight-company" type="text" class="thai-field w-full" ></label><label class="text-sm font-medium">Numero volo<input id="thai-flight-number" type="text" class="thai-field w-full" ></label><label class="text-sm font-medium">Data<input id="thai-flight-date" type="date" class="thai-field w-full" ></label><label class="text-sm font-medium">Aeroporto partenza<input id="thai-flight-from" type="text" class="thai-field w-full" required></label><label class="text-sm font-medium">Aeroporto arrivo<input id="thai-flight-to" type="text" class="thai-field w-full" required></label><label class="text-sm font-medium">Orario partenza<input id="thai-flight-depart" type="time" class="thai-field w-full" ></label><label class="text-sm font-medium">Orario arrivo<input id="thai-flight-arrive" type="time" class="thai-field w-full" ></label><label class="text-sm font-medium">PNR prenotazione<input id="thai-flight-reference" type="text" class="thai-field w-full" ></label><label class="text-sm font-medium">Link biglietto<input id="thai-flight-link" type="text" class="thai-field w-full" ></label><label class="text-sm font-medium">Note<input id="thai-flight-notes" type="text" class="thai-field w-full" ></label><div class="sm:col-span-2 flex justify-end gap-2"><button type="button" onclick="thaiFlightModalClose()" class="thai-action">Annulla</button><button type="submit" class="thai-action">Salva volo</button></div></form></div></div>
+    <div id="thai-backups-modal" class="hidden fixed inset-0 z-[90] bg-black/65 p-3 overflow-y-auto"><div class="bg-white dark:bg-slate-800 rounded-2xl p-5 max-w-xl mx-auto my-8 space-y-3"><h2 class="font-bold text-lg">🗂️ Backup del planner</h2><p class="text-xs opacity-75">Il ripristino sostituisce i dati attuali per entrambi i dispositivi. Prima viene conservato un backup della versione corrente.</p><div id="thai-backups-list"></div><button class="thai-action" onclick="document.getElementById('thai-backups-modal').classList.add('hidden')">Chiudi</button></div></div>
     <script>
         function thaiToggleTheme() {
             const dark = document.documentElement.classList.toggle('dark');
@@ -727,7 +710,7 @@
         })();
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEctxIJynpq1Cy4oF1wOI-75Mlwgyd_NL7IT3v8eIvArkQdXkgwpCQtAj_0jMMAVqDAw/exec";
 
-        let tripData = { days: [], todos: [], notes: [], expenses: [], plannedExpenses: [] };
+        let tripData = { days: [], todos: [], notes: [], expenses: [], plannedExpenses: [], flights: [] };
 
         // Funzione di formattazione importi con punto per migliaia e virgola per decimali (es. 2.295,00€)
         function formatEUR(amount) {
@@ -813,6 +796,7 @@
         const THAI_SESSION_KEY='thaiPlannerSession_v1';
         const THAI_BASE_KEY='thaiPlannerSyncedBase_v1';
         let thaiToken=localStorage.getItem(THAI_SESSION_KEY)||'';
+        function thaiTokenLooksCurrent(){try{const part=thaiToken.split('.')[0];const payload=JSON.parse(atob(part.replace(/-/g,'+').replace(/_/g,'/')));return Number(payload.exp)>Date.now();}catch(e){return false;}}
         let thaiLoginBusy=false;
         let thaiBase=null;
         try { thaiBase=JSON.parse(localStorage.getItem(THAI_BASE_KEY)||'null'); } catch(e){}
@@ -820,10 +804,20 @@
             thaiBase=structuredClone(data);
             try{localStorage.setItem(THAI_BASE_KEY,JSON.stringify(thaiBase));}catch(e){console.warn('Base sync non salvata',e);}
         }
-        function thaiLogout(){
-            thaiToken='';localStorage.removeItem(THAI_SESSION_KEY);
-            alert('Dispositivo disconnesso. Ti sarà chiesto il codice al prossimo accesso.');
+        async function thaiLogout(){
+            if(thaiDirty){alert('Ci sono modifiche da sincronizzare: attendi il salvataggio prima di uscire.');return;}
+            const old=thaiToken;
+            try{if(old)await thaiApi({action:'logout',_sessionToken:old});}
+            catch(e){alert('Impossibile revocare la sessione sul server. Riprova quando sei online.');return;}
+            thaiToken='';localStorage.removeItem(THAI_SESSION_KEY);localStorage.removeItem(THAI_STORAGE);localStorage.removeItem(THAI_BASE_KEY);thaiBase=null;tripData={days:[],todos:[],notes:[],expenses:[],plannedExpenses:[],flights:[]};renderApp();
+            alert('Sessione revocata. Al prossimo accesso servirà il codice.');
         }
+        async function thaiApi(input){
+            const response=await fetch(GOOGLE_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({_sessionToken:thaiToken,...input}),cache:'no-store'});
+            if(!response.ok)throw Error('HTTP '+response.status);
+            return response.json();
+        }
+        async function thaiReadRemote(){return thaiApi({action:'read'});}
         async function thaiAskAccessKey(){
             if(thaiLoginBusy)return false;
             const key=prompt('Inserisci il codice di accesso Thai Planner (solo al primo accesso su questo dispositivo):');
@@ -838,7 +832,6 @@
             }catch(e){alert('Accesso non riuscito: '+e.message);return false;}
             finally{thaiLoginBusy=false;}
         }
-        function thaiRemoteUrl(){const u=new URL(GOOGLE_SCRIPT_URL);if(thaiToken)u.searchParams.set('token',thaiToken);return u.href;}
         async function thaiAuthError(d){
             if(d && (d.status==='unauthorized'||d.status==='setup_required')){
                 if(d.status==='setup_required'){alert(d.message);return true;}
@@ -888,10 +881,11 @@
             return `<a href="${thaiEsc(href)}" target="_blank" rel="noopener noreferrer" class="thai-hotel-map-link" aria-label="Apri indirizzo hotel su Google Maps">📍 ${thaiEsc(val)} <span aria-hidden="true">↗</span></a>`;
         };
         const thaiBtn = (label, handler, cls='') => `<button type="button" onclick="${handler}" class="thai-action ${cls}">${label}</button>`;
-        const thaiValid = d => d && typeof d === 'object' && Array.isArray(d.days) && Array.isArray(d.todos) && Array.isArray(d.notes) && (d.expenses === undefined || Array.isArray(d.expenses)) && (d.plannedExpenses === undefined || Array.isArray(d.plannedExpenses));
+        const thaiValid = d => d && typeof d === 'object' && Array.isArray(d.days) && Array.isArray(d.todos) && Array.isArray(d.notes) && (d.expenses === undefined || Array.isArray(d.expenses)) && (d.plannedExpenses === undefined || Array.isArray(d.plannedExpenses)) && (d.flights === undefined || Array.isArray(d.flights));
         function thaiNormalize(d) {
             if (!Array.isArray(d.expenses)) d.expenses=[];
             if(!Array.isArray(d.plannedExpenses))d.plannedExpenses=[];
+            if(!Array.isArray(d.flights))d.flights=[];
             d.days.forEach(day => { if(!Array.isArray(day.activities)) day.activities=[]; if(!Array.isArray(day.transports)) day.transports=[]; });
             return d;
         }
@@ -908,10 +902,10 @@
         function initApp() {
             calculateCountdown();thaiRenderExchangeRate();
             if('serviceWorker' in navigator)navigator.serviceWorker.register('/thailand-planner/sw.js').catch(e=>console.warn('Offline shell:',e));
-            try { const cache=JSON.parse(localStorage.getItem(THAI_STORAGE)||'null'); if(thaiValid(cache)) { tripData=thaiNormalize(cache); renderApp(); } } catch(e) { console.warn('Cache non valida',e); }
+            try { const cache=JSON.parse(localStorage.getItem(THAI_STORAGE)||'null'); if(thaiTokenLooksCurrent() && thaiValid(cache)) { tripData=thaiNormalize(cache); renderApp(); } } catch(e) { console.warn('Cache non valida',e); }
             if(thaiDirty) { thaiShowSync(); if(navigator.onLine) setTimeout(thaiSyncPending,500); }
             else fetchDataFromSheet();
-            setInterval(()=>{if(!document.hidden && navigator.onLine){if(thaiDirty)thaiSyncPending();else fetchDataFromSheet();}},30000);
+            setInterval(()=>{if(!document.hidden && navigator.onLine && !thaiEditingVisible()){if(thaiDirty)thaiSyncPending();else fetchDataFromSheet();}},15000);
         }
         async function fetchDataFromSheet() {
             if(thaiDirty || thaiSaving) { thaiShowSync(); return; }
@@ -919,12 +913,11 @@
             thaiLoadStarted=true;
             updateSyncStatus('⌛ Caricamento...', 'bg-sky-100 text-sky-800');
             try {
-                const response=await fetch(thaiRemoteUrl(),{cache:'no-store'});
-                if(!response.ok) throw Error('HTTP '+response.status);
-                const data=await response.json();
+                const data=await thaiReadRemote();
                 if(await thaiAuthError(data))return;
                 if(!thaiValid(data)) throw Error(data.message || 'Dati server non validi');
                 if(thaiDirty) { thaiShowSync(); return; }
+                if(thaiBase && Number(thaiBase._revision)===Number(data._revision)){thaiShowSync();return;}
                 tripData=thaiNormalize(data);
                 thaiStoreBase(tripData);
                 localStorage.setItem(THAI_STORAGE,JSON.stringify(tripData));
@@ -942,7 +935,7 @@
         // Fusione prudente a tre vie: elimina ambiguita solo se si puo stabilire
         // senza dubbio quale elemento e' stato modificato. In caso contrario
         // mantiene il blocco di conflitto, senza perdere dati.
-        const THAI_SYNC_LISTS=['days','todos','notes','expenses','plannedExpenses'];
+        const THAI_SYNC_LISTS=['days','todos','notes','expenses','plannedExpenses','flights'];
         function thaiFingerprint(v){return JSON.stringify(v);}
         function thaiMergeArray(base,local,remote){
             if(thaiFingerprint(local)===thaiFingerprint(base))return remote;
@@ -977,8 +970,7 @@
         }
         async function thaiAutoMerge(localSnapshot,expectedSequence){
             if(!thaiBase)return false;
-            const res=await fetch(thaiRemoteUrl(),{cache:'no-store'});
-            const remote=await res.json();
+            const remote=await thaiReadRemote();
             if(await thaiAuthError(remote))return false;
             if(!thaiValid(remote))throw Error('Impossibile leggere il server');
             const merged=thaiThreeWayMerge(thaiBase,localSnapshot,remote);
@@ -1303,10 +1295,10 @@
                   <div class="flex justify-between items-start gap-2"><div class="flex gap-2 items-start"><span class="day-drag-handle cursor-grab p-1 text-slate-400">☷</span><div><p class="text-[11px] font-bold text-brand-600">GIORNO ${thaiEsc(d.id)} · ${thaiEsc(d.date||'')}</p><h3 class="font-bold">${thaiEsc(d.title||'Tappa')}</h3></div></div><div class="flex gap-2">${thaiBtn('✏️',`openDayModal(${i})`)}${thaiBtn('🗑️',`deleteDay(${i})`)}</div></div>
                   <div class="flex flex-wrap gap-2">${thaiBtn(hotel || d.link || d.cancellation || d.hotel_status === 'Prenotato' ? '🏨 Gestisci hotel' : '🏨 Aggiungi hotel',`openHotelModal(${i})`)}${thaiBtn('🚆 Aggiungi spostamento',`openTransportModal(${i})`)}${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}</div>
                   ${checkoutStays.map(stay=>thaiSharedHotelCard(stay,d.date)).join('')}
-                  ${(hotel?.name) ? `<div class="thai-section hotel-detail text-xs space-y-2"><div class="flex items-center justify-between flex-wrap gap-2"><p class="font-bold">🏨 ${hotel?.checkin && thaiDateKey(hotel.checkin)===thaiDateKey(d.date)?'Check-in oggi · ':''}Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p><span class="flex flex-wrap gap-2"><button type="button" onclick="thaiOpenMove('hotel',${i})" class="thai-action" aria-label="Sposta hotel in un altro giorno">↔️ Sposta hotel</button><button type="button" onclick="thaiDeleteHotel(${i})" class="rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-2 text-rose-700 dark:text-rose-200 font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Elimina hotel dalla giornata">🗑️ Elimina hotel</button></span></div>${hotel?.name?`<p class="thai-hotel-name"><strong>${thaiEsc(hotel.name)}</strong></p>`:''}${thaiHotelNightLabel(hotel,d.date)?`<span class="thai-night-tag">${thaiEsc(thaiHotelNightLabel(hotel,d.date))}</span>`:''}${hotel?.address?`<p>${thaiHotelAddress(hotel.address)}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${hotel?.cost !== undefined && hotel?.cost !== null && hotel?.cost !== '' ? `<p class="font-bold text-sm">💶 Prezzo totale hotel: ${formatEUR(hotel.cost)} <span class="font-normal opacity-75">(non aggiunto automaticamente al budget)</span></p>` : ''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${(hotel?.cancellation||d.cancellation)?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(hotel?.cancellation||d.cancellation)}</p>`:''}</div>` : ''}
+                  ${(hotel?.name) ? `<div class="thai-section hotel-detail text-xs space-y-2"><div class="flex items-center justify-between flex-wrap gap-2"><p class="font-bold">🏨 ${hotel?.checkin && thaiDateKey(hotel.checkin)===thaiDateKey(d.date)?'Check-in oggi · ':''}Hotel ${thaiEsc(hotel?.status||d.hotel_status||'Da prenotare')}</p><span class="flex flex-wrap gap-2"><button type="button" onclick="thaiOpenMove('hotel',${i})" class="thai-action" aria-label="Sposta hotel in un altro giorno">↔️ Sposta hotel</button><button type="button" onclick="thaiDeleteHotel(${i})" class="rounded-lg border border-rose-300 dark:border-rose-700 px-3 py-2 text-rose-700 dark:text-rose-200 font-semibold hover:bg-rose-50 dark:hover:bg-rose-900/30" aria-label="Elimina hotel dalla giornata">🗑️ Elimina hotel</button></span></div>${hotel?.name?`<p class="thai-hotel-name"><strong>${thaiEsc(hotel.name)}</strong></p>`:''}${thaiHotelNightLabel(hotel,d.date)?`<span class="thai-night-tag">${thaiEsc(thaiHotelNightLabel(hotel,d.date))}</span>`:''}${hotel?.address?`<p>${thaiHotelAddress(hotel.address)}</p>`:''}${hotel?.checkin?`<p>Check-in: ${thaiEsc(hotel.checkin)}</p>`:''}${hotel?.checkout?`<p>Check-out: ${thaiEsc(hotel.checkout)}</p>`:''}${hotel?.reference?`<p>Prenotazione: ${thaiEsc(hotel.reference)}</p>`:''}${hotel?.cost !== undefined && hotel?.cost !== null && hotel?.cost !== '' ? `<p class="font-bold text-sm">💶 Prezzo totale hotel: ${formatEUR(hotel.cost)} <span class="font-normal opacity-75">(non aggiunto automaticamente al budget)</span></p>` : ''}${thaiLink(hotel?.link||d.link,'Apri prenotazione')}${hotel?.cost!==''&&hotel?.cost!=null?thaiBtn('💶 Collega al budget',`thaiLinkBookingCost('hotel',${i})`):''}${hotel?.notes?`<p>${thaiEsc(hotel.notes)}</p>`:''}${(hotel?.cancellation||d.cancellation)?`<p class="mt-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-700 px-2.5 py-2 text-emerald-800 dark:text-emerald-200"><b>✅ Condizioni di cancellazione hotel:</b> ${thaiEsc(hotel?.cancellation||d.cancellation)}</p>`:''}</div>` : ''}
                   ${otherStays.map(stay=>thaiSharedHotelCard(stay,d.date)).join('')}
                   
-                  ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<div class="thai-legacy"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-semibold">📌 Descrizione trasporto importata</span><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},\'transport_details\')`)}</div></div><p class="whitespace-pre-wrap mt-1">${thaiEsc(d.transport_details)}</p><p class="thai-help">È un testo salvato nel vecchio itinerario, non un biglietto o una spesa. Puoi rimuoverlo dopo aver creato lo spostamento qui sopra.</p></div>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('↔️ Sposta',`thaiOpenMove('transport',${i},${j})`)} ${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
+                  ${(transport.length || d.transport_details)?`<div class="thai-section transport-detail text-xs space-y-2"><h4 class="font-bold">🚆 Spostamenti</h4>${d.transport_details?`<div class="thai-legacy"><div class="flex flex-wrap justify-between items-center gap-2"><span class="font-semibold">📌 Descrizione trasporto importata</span><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},\'transport_details\')`)}</div></div><p class="whitespace-pre-wrap mt-1">${thaiEsc(d.transport_details)}</p><p class="thai-help">È un testo salvato nel vecchio itinerario, non un biglietto o una spesa. Puoi rimuoverlo dopo aver creato lo spostamento qui sopra.</p></div>`:''}${transport.map((t,j)=>`<div class="border-t border-slate-200 dark:border-slate-700 pt-2"><div class="flex flex-wrap justify-between gap-2"><span class="font-semibold">${thaiTransportLabel(t)}</span><span>${thaiBtn('↔️ Sposta',`thaiOpenMove('transport',${i},${j})`)} ${thaiBtn('✏️',`openTransportModal(${i},${j})`)} ${thaiBtn('🗑️',`thaiDelete('transport',${i},${j})`)}</span></div><p>${thaiEsc(t.date||'')} ${thaiEsc(t.departure||'')} → ${thaiEsc(t.arrival||'')} · ${thaiEsc(t.status||'Da prenotare')}</p>${t.cost!==''&&t.cost!=null?`<p>Costo: ${formatEUR(t.cost)} ${thaiBtn('💶 Collega al budget',`thaiLinkBookingCost('transport',${i},${j})`)}</p>`:''}${t.reference?`<p>Rif.: ${thaiEsc(t.reference)}</p>`:''}${t.notes?`<p>${thaiEsc(t.notes)}</p>`:''}${thaiLink(t.link,'Biglietto / prenotazione')}</div>`).join('')}</div>`:''}
                   ${d.cost?`<div class="thai-legacy text-xs"><div class="flex flex-wrap items-center justify-between gap-2"><b>💶 Importo del vecchio itinerario: ${thaiEsc(d.cost)}</b><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},'cost')`)}</div></div><p class="thai-help">È un valore generico importato: non è stato attribuito a hotel, trasporti o budget. Se è una spesa reale, registrala in Budget & Costi, poi rimuovi questo valore.</p></div>`:''}
                   ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
                   <div class="flex justify-between gap-2 items-center"><h4 class="font-bold text-sm">Attività (${activities.length})</h4></div>
@@ -1376,7 +1368,7 @@
             if(paidBy===null)return;
             const payer=paidBy.trim().toLowerCase()==='laura'?'Laura':paidBy.trim().toLowerCase()==='barbara'?'Barbara':null;
             if(!payer){alert('Inserisci Barbara o Laura.');return;}
-            tripData.expenses.push({title:item.title,amount:item.amount,category:item.category,split:item.split,payer});
+            tripData.expenses.push({title:item.title,amount:item.amount,category:item.category,split:item.split,payer,_sourceId:item._sourceId});
             tripData.plannedExpenses.splice(i,1);saveDataToSheet();renderApp();
         }
         function thaiRenderForecast(paid,shares){
@@ -1479,7 +1471,7 @@
             tripData.days[dayIndex][field]='';
             saveDataToSheet();renderApp();
         }
-        function renderApp(){renderItinerary();renderBudget();renderTodos();renderNotes();initDragAndDrop();thaiInstallFolds();}
+        function renderApp(){renderItinerary();renderBudget();renderTodos();renderNotes();thaiRenderFlights();thaiRenderToday();initDragAndDrop();thaiInstallFolds();}
         let thaiSortable, thaiTodoSortable;
         function initDragAndDrop(){
             if(!window.Sortable)return;
@@ -1572,13 +1564,11 @@
             document.addEventListener('touchcancel', function(){tracking=false;distance=0;hide();}, {passive:true});
         })();
         let thaiConflictRemote=null;
-        const THAI_MERGE_FIELDS=[['days','Itinerario, hotel e trasporti'],['todos','To Do'],['notes','Note'],['expenses','Spese pagate'],['plannedExpenses','Spese future previste']];
+        const THAI_MERGE_FIELDS=[['days','Itinerario, hotel e trasporti'],['todos','To Do'],['notes','Note'],['expenses','Spese pagate'],['plannedExpenses','Spese future previste'],['flights','Voli']];
         async function thaiResolveConflict(){
             if(!thaiConflict)return;
             try{
-                const res=await fetch(thaiRemoteUrl(),{cache:'no-store'});
-                if(!res.ok)throw Error('HTTP '+res.status);
-                const data=await res.json();
+                const data=await thaiReadRemote();
                 if(!thaiValid(data))throw Error(data.message||'Risposta non valida');
                 thaiConflictRemote=thaiNormalize(data);
                 const container=document.getElementById('thai-conflict-choices');
@@ -1720,6 +1710,73 @@
             });
             document.querySelectorAll('details.thai-linked-stay').forEach(detail=>{detail.open=!collapsed;});
             thaiRememberFolds();
+        }
+
+        /* Versione finale: voli in database, ripristino, budget collegato e vista Oggi */
+        let thaiFlightEditIndex=-1;
+        function thaiEditingVisible(){return ['thai-modal','expense-modal','thai-forecast-modal','thai-flight-modal','thai-backups-modal','thai-conflict-modal'].some(id=>{const e=document.getElementById(id);return e&&!e.classList.contains('hidden');}) || !!document.activeElement?.closest('input,textarea,select,[contenteditable="true"]');}
+        function thaiFlightModalClose(){document.getElementById('thai-flight-modal').classList.add('hidden');document.getElementById('thai-flight-modal').classList.remove('flex');}
+        function thaiEditFlight(i=-1){
+            thaiFlightEditIndex=i;
+            const f=i>=0?tripData.flights[i]:{};
+            for(const field of ['route','company','number','date','depart','arrive','from','to','reference','link','notes'])document.getElementById('thai-flight-'+field).value=f[field]||'';
+            document.getElementById('thai-flight-modal').classList.remove('hidden');document.getElementById('thai-flight-modal').classList.add('flex');
+        }
+        function thaiSaveFlight(e){
+            e.preventDefault();const f={};
+            for(const field of ['route','company','number','date','depart','arrive','from','to','reference','link','notes'])f[field]=document.getElementById('thai-flight-'+field).value.trim();
+            if(!f.from||!f.to){alert('Inserisci partenza e destinazione.');return;}
+            if(f.link){f.link=thaiUrl(f.link);if(!f.link){alert('Link non valido');return;}}
+            if(thaiFlightEditIndex>=0)tripData.flights[thaiFlightEditIndex]={...tripData.flights[thaiFlightEditIndex],...f};else tripData.flights.push(f);
+            thaiFlightModalClose();saveDataToSheet();renderApp();
+        }
+        function thaiDeleteFlight(i){if(!confirm('Eliminare questo volo?'))return;tripData.flights.splice(i,1);saveDataToSheet();renderApp();}
+        function thaiRenderFlights(){
+            const el=document.getElementById('thai-flights-list');if(!el)return;
+            el.innerHTML=(tripData.flights||[]).map((f,i)=>`<article class="rounded-xl p-3 border border-amber-200 dark:border-amber-700 bg-white/60 dark:bg-slate-800/65 space-y-1"><strong>${thaiEsc(f.route||'Volo')} · ${thaiEsc(f.company||'Compagnia')} ${thaiEsc(f.number||'')}</strong><p>${thaiEsc(f.from||'')} → ${thaiEsc(f.to||'')} · ${thaiEsc(f.date||'')}</p><p>${thaiEsc(f.depart||'')} → ${thaiEsc(f.arrive||'')}</p>${f.reference?`<p>PNR: ${thaiEsc(f.reference)}</p>`:''}${f.notes?`<p>${thaiEsc(f.notes)}</p>`:''}<div class="flex gap-2 flex-wrap">${thaiLink(f.link,'Biglietto / compagnia')}${thaiBtn('✏️ Modifica',`thaiEditFlight(${i})`)}${thaiBtn('🗑️ Elimina',`thaiDeleteFlight(${i})`)}</div></article>`).join('')||'<p class="text-sm opacity-80">Nessun volo nel database. Aggiungilo qui: non è più necessario modificare l’HTML.</p>';
+        }
+        async function thaiShowBackups(){
+            if(thaiDirty){alert('Attendi che le modifiche locali siano sincronizzate.');return;}
+            try{
+                const d=await thaiApi({action:'backups'});if(await thaiAuthError(d))return;if(d.status!=='success')throw Error(d.message||'Errore backup');
+                const modal=document.getElementById('thai-backups-modal');const list=document.getElementById('thai-backups-list');
+                list.innerHTML=(d.backups||[]).map(b=>`<div class="flex items-center justify-between gap-3 p-2 border-b border-slate-200 dark:border-slate-700"><span>Rev. ${Number(b.revision)||0} · ${thaiEsc(String(b.date||'').slice(0,19))}</span><button type="button" class="thai-action" onclick="thaiRestoreBackup(${Number(b.row)})">Ripristina</button></div>`).join('')||'<p>Nessun backup disponibile.</p>';
+                modal.classList.remove('hidden');
+            }catch(e){alert('Backup non disponibili: '+e.message);}
+        }
+        async function thaiRestoreBackup(row){
+            if(thaiDirty){alert('Hai modifiche non sincronizzate. Salvale prima.');return;}
+            if(!confirm('Ripristinare questo backup? La versione attuale verrà salvata nei BACKUPS. La modifica sarà visibile su tutti i dispositivi.'))return;
+            exportJSONData();
+            try{const d=await thaiApi({action:'restore',row,_revision:tripData._revision});if(d.status!=='success')throw Error(d.message||'Ripristino non completato');document.getElementById('thai-backups-modal').classList.add('hidden');await fetchDataFromSheet();alert('Backup ripristinato e dati aggiornati.');}
+            catch(e){alert('Ripristino non riuscito: '+e.message);}
+        }
+        function thaiLinkBookingCost(kind,dayIndex,itemIndex=-1){
+            const day=tripData.days[dayIndex];if(!day)return;
+            const item=kind==='hotel'?day.hotel:day.transports[itemIndex];if(!item)return;
+            const amount=Number(item.cost);if(!Number.isFinite(amount)||amount<=0){alert('Inserisci prima un prezzo positivo nella prenotazione.');return;}
+            if(!item._budgetId)item._budgetId='booking-'+Date.now()+'-'+Math.random().toString(36).slice(2,9);
+            const existingPaid=tripData.expenses.find(e=>e._sourceId===item._budgetId);
+            if(existingPaid){alert('Questa prenotazione è già collegata a una spesa pagata: modifica la spesa dal Budget.');return;}
+            const existing=tripData.plannedExpenses.findIndex(e=>e._sourceId===item._budgetId);
+            const row={title:kind==='hotel'?('Hotel · '+(item.name||day.title)):((item.type||'Trasporto')+' · '+(item.from||'')+' → '+(item.to||'')),amount,category:kind==='hotel'?'Hotel':'Trasporti',split:'uguale',_sourceId:item._budgetId};
+            if(existing>=0){if(!confirm('Aggiornare la previsione collegata con il nuovo prezzo?'))return;tripData.plannedExpenses[existing]={...tripData.plannedExpenses[existing],...row};}
+            else {if(!confirm('Aggiungere questo importo come previsione? Verifica prima che la spesa non sia gia presente nel budget.'))return;tripData.plannedExpenses.push(row);}
+            saveDataToSheet();renderApp();alert('Prenotazione collegata al budget come spesa prevista. Usa “Pagata” quando sarà saldata.');
+        }
+        function thaiRenderToday(){
+            const picker=document.getElementById('thai-today-day'),out=document.getElementById('thai-today-content');if(!picker||!out)return;
+            const current=picker.value;const now=new Date();const todayUTC=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+            const active=tripData.days.findIndex(d=>thaiDateKey(d.date)===todayUTC);
+            picker.innerHTML=(tripData.days||[]).map((d,i)=>`<option value="${i}">${thaiEsc(d.date||'Giorno '+(i+1))} · ${thaiEsc(d.title||'')}</option>`).join('');
+            const selected=current!==''&&Number(current)<tripData.days.length?Number(current):Math.max(active,0);
+            picker.value=String(selected);const d=tripData.days[selected];if(!d){out.innerHTML='<p>Nessuna giornata disponibile.</p>';return;}
+            const stays=thaiHotelStaysForDay(selected);
+            const htmlStays=stays.map(st=>`<div class="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30">${st.checkout?'🧳 Check-out':thaiDateKey(st.hotel.checkin)===thaiDateKey(d.date)?'🏨 Check-in':'🏨 Pernottamento'} · <strong>${thaiEsc(st.hotel.name||'Hotel')}</strong>${st.hotel.address?`<p>${thaiHotelAddress(st.hotel.address)}</p>`:''}</div>`).join('');
+            const transports=(d.transports||[]).map(t=>`<div class="p-3 rounded-xl bg-sky-50 dark:bg-sky-950/30">🚆 <strong>${thaiEsc(t.type||'Trasporto')} ${thaiEsc(t.from||'')} → ${thaiEsc(t.to||'')}</strong><p>${thaiEsc(t.departure||'')} – ${thaiEsc(t.arrival||'')}</p></div>`).join('');
+            const acts=(d.activities||[]).slice().sort((a,b)=>(a.start||'99').localeCompare(b.start||'99')).map(a=>`<div class="p-3 rounded-xl bg-violet-50 dark:bg-violet-950/30">${thaiEsc(a.start||'')} <strong>${thaiEsc(a.title||a.desc||'Attività')}</strong> ${thaiLink(a.maps,'Google Maps')}</div>`).join('');
+            const todos=(tripData.todos||[]).filter(t=>!t.done&&t.due&&thaiDateKey(t.due)===thaiDateKey(d.date)).map(t=>`<div class="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30">☑ ${thaiEsc(t.text)}</div>`).join('');
+            out.innerHTML=`<div class="bg-white dark:bg-slate-800 rounded-2xl border p-4 space-y-3"><h3 class="text-lg font-bold">${thaiEsc(d.title||'Tappa')}</h3>${htmlStays}${transports}${acts}${todos||''}${!htmlStays&&!transports&&!acts&&!todos?'<p>Nessuna attività registrata.</p>':''}</div>`;
         }
     </script>
 </body>
