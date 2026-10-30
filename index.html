@@ -809,19 +809,42 @@
         const THAI_STORAGE = 'thailandData2026_v5';
         const THAI_PENDING = 'thailandPending_v2';
         let thaiDirty = localStorage.getItem(THAI_PENDING) === '1';
-        let thaiAccessKey=sessionStorage.getItem('thaiPlannerAccessKey')||'';
-        function thaiAskAccessKey(){
-            const key=prompt('Inserisci il codice di accesso Thai Planner configurato in Apps Script:');
-            if(key===null)return false;
-            thaiAccessKey=key.trim();sessionStorage.setItem('thaiPlannerAccessKey',thaiAccessKey);
-            return !!thaiAccessKey;
+        // Un token temporaneo firmato dal backend ricorda l'accesso sul dispositivo.
+        const THAI_SESSION_KEY='thaiPlannerSession_v1';
+        const THAI_BASE_KEY='thaiPlannerSyncedBase_v1';
+        let thaiToken=localStorage.getItem(THAI_SESSION_KEY)||'';
+        let thaiLoginBusy=false;
+        let thaiBase=null;
+        try { thaiBase=JSON.parse(localStorage.getItem(THAI_BASE_KEY)||'null'); } catch(e){}
+        function thaiStoreBase(data){
+            thaiBase=structuredClone(data);
+            try{localStorage.setItem(THAI_BASE_KEY,JSON.stringify(thaiBase));}catch(e){console.warn('Base sync non salvata',e);}
         }
-        function thaiRemoteUrl(){const u=new URL(GOOGLE_SCRIPT_URL);if(thaiAccessKey)u.searchParams.set('key',thaiAccessKey);return u.href;}
-        function thaiAuthError(d){
+        function thaiLogout(){
+            thaiToken='';localStorage.removeItem(THAI_SESSION_KEY);
+            alert('Dispositivo disconnesso. Ti sarà chiesto il codice al prossimo accesso.');
+        }
+        async function thaiAskAccessKey(){
+            if(thaiLoginBusy)return false;
+            const key=prompt('Inserisci il codice di accesso Thai Planner (solo al primo accesso su questo dispositivo):');
+            if(key===null || !key.trim())return false;
+            thaiLoginBusy=true;
+            try{
+                const r=await fetch(GOOGLE_SCRIPT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'login',_accessKey:key.trim()})});
+                const d=await r.json();
+                if(d.status!=='success'||!d.token)throw Error(d.message||'Accesso non riuscito');
+                thaiToken=d.token;localStorage.setItem(THAI_SESSION_KEY,thaiToken);
+                return true;
+            }catch(e){alert('Accesso non riuscito: '+e.message);return false;}
+            finally{thaiLoginBusy=false;}
+        }
+        function thaiRemoteUrl(){const u=new URL(GOOGLE_SCRIPT_URL);if(thaiToken)u.searchParams.set('token',thaiToken);return u.href;}
+        async function thaiAuthError(d){
             if(d && (d.status==='unauthorized'||d.status==='setup_required')){
                 if(d.status==='setup_required'){alert(d.message);return true;}
+                thaiToken='';localStorage.removeItem(THAI_SESSION_KEY);
                 updateSyncStatus('🔒 Accesso richiesto','bg-amber-100 text-amber-800');
-                if(thaiAskAccessKey())setTimeout(()=>thaiDirty?thaiSyncPending():fetchDataFromSheet(),30);
+                if(await thaiAskAccessKey())setTimeout(()=>thaiDirty?thaiSyncPending():fetchDataFromSheet(),50);
                 return true;
             }
             return false;
@@ -888,6 +911,7 @@
             try { const cache=JSON.parse(localStorage.getItem(THAI_STORAGE)||'null'); if(thaiValid(cache)) { tripData=thaiNormalize(cache); renderApp(); } } catch(e) { console.warn('Cache non valida',e); }
             if(thaiDirty) { thaiShowSync(); if(navigator.onLine) setTimeout(thaiSyncPending,500); }
             else fetchDataFromSheet();
+            setInterval(()=>{if(!document.hidden && navigator.onLine){if(thaiDirty)thaiSyncPending();else fetchDataFromSheet();}},30000);
         }
         async function fetchDataFromSheet() {
             if(thaiDirty || thaiSaving) { thaiShowSync(); return; }
@@ -898,10 +922,11 @@
                 const response=await fetch(thaiRemoteUrl(),{cache:'no-store'});
                 if(!response.ok) throw Error('HTTP '+response.status);
                 const data=await response.json();
-                if(thaiAuthError(data))return;
+                if(await thaiAuthError(data))return;
                 if(!thaiValid(data)) throw Error(data.message || 'Dati server non validi');
                 if(thaiDirty) { thaiShowSync(); return; }
                 tripData=thaiNormalize(data);
+                thaiStoreBase(tripData);
                 localStorage.setItem(THAI_STORAGE,JSON.stringify(tripData));
                 renderApp(); thaiShowSync();
             } catch(e) { console.warn('Lettura remota non riuscita',e); updateSyncStatus('📴 Dati locali / connessione assente','bg-sky-100 text-sky-800'); }
@@ -914,6 +939,57 @@
             clearTimeout(thaiSyncTimer);
             thaiSyncTimer=setTimeout(thaiSyncPending,350);
         }
+        // Fusione prudente a tre vie: elimina ambiguita solo se si puo stabilire
+        // senza dubbio quale elemento e' stato modificato. In caso contrario
+        // mantiene il blocco di conflitto, senza perdere dati.
+        const THAI_SYNC_LISTS=['days','todos','notes','expenses','plannedExpenses'];
+        function thaiFingerprint(v){return JSON.stringify(v);}
+        function thaiMergeArray(base,local,remote){
+            if(thaiFingerprint(local)===thaiFingerprint(base))return remote;
+            if(thaiFingerprint(remote)===thaiFingerprint(base))return local;
+            if(thaiFingerprint(local)===thaiFingerprint(remote))return local;
+            // La fusione automatica sicura richiede array di soli append.
+            // Sulle liste modificate/riordinate/accorciate si richiede conferma.
+            if(local.length<base.length || remote.length<base.length)return null;
+            for(let i=0;i<base.length;i++){
+                if(thaiFingerprint(local[i])!==thaiFingerprint(base[i]) || thaiFingerprint(remote[i])!==thaiFingerprint(base[i]))return null;
+            }
+            const addedLocal=local.slice(base.length), addedRemote=remote.slice(base.length);
+            return [...base,...addedRemote,...addedLocal];
+        }
+        function thaiThreeWayMerge(base,local,remote){
+            if(!base || !thaiValid(base))return null;
+            const out=structuredClone(remote);
+            for(const field of THAI_SYNC_LISTS){
+                const merged=thaiMergeArray(base[field]||[],local[field]||[],remote[field]||[]);
+                if(merged===null)return null;
+                out[field]=merged;
+            }
+            for(const field of Object.keys(local)){
+                if(THAI_SYNC_LISTS.includes(field)||field==='_revision')continue;
+                const changedLocal=thaiFingerprint(local[field])!==thaiFingerprint(base[field]);
+                const changedRemote=thaiFingerprint(remote[field])!==thaiFingerprint(base[field]);
+                if(changedLocal&&changedRemote&&thaiFingerprint(local[field])!==thaiFingerprint(remote[field]))return null;
+                if(changedLocal)out[field]=structuredClone(local[field]);
+            }
+            out._revision=remote._revision;
+            return out;
+        }
+        async function thaiAutoMerge(localSnapshot,expectedSequence){
+            if(!thaiBase)return false;
+            const res=await fetch(thaiRemoteUrl(),{cache:'no-store'});
+            const remote=await res.json();
+            if(await thaiAuthError(remote))return false;
+            if(!thaiValid(remote))throw Error('Impossibile leggere il server');
+            const merged=thaiThreeWayMerge(thaiBase,localSnapshot,remote);
+            if(!merged || thaiSequence!==expectedSequence)return false;
+            thaiStoreBase(remote);
+            tripData=thaiNormalize(merged);
+            thaiConflict=false;
+            thaiDirty=true;thaiSequence++;
+            thaiPersist();renderApp();
+            return true;
+        }
         async function thaiSyncPending() {
             if(!thaiDirty || thaiSaving || !navigator.onLine || thaiConflict) { thaiShowSync(); return; }
             thaiSaving=true;
@@ -921,16 +997,18 @@
             const payload=JSON.stringify(tripData);
             updateSyncStatus('⌛ Invio modifiche...', 'bg-sky-100 text-sky-800');
             try {
-                const res=await fetch(GOOGLE_SCRIPT_URL, {method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...JSON.parse(payload),_accessKey:thaiAccessKey})});
+                const res=await fetch(GOOGLE_SCRIPT_URL, {method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...JSON.parse(payload),_sessionToken:thaiToken})});
                 if(!res.ok) throw Error('HTTP '+res.status);
                 const ack=await res.json();
-                if(thaiAuthError(ack))return;
+                if(await thaiAuthError(ack))return;
                 if(ack.status==='conflict') {
+                    if(await thaiAutoMerge(JSON.parse(payload),seq)){thaiSyncError='';return;}
                     thaiConflict=true;
-                    throw Error('Un altro dispositivo ha aggiornato i dati. Esporta il JSON locale prima di ricaricare.');
+                    throw Error('Modifiche allo stesso elemento: usa Risolvi conflitto. I tuoi dati locali sono conservati.');
                 }
                 if(ack.status!=='success') throw Error(ack.message || 'Salvataggio non confermato');
                 if(Number.isInteger(ack.revision)) tripData._revision=ack.revision;
+                thaiStoreBase({...JSON.parse(payload),_revision:ack.revision});
                 if(seq===thaiSequence) {
                     thaiSyncError='';thaiDirty=false;
                     localStorage.removeItem(THAI_PENDING);
