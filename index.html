@@ -430,7 +430,15 @@
 #tab-budget .thai-forecast-actions button{min-height:36px}
 .thai-modal-panel,.thai-flight-modal-panel{border-radius:1rem}
 .thai-field{max-width:100%}
-@media(min-width:768px){
+@media(min-width:768px) and (max-width:1100px){
+  .thai-header{
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"brand tools" "converter converter";
+  }
+  .thai-converter{justify-content:flex-start;flex-wrap:wrap}
+  .thai-header-tools{justify-content:flex-end}
+}
+@media(min-width:1101px){
   .thai-header{grid-template-columns:minmax(190px,1fr) auto auto}
   .thai-converter{flex-wrap:nowrap}
   #days-container .day-card{padding:1.1rem 1.25rem}
