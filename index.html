@@ -2017,9 +2017,23 @@
             const m=x.match(/^(\d{1,2})\s*(?:[\/-]|\s+)\s*(\d{1,2}|gen(?:naio)?|feb(?:braio)?|mar(?:zo)?|apr(?:ile)?|mag(?:gio)?|giu(?:gno)?|lug(?:lio)?|ago(?:sto)?|set(?:tembre)?|ott(?:obre)?|nov(?:embre)?|dic(?:embre)?)\s*(?:[\/-]|\s+)?\s*(\d{4})?$/i);
             if(!m)return '';
             const months=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];const mo=/^\d+$/.test(m[2])?Number(m[2]):months.findIndex(x=>m[2].toLowerCase().startsWith(x))+1;
-            return `${m[3]||'2026'}-${String(mo).padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+            // Itinerario 26 dicembre 2026 - 11 gennaio 2027: l'anno omesso
+            // sulle date di gennaio appartiene al 2027, non al 2026.
+            if(!(mo>=1&&mo<=12))return '';
+            const year=m[3]||String(mo<=1?2027:2026);
+            return `${year}-${String(mo).padStart(2,'0')}-${m[1].padStart(2,'0')}`;
         }
-        function thaiFlightDayIndex(f){const iso=thaiDateAsISO(f.date);return (tripData.days||[]).findIndex(d=>thaiDateAsISO(d.date)===iso);}
+        function thaiFlightDayIndex(f){
+            const iso=thaiDateAsISO(f.date);
+            if(!iso)return -1;
+            const days=tripData.days||[];
+            const exact=days.findIndex(d=>thaiDateAsISO(d.date)===iso);
+            if(exact>=0)return exact;
+            // Se il vecchio itinerario non riporta l'anno, confrontiamo
+            // giorno e mese soltanto quando esiste una sola corrispondenza.
+            const sameDay=days.map((d,i)=>({date:thaiDateAsISO(d.date),i})).filter(x=>x.date&&x.date.slice(5)===iso.slice(5));
+            return sameDay.length===1?sameDay[0].i:-1;
+        }
         function thaiDomesticForDay(index){return (tripData.flights||[]).map((f,i)=>({f,i})).filter(x=>!x.f.international && thaiFlightDayIndex(x.f)===index).map(({f,i})=>`<div class="rounded-xl border border-sky-300 dark:border-sky-700 bg-sky-50 dark:bg-sky-950/30 p-3 space-y-2 text-xs"><div class="flex items-center justify-between gap-2"><b>🛫 ${thaiEsc(f.company||'Volo interno')} ${thaiEsc(f.number||'')}</b><div class="flex gap-1">${thaiBtn('✏️',`thaiEditFlight(${i})`)}${thaiBtn('🗑️',`thaiDeleteFlight(${i})`)}</div></div><div class="flex items-center justify-between gap-2"><div><b class="text-base">${thaiEsc(f.from||'—')}</b><p>${thaiEsc(f.date||'')} ${thaiEsc(f.depart||'')}</p></div><span>✈️ ${thaiEsc(f.duration||'')}</span><div class="text-right"><b class="text-base">${thaiEsc(f.to||'—')}</b><p>${thaiEsc(f.arrivalDate||f.date||'')} ${thaiEsc(f.arrive||'')}</p></div></div>${f.reference?`<p>PNR: <b>${thaiEsc(f.reference)}</b></p>`:''}${f.baggage?`<p>🧳 ${thaiEsc(f.baggage)}</p>`:''}${f.price?`<p>💶 ${thaiEsc(f.price)} € ${thaiEsc(f.paidBy||'')}</p>`:''}${thaiLink(f.link,'Apri prenotazione')}</div>`).join('');}
         function thaiSaveFlight(e){
             e.preventDefault();const f={international:false};THAI_FLIGHT_FIELDS.forEach(field=>{const el=document.getElementById('thai-flight-'+field);if(el)f[field]=el.value.trim();});f.route='Interno';
@@ -2045,7 +2059,7 @@
             const domestic=(tripData.flights||[]).map((f,i)=>({f,i})).filter(x=>!x.f.international);
             if(dom)dom.innerHTML=domestic.length?domestic.sort((a,b)=>(a.f.date||'').localeCompare(b.f.date||'')).map(({f,i})=>`<button type="button" class="w-full text-left p-2 rounded-lg bg-white/50 dark:bg-slate-800/50 border border-amber-200 dark:border-amber-800" onclick="thaiGoToDomestic(${i})"><b>${thaiEsc(f.date||'')}</b> · ${thaiEsc(f.from||'')} → ${thaiEsc(f.to||'')}<p>${thaiEsc(f.depart||'')} · ${thaiEsc(f.company||'')} ${thaiEsc(f.number||'')}</p></button>`).join(''):'<p class="opacity-75">Nessun volo interno. Aggiungili dopo la prenotazione.</p>';
         }
-        function thaiGoToDomestic(i){const f=tripData.flights?.[i];if(!f)return;const n=thaiFlightDayIndex(f);switchTab('itinerary');if(n>=0){const cards=document.querySelectorAll('#days-container > .day-card');cards[n]?.scrollIntoView({behavior:'smooth',block:'start'});}else alert('Il volo non corrisponde a una giornata dell’itinerario: verifica la data.');}
+        function thaiGoToDomestic(i){const f=tripData.flights?.[i];if(!f)return;const n=thaiFlightDayIndex(f);switchTab('itinerary');if(n>=0){const cards=document.querySelectorAll('#days-container > .day-card');cards[n]?.scrollIntoView({behavior:'smooth',block:'start'});}else if(confirm('La data di partenza del volo ('+(f.date||'non indicata')+') non coincide con una giornata dell’itinerario. Vuoi correggere la data del volo?'))thaiEditFlight(i);}
         async function thaiShowBackups(){
             if(thaiDirty){alert('Attendi che le modifiche locali siano sincronizzate.');return;}
             try{
