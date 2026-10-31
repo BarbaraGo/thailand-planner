@@ -637,6 +637,7 @@
   }
   #tab-budget #thai-forecast-panel .thai-forecast-row { padding:.7rem .75rem; }
 }
+.thai-activity-cost{margin:.35rem 0 0;font-size:.75rem;font-weight:650;color:#287665;line-height:1.35}.dark .thai-activity-cost{color:#99e2d0}
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200" onload="initApp()">
@@ -1306,7 +1307,7 @@
         // Modale condivisa: tutti i campi sono mantenuti in strutture compatibili con il vecchio JSON.
         const THAI_FIELDS = {
           day:[['date','Data / etichetta (es. 27 dic)','text'],['title','Titolo tappa','text',true],['notes','Note della giornata','textarea'],['transport_details','Vecchia descrizione trasporti (puoi cancellarla)','textarea'],['link','Link prenotazione','url'],['cost','Costo generico precedente (senza categoria; cancellabile)','text']],
-          activity:[['title','Attività','text',true],['start','Ora inizio','time'],['end','Ora fine','time'],['desc','Descrizione / note','textarea'],['maps','Link Google Maps','url'],['link','Altro link','url']],
+          activity:[['title','Attività','text',true],['start','Ora inizio','time'],['end','Ora fine','time'],['desc','Descrizione / note','textarea'],['cost','Costo totale attività','number'],['costCurrency','Valuta del costo','select',false,['THB','EUR']],['maps','Link Google Maps','url'],['link','Altro link','url']],
           transport:[['type','Mezzo di trasporto','select',false,['Aereo','Treno','Bus','Traghetto','Taxi','Auto','Altro']],['from','Partenza da','text',true],['to','Destinazione','text',true],['departure','Orario partenza','time'],['arrival','Orario arrivo','time'],['date','Data (facoltativa)','text'],['cost','Costo trasporto (€)','number'],['status','Stato','select',false,['Da prenotare','Prenotato','Completato']],['reference','Codice prenotazione','text'],['link','Link biglietto / prenotazione','url'],['notes','Note','textarea']],
           hotel:[['name','Nome hotel','text'],['address','Indirizzo','text'],['checkin','Check-in (data e ora)','text'],['checkout','Check-out (data e ora)','text'],['cost','Prezzo totale hotel (€)','number'],['cancellation','Condizioni di cancellazione (es. Gratis fino al 20/12)','text'],['status','Stato','select',false,['Da prenotare','Prenotato','Completato']],['reference','Codice prenotazione','text'],['link','Link Booking / struttura','url'],['notes','Note','textarea']],
           todo:[['text','Cosa devi fare?','textarea',true],['due','Scadenza (facoltativa)','date'],['owner','Assegnato a','select',false,['Entrambe','Barbara','Laura']]],
@@ -1338,6 +1339,56 @@
             modal.querySelector('input,textarea,select')?.focus();
         }
         function closeThaiModal(){const m=document.getElementById('thai-modal');m.classList.add('hidden');m.classList.remove('flex');thaiContext=null;}
+        // Collega ogni attivita' a una sola previsione. Il budget rimane in EUR,
+        // mentre l'importo originale e il tasso di conversione sono conservati.
+        function thaiActivityForecastSync(activity,day){
+            const amt=activity.cost===''||activity.cost==null?0:Number(activity.cost);
+            const currency=activity.costCurrency==='THB'?'THB':'EUR';
+            const id=activity._budgetId;
+            const planned=tripData.plannedExpenses||[];
+            const paid=tripData.expenses||[];
+            const planIndex=id?planned.findIndex(x=>x._sourceId===id):-1;
+            const paidEntry=id?paid.find(x=>x._sourceId===id):null;
+            if(!Number.isFinite(amt)||amt<0)return;
+            if(paidEntry){
+                // Una previsione gia' pagata non deve ricomparire.
+                if(planIndex>=0)planned.splice(planIndex,1);
+                return;
+            }
+            if(amt<=0){
+                if(planIndex>=0)planned.splice(planIndex,1);
+                return;
+            }
+            if(!activity._budgetId)activity._budgetId='activity-'+Date.now()+'-'+Math.random().toString(36).slice(2,9);
+            const rate=currency==='THB'?thaiExchangeRate():1;
+            const euro=Math.round((currency==='THB'?amt/rate:amt)*100)/100;
+            const row={
+                title:'Attività · '+(activity.title||activity.desc||day.title||'Senza nome'),
+                amount:euro,category:'Attività',split:'uguale',
+                _sourceId:activity._budgetId,
+                _originalAmount:amt,_originalCurrency:currency,_conversionRate:rate
+            };
+            const existing=planned.findIndex(x=>x._sourceId===activity._budgetId);
+            if(existing>=0)planned[existing]={...planned[existing],...row};
+            else planned.push(row);
+        }
+        function thaiRemoveActivityForecast(activity){
+            if(!activity?._budgetId)return;
+            const planned=tripData.plannedExpenses||[];
+            for(let i=planned.length-1;i>=0;i--){
+                if(planned[i]._sourceId===activity._budgetId)planned.splice(i,1);
+            }
+        }
+        function thaiActivityCostText(a){
+            const n=Number(a?.cost);
+            if(a?.cost==null||a.cost===''||!Number.isFinite(n)||n<=0)return '';
+            const curr=a.costCurrency==='THB'?'THB':'EUR';
+            const original=n.toLocaleString('it-IT',{minimumFractionDigits:curr==='EUR'?2:0,maximumFractionDigits:2});
+            const planned=(tripData.plannedExpenses||[]).find(x=>x._sourceId===a._budgetId);
+            const paid=(tripData.expenses||[]).some(x=>x._sourceId===a._budgetId);
+            const extra=curr==='THB'&&planned?' · ≈ '+formatEUR(planned.amount):'';
+            return '<p class="thai-activity-cost">💰 Costo previsto: '+original+' '+(curr==='EUR'?'€':'THB')+extra+(paid?' · Pagato':'')+'</p>';
+        }
         function saveThaiModal(e){
             e.preventDefault(); if(!thaiContext) return;
             const {kind,dayIndex,itemIndex}=thaiContext;
@@ -1358,6 +1409,7 @@
             } else if(kind==='activity') {
                 const arr=tripData.days[dayIndex].activities;
                 if(itemIndex>=0) arr[itemIndex]={...arr[itemIndex],...data}; else arr.push(data);
+                thaiActivityForecastSync(itemIndex>=0?arr[itemIndex]:arr[arr.length-1],tripData.days[dayIndex]);
             } else if(kind==='transport') {
                 const arr=tripData.days[dayIndex].transports;
                 if(itemIndex>=0) arr[itemIndex]={...arr[itemIndex],...data}; else arr.push(data);
@@ -1462,8 +1514,8 @@
         function thaiDelete(kind,d,i){
             if(!confirm('Eliminare questo elemento?'))return;
             if(kind==='transport')tripData.days[d].transports.splice(i,1);
-            else if(kind==='activity')tripData.days[d].activities.splice(i,1);
-            else if(kind==='day')tripData.days.splice(d,1);
+            else if(kind==='activity'){thaiRemoveActivityForecast(tripData.days[d].activities[i]);tripData.days[d].activities.splice(i,1);}
+            else if(kind==='day'){(tripData.days[d].activities||[]).forEach(thaiRemoveActivityForecast);tripData.days.splice(d,1);}
             else if(kind==='todo')tripData.todos.splice(i,1);
             else if(kind==='note')tripData.notes.splice(i,1);
             else if(kind==='expense')tripData.expenses.splice(i,1);
@@ -1589,7 +1641,7 @@
                   ${d.cost?`<div class="thai-legacy text-xs"><div class="flex flex-wrap items-center justify-between gap-2"><b>💶 Importo del vecchio itinerario: ${thaiEsc(d.cost)}</b><div class="flex gap-1">${thaiBtn('✏️ Modifica',`openDayModal(${i})`)}${thaiBtn('Rimuovi',`thaiClearLegacy(${i},'cost')`)}</div></div><p class="thai-help">È un valore generico importato: non è stato attribuito a hotel, trasporti o budget. Se è una spesa reale, registrala in Budget & Costi, poi rimuovi questo valore.</p></div>`:''}
                   ${d.notes?`<div class="text-xs bg-slate-50 dark:bg-slate-700/30 rounded-xl p-3 space-y-1"><p>📝 Note giornata: ${thaiEsc(d.notes)}</p></div>`:''}
                   
-                  <div class="space-y-2">${activities.map(({a,j})=>`<div class="activity-detail bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs flex justify-between gap-2"><div class="min-w-0"><p class="font-semibold">${a.start?`<span class="text-brand-600">${thaiEsc(a.start)}${a.end?'–'+thaiEsc(a.end):''} · </span>`:''}${thaiEsc(a.title||a.desc||'Attività')}</p>${a.desc&&a.title?`<p class="mt-1 whitespace-pre-wrap">${thaiEsc(a.desc)}</p>`:''}<div class="flex gap-3 mt-1">${thaiLink(a.maps,'Google Maps')} ${thaiLink(a.link,'Apri link')}</div></div><div class="flex gap-1 items-start">${thaiBtn('✏️',`openActivityModal(${i},${j})`)}${thaiBtn('🗑️',`deleteActivity(${i},${j})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività aggiunta.</p>'}</div>
+                  <div class="space-y-2">${activities.map(({a,j})=>`<div class="activity-detail bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-xs flex justify-between gap-2"><div class="min-w-0"><p class="font-semibold">${a.start?`<span class="text-brand-600">${thaiEsc(a.start)}${a.end?'–'+thaiEsc(a.end):''} · </span>`:''}${thaiEsc(a.title||a.desc||'Attività')}</p>${a.desc&&a.title?`<p class="mt-1 whitespace-pre-wrap">${thaiEsc(a.desc)}</p>`:''}${thaiActivityCostText(a)}<div class="flex gap-3 mt-1">${thaiLink(a.maps,'Google Maps')} ${thaiLink(a.link,'Apri link')}</div></div><div class="flex gap-1 items-start">${thaiBtn('✏️',`openActivityModal(${i},${j})`)}${thaiBtn('🗑️',`deleteActivity(${i},${j})`)}</div></div>`).join('')||'<p class="text-xs text-slate-400">Nessuna attività aggiunta.</p>'}</div>
                   ${thaiBtn('+ Aggiungi attività',`openActivityModal(${i})`)}
                 </article>`;
             }).join('');
